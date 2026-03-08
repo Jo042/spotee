@@ -8,91 +8,54 @@ datasource db {
   directUrl = env("DIRECT_URL")
 }
 
-
-// ============================================
-// ユーザーモデル
-// ============================================
 model User {
-  // id: UUID形式の主キー
-  // @id: このフィールドが主キーであることを示す
-  // @default(uuid()): 自動でUUIDを生成
   id          String   @id @default(uuid())
-  
-  // supabaseId: Supabase Authで発行されるユーザーID
-  // @unique: 一意制約（重複不可）
-  // @map("supabase_id"): DBのカラム名を指定（キャメルケース→スネークケース）
   supabaseId  String   @unique @map("supabase_id")
-  
   email       String   @unique
   name        String
-  avatarUrl   String?  @map("avatar_url")  // ? は NULL許容
+  avatarUrl   String?  @map("avatar_url")
   bio         String?
-  
-  // タイムスタンプ
-  // @default(now()): 現在時刻をデフォルト値に
-  // @updatedAt: 更新時に自動で現在時刻を設定
   createdAt   DateTime @default(now()) @map("created_at")
   updatedAt   DateTime @updatedAt @map("updated_at")
-
-  // リレーション（他のテーブルとの関係）
-  spots       Spot[]       // 1対多: 1人のユーザーが複数のスポットを投稿
-  likes       Like[]       // 1対多: 1人のユーザーが複数のいいね
   
-  // フォロー関係（自己参照）
-  followers   Follow[]     @relation("following")  // このユーザーをフォローしている人
-  following   Follow[]     @relation("follower")   // このユーザーがフォローしている人
+  spots       Spot[]
+  likes       Like[]
+  followers   Follow[]     @relation("following")
+  following   Follow[]     @relation("follower")
 
-  // @@map: テーブル名を指定（複数形・スネークケース）
   @@map("users")
 }
 
-// ============================================
-// フォローモデル（多対多の中間テーブル）
-// ============================================
 model Follow {
   id          String   @id @default(uuid())
-  followerId  String   @map("follower_id")   // フォローする側
-  followingId String   @map("following_id")  // フォローされる側
+  followerId  String   @map("follower_id")
+  followingId String   @map("following_id") 
   createdAt   DateTime @default(now()) @map("created_at")
 
-  // リレーション
-  // fields: このテーブルの外部キー
-  // references: 参照先テーブルの主キー
-  // onDelete: Cascade = 親が削除されたら子も削除
   follower    User     @relation("follower", fields: [followerId], references: [id], onDelete: Cascade)
   following   User     @relation("following", fields: [followingId], references: [id], onDelete: Cascade)
 
-  // @@unique: 複合ユニーク制約（同じ組み合わせは1つだけ）
   @@unique([followerId, followingId])
-  
-  // @@index: インデックス（検索高速化）
   @@index([followerId])
   @@index([followingId])
-  
   @@map("follows")
 }
 
-// ============================================
-// スポットモデル
-// ============================================
 model Spot {
   id            String   @id @default(uuid())
   title         String
   description   String?
   address       String
-  latitude      Float?      // 緯度（将来の地図機能用）
-  longitude     Float?      // 経度
-  priceRange    Int?     @map("price_range")     // 1: ~1000円, 2: 1000~3000円, etc.
-  businessHours String?  @map("business_hours")  // 営業時間
-  likeCount     Int      @default(0) @map("like_count")  // 非正規化（パフォーマンス用）
+  latitude      Float? 
+  longitude     Float?
+  priceRange    Int?     @map("price_range") 
+  businessHours String?  @map("business_hours") 
+  likeCount     Int      @default(0) @map("like_count") 
   createdAt     DateTime @default(now()) @map("created_at")
   updatedAt     DateTime @updatedAt @map("updated_at")
-
-  // 外部キー
   userId        String   @map("user_id")
   categoryId    String   @map("category_id")
 
-  // リレーション
   user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   category      Category @relation(fields: [categoryId], references: [id])
   images        SpotImage[]
@@ -100,23 +63,19 @@ model Spot {
   attributeTags SpotAttributeTag[]
   moodTags      SpotMoodTag[]
 
-  // インデックス（検索・ソートの高速化）
   @@index([userId])
   @@index([categoryId])
-  @@index([likeCount])      // いいね順ソート用
-  @@index([createdAt])      // 新着順ソート用
+  @@index([likeCount])
+  @@index([createdAt])
   
   @@map("spots")
 }
 
-// ============================================
-// スポット画像モデル
-// ============================================
 model SpotImage {
   id        String   @id @default(uuid())
   spotId    String   @map("spot_id")
   url       String
-  order     Int      @default(0)  // 表示順
+  order     Int      @default(0)
   createdAt DateTime @default(now()) @map("created_at")
 
   spot      Spot     @relation(fields: [spotId], references: [id], onDelete: Cascade)
@@ -125,13 +84,10 @@ model SpotImage {
   @@map("spot_images")
 }
 
-// ============================================
-// カテゴリモデル（1層目タグ）
-// ============================================
 model Category {
   id           String   @id @default(uuid())
-  name         String   @unique   // カフェ、レストラン等
-  slug         String   @unique   // cafe, restaurant等（URL用）
+  name         String   @unique
+  slug         String   @unique
   displayOrder Int      @default(0) @map("display_order")
   createdAt    DateTime @default(now()) @map("created_at")
   updatedAt    DateTime @updatedAt @map("updated_at")
@@ -141,12 +97,9 @@ model Category {
   @@map("categories")
 }
 
-// ============================================
-// 属性タグモデル（2層目タグ）
-// ============================================
 model AttributeTag {
   id           String   @id @default(uuid())
-  name         String   @unique   // Wi-Fiあり、駐車場あり等
+  name         String   @unique 
   slug         String   @unique
   displayOrder Int      @default(0) @map("display_order")
   createdAt    DateTime @default(now()) @map("created_at")
@@ -157,7 +110,6 @@ model AttributeTag {
   @@map("attribute_tags")
 }
 
-// スポットと属性タグの中間テーブル
 model SpotAttributeTag {
   id        String   @id @default(uuid())
   spotId    String   @map("spot_id")
@@ -173,12 +125,9 @@ model SpotAttributeTag {
   @@map("spot_attribute_tags")
 }
 
-// ============================================
-// ムードタグモデル（3層目タグ）
-// ============================================
 model MoodTag {
   id           String   @id @default(uuid())
-  name         String   @unique   // デートにおすすめ、雨の日OK等
+  name         String   @unique
   slug         String   @unique
   displayOrder Int      @default(0) @map("display_order")
   createdAt    DateTime @default(now()) @map("created_at")
@@ -189,7 +138,6 @@ model MoodTag {
   @@map("mood_tags")
 }
 
-// スポットとムードタグの中間テーブル
 model SpotMoodTag {
   id        String   @id @default(uuid())
   spotId    String   @map("spot_id")
@@ -205,9 +153,6 @@ model SpotMoodTag {
   @@map("spot_mood_tags")
 }
 
-// ============================================
-// いいねモデル
-// ============================================
 model Like {
   id        String   @id @default(uuid())
   userId    String   @map("user_id")
@@ -217,7 +162,6 @@ model Like {
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   spot      Spot     @relation(fields: [spotId], references: [id], onDelete: Cascade)
 
-  // 1ユーザーが同じスポットに複数いいねできないように
   @@unique([userId, spotId])
   @@index([userId])
   @@index([spotId])
