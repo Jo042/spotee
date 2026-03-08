@@ -1,15 +1,18 @@
 import { Controller, Get } from '@nestjs/common';
-import { AppService } from './app.service';
+import { PrismaService } from 'prisma/prisma.service';
 
 @Controller()
 export class AppController {
-  constructor(private readonly appService: AppService) {}
+  constructor(private readonly prisma: PrismaService) {}
 
   @Get()
-  getHealth(): { status: string; timestamp: string } {
+  async getHealth() {
+    const categoryCount = await this.prisma.category.count();
     return {
       status: 'ok',
       timestamp: new Date().toISOString(),
+      database: 'connected',
+      categoryCount,
     };
   }
 }

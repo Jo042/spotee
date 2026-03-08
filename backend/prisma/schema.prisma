@@ -1,0 +1,169 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model User {
+  id          String   @id @default(uuid())
+  supabaseId  String   @unique @map("supabase_id")
+  email       String   @unique
+  name        String
+  avatarUrl   String?  @map("avatar_url")
+  bio         String?
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+  
+  spots       Spot[]
+  likes       Like[]
+  followers   Follow[]     @relation("following")
+  following   Follow[]     @relation("follower")
+
+  @@map("users")
+}
+
+model Follow {
+  id          String   @id @default(uuid())
+  followerId  String   @map("follower_id")
+  followingId String   @map("following_id") 
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  follower    User     @relation("follower", fields: [followerId], references: [id], onDelete: Cascade)
+  following   User     @relation("following", fields: [followingId], references: [id], onDelete: Cascade)
+
+  @@unique([followerId, followingId])
+  @@index([followerId])
+  @@index([followingId])
+  @@map("follows")
+}
+
+model Spot {
+  id            String   @id @default(uuid())
+  title         String
+  description   String?
+  address       String
+  latitude      Float? 
+  longitude     Float?
+  priceRange    Int?     @map("price_range") 
+  businessHours String?  @map("business_hours") 
+  likeCount     Int      @default(0) @map("like_count") 
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+  userId        String   @map("user_id")
+  categoryId    String   @map("category_id")
+
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  category      Category @relation(fields: [categoryId], references: [id])
+  images        SpotImage[]
+  likes         Like[]
+  attributeTags SpotAttributeTag[]
+  moodTags      SpotMoodTag[]
+
+  @@index([userId])
+  @@index([categoryId])
+  @@index([likeCount])
+  @@index([createdAt])
+  
+  @@map("spots")
+}
+
+model SpotImage {
+  id        String   @id @default(uuid())
+  spotId    String   @map("spot_id")
+  url       String
+  order     Int      @default(0)
+  createdAt DateTime @default(now()) @map("created_at")
+
+  spot      Spot     @relation(fields: [spotId], references: [id], onDelete: Cascade)
+
+  @@index([spotId])
+  @@map("spot_images")
+}
+
+model Category {
+  id           String   @id @default(uuid())
+  name         String   @unique
+  slug         String   @unique
+  displayOrder Int      @default(0) @map("display_order")
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  spots        Spot[]
+
+  @@map("categories")
+}
+
+model AttributeTag {
+  id           String   @id @default(uuid())
+  name         String   @unique 
+  slug         String   @unique
+  displayOrder Int      @default(0) @map("display_order")
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  spots        SpotAttributeTag[]
+
+  @@map("attribute_tags")
+}
+
+model SpotAttributeTag {
+  id        String   @id @default(uuid())
+  spotId    String   @map("spot_id")
+  tagId     String   @map("tag_id")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  spot      Spot         @relation(fields: [spotId], references: [id], onDelete: Cascade)
+  tag       AttributeTag @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@unique([spotId, tagId])
+  @@index([spotId])
+  @@index([tagId])
+  @@map("spot_attribute_tags")
+}
+
+model MoodTag {
+  id           String   @id @default(uuid())
+  name         String   @unique
+  slug         String   @unique
+  displayOrder Int      @default(0) @map("display_order")
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  spots        SpotMoodTag[]
+
+  @@map("mood_tags")
+}
+
+model SpotMoodTag {
+  id        String   @id @default(uuid())
+  spotId    String   @map("spot_id")
+  tagId     String   @map("tag_id")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  spot      Spot    @relation(fields: [spotId], references: [id], onDelete: Cascade)
+  tag       MoodTag @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@unique([spotId, tagId])
+  @@index([spotId])
+  @@index([tagId])
+  @@map("spot_mood_tags")
+}
+
+model Like {
+  id        String   @id @default(uuid())
+  userId    String   @map("user_id")
+  spotId    String   @map("spot_id")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  spot      Spot     @relation(fields: [spotId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, spotId])
+  @@index([userId])
+  @@index([spotId])
+  @@map("likes")
+}

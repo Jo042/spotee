@@ -21,3 +21,4 @@ npm-debug.log*
 
 prisma/*.db
 prisma/*.db-journal
+backend/generated/prisma
