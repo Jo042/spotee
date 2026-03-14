@@ -6,13 +6,13 @@ export class CategoryService {
   constructor(private prisma: PrismaService) {}
 
   async findAll() {
-    return this.prisma.category.findMany({
+    return await this.prisma.category.findMany({
       orderBy: { displayOrder: 'asc' },
     });
   }
 
   async findOne(id: string) {
-    return this.prisma.category.findUnique({
+    return await this.prisma.category.findUnique({
       where: { id },
     });
   }
