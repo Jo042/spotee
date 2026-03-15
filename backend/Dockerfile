@@ -9,7 +9,10 @@ RUN npm install
 
 COPY . .
 
-RUN rm -f tsconfig.build.tsbuildinfo && npm run build
+RUN rm -f tsconfig.build.tsbuildinfo && \
+    npm run build 2>&1 && \
+    echo "=== dist contents ===" && \
+    ls -la dist/ 2>&1 || echo "=== dist/ missing ==="
 
 EXPOSE 4000
 
