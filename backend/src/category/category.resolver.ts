@@ -2,8 +2,8 @@ import { Resolver, Query, Args, ID } from '@nestjs/graphql';
 import { Category } from './dto/category.object';
 import { CategoryService } from './category.service';
 import { UseGuards } from '@nestjs/common';
-import { CurrentUser } from 'src/modules/auth/decorators/current-user.decorator';
-import { GqlAuthGuard } from 'src/modules/auth/auth.guard';
+import { CurrentUser } from 'src/auth/decorators/current-user.decorator';
+import { GqlAuthGuard } from 'src/auth/auth.guard';
 
 @Resolver(() => Category)
 export class CategoryResolver {
