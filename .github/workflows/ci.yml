@@ -36,6 +36,8 @@ jobs:
         run: npm run build
         env:
           NEXT_PUBLIC_API_URL: http://localhost:4000/graphql
+          NEXT_PUBLIC_SUPABASE_URL: https://zvgymgxcmxupxhscnlfo.supabase.co
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp2Z3ltZ3hjbXh1cHhoc2NubGZvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI5MDI5NzUsImV4cCI6MjA4ODQ3ODk3NX0.Ped7dckop76J-kQA9n4uMmSRabovrumekx8pCE9hhcY
 
   backend:
     runs-on: ubuntu-latest
