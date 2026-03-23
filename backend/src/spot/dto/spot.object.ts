@@ -1,6 +1,7 @@
 import { ObjectType, Field, ID, Int, Float } from '@nestjs/graphql';
 import { User } from '../../user/dto/user.object';
 import { Category } from '../../category/dto/category.object';
+import { registerEnumType } from '@nestjs/graphql';
 
 @ObjectType()
 export class SpotImage {
@@ -13,8 +14,6 @@ export class SpotImage {
   @Field(() => Int)
   order: number;
 }
-
-import { registerEnumType } from '@nestjs/graphql';
 
 export enum PriceRange {
   UNDER_1000 = 1,
