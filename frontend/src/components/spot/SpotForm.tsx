@@ -80,6 +80,13 @@ export function SpotForm() {
     }
   };
 
+  const priceRangeEnumMap: Record<number, string> = {
+    1: "UNDER_1000",
+    2: "RANGE_1000_3000",
+    3: "RANGE_3000_5000",
+    4: "OVER_5000",
+  };
+
   const onSubmit = async (data: SpotFormData) => {
     if (imageUrls.length === 0) {
       alert("画像を最低1枚アップロードしてください");
@@ -94,7 +101,9 @@ export function SpotForm() {
             description: data.description || null,
             address: data.address,
             categoryId: data.categoryId,
-            priceRange: data.priceRange,
+            priceRange: data.priceRange
+              ? priceRangeEnumMap[data.priceRange]
+              : null,
             businessHours: data.businessHours || null,
             imageUrls,
             attributeTagIds: data.attributeTagIds,
