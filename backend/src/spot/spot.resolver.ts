@@ -1,18 +1,31 @@
-import { Resolver, Query, Mutation, Args, ID } from '@nestjs/graphql';
+import {
+  Resolver,
+  Query,
+  Mutation,
+  Args,
+  ID,
+  ResolveField,
+  Parent,
+} from '@nestjs/graphql';
 import { UseGuards } from '@nestjs/common';
 import { SpotService } from './spot.service';
 import { UserService } from '../user/user.service';
 import { Spot } from './dto/spot.object';
+import { User } from 'src/user/dto/user.object';
+import { Category } from 'src/category/dto/category.object';
+import { SpotImage } from './dto/spot.object';
 import { CreateSpotInput } from './dto/create-spot.input';
 import { UpdateSpotInput } from './dto/update-spot.input';
 import { GqlAuthGuard } from '../auth/auth.guard';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import type { AuthUser } from 'src/auth/types/auth-user.type';
+import { SpotLoader } from './spot.loader';
 
 @Resolver(() => Spot)
 export class SpotResolver {
   constructor(
     private spotService: SpotService,
+    private spotLoader: SpotLoader,
     private userService: UserService,
   ) {}
 
@@ -52,5 +65,20 @@ export class SpotResolver {
   ): Promise<boolean> {
     const user = await this.userService.getOrCreateUser(authUser);
     return this.spotService.delete(user.id, id);
+  }
+
+  @ResolveField(() => User)
+  async user(@Parent() spot: { userId: string }): Promise<User> {
+    return this.spotLoader.userLoader.load(spot.userId);
+  }
+
+  @ResolveField(() => Category)
+  async category(@Parent() spot: { categoryId: string }): Promise<Category> {
+    return this.spotLoader.categoryLoader.load(spot.categoryId);
+  }
+
+  @ResolveField(() => [SpotImage])
+  async images(@Parent() spot: { id: string }): Promise<SpotImage[]> {
+    return this.spotLoader.imagesLoader.load(spot.id);
   }
 }
