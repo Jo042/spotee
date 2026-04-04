@@ -6,6 +6,11 @@ import {
 import { PrismaService } from '../../prisma/prisma.service';
 import { CreateSpotInput } from './dto/create-spot.input';
 import { UpdateSpotInput } from './dto/update-spot.input';
+import {
+  SpotConnection,
+  SpotEdge,
+  PageInfo,
+} from './dto/spot-connection.object';
 
 @Injectable()
 export class SpotService {
@@ -145,5 +150,78 @@ export class SpotService {
     await this.prisma.spot.delete({ where: { id } });
 
     return true;
+  }
+
+  /**
+   * スポット一覧を取得（Cursor-based ページネーション）
+   * @param first 取得件数
+   * @param after カーソル
+   */
+  async findMany(first: number = 20, after?: string): Promise<SpotConnection> {
+    const take = first + 1;
+
+    const where = after
+      ? {
+          createdAt: {
+            lt: this.getCursorDate(after),
+          },
+        }
+      : {};
+
+    const spots = await this.prisma.spot.findMany({
+      where,
+      take,
+      orderBy: { createdAt: 'desc' },
+      include: {
+        images: { orderBy: { order: 'asc' } },
+        user: true,
+        category: true,
+      },
+    });
+
+    const hasNextPage = spots.length > first;
+
+    const resultSpots = hasNextPage ? spots.slice(0, first) : spots;
+
+    const edges: SpotEdge[] = resultSpots.map((spot) => ({
+      node: spot,
+      cursor: this.encodeCursor(spot.id, spot.createdAt),
+    }));
+
+    const totalCount = await this.prisma.spot.count();
+
+    const pageInfo: PageInfo = {
+      hasNextPage,
+      hasPreviousPage: !!after,
+      startCursor: edges.length > 0 ? edges[0].cursor : null,
+      endCursor: edges.length > 0 ? edges[edges.length - 1].cursor : null,
+    };
+
+    return {
+      edges,
+      pageInfo,
+      totalCount,
+    };
+  }
+
+  /**
+   * カーソルをエンコード
+   * ID と createdAt を Base64 エンコード
+   */
+  private encodeCursor(id: string, createdAt: Date): string {
+    const data = JSON.stringify({ id, createdAt: createdAt.toISOString() });
+    return Buffer.from(data).toString('base64');
+  }
+
+  /**
+   * カーソルをデコードして createdAt を取得
+   */
+  private getCursorDate(cursor: string): Date {
+    try {
+      const data = JSON.parse(Buffer.from(cursor, 'base64').toString('utf-8'));
+      return new Date(data.createdAt);
+    } catch {
+      throw new Error('Invalid cursor');
+    }
   }
 }

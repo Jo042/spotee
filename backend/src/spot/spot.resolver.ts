@@ -3,6 +3,7 @@ import {
   Query,
   Mutation,
   Args,
+  Int,
   ID,
   ResolveField,
   Parent,
@@ -20,6 +21,7 @@ import { GqlAuthGuard } from '../auth/auth.guard';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import type { AuthUser } from 'src/auth/types/auth-user.type';
 import { SpotLoader } from './spot.loader';
+import { SpotConnection } from './dto/spot-connection.object';
 
 @Resolver(() => Spot)
 export class SpotResolver {
@@ -44,6 +46,15 @@ export class SpotResolver {
     @Args('id', { type: () => ID }) id: string,
   ): Promise<Spot | null> {
     return this.spotService.findById(id);
+  }
+
+  @Query(() => SpotConnection, { name: 'spots' })
+  async getSpots(
+    @Args('first', { type: () => Int, nullable: true, defaultValue: 20 })
+    first: number,
+    @Args('after', { type: () => String, nullable: true }) after?: string,
+  ): Promise<SpotConnection> {
+    return this.spotService.findMany(first, after);
   }
 
   @Mutation(() => Spot)
