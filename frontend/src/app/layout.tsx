@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import { Noto_Sans_JP } from "next/font/google";
 import "./globals.css";
 import { Providers } from "./provider";
+import { Header } from "@/components/layout/Header";
 
-// 日本語フォントの設定
 const notoSansJP = Noto_Sans_JP({
   variable: "--font-noto-sans-jp",
   subsets: ["latin"],
@@ -14,7 +14,7 @@ const notoSansJP = Noto_Sans_JP({
 export const metadata: Metadata = {
   title: {
     default: "Spotee | スポット共有サービス",
-    template: "%s | Spotee", // 各ページで title を設定すると "ページ名 | Spotee" になる
+    template: "%s | Spotee",
   },
   description: "すべての人が、次の行きたい場所に出会えるサービス",
 };
@@ -27,7 +27,10 @@ export default function RootLayout({
   return (
     <html lang="ja">
       <body className={`${notoSansJP.variable} font-sans antialiased`}>
-        <Providers>{children}</Providers>
+        <Providers>
+          <Header />
+          {children}
+        </Providers>
       </body>
     </html>
   );

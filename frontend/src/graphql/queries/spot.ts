@@ -28,3 +28,39 @@ export const GET_SPOT = gql`
     }
   }
 `;
+
+export const GET_SPOTS = gql`
+  query GetSpots($first: Int, $after: String) {
+    spots(first: $first, after: $after) {
+      edges {
+        node {
+          id
+          title
+          address
+          likeCount
+          createdAt
+          images {
+            id
+            url
+            order
+          }
+          category {
+            id
+            name
+          }
+          user {
+            id
+            name
+            avatarUrl
+          }
+        }
+        cursor
+      }
+      pageInfo {
+        hasNextPage
+        endCursor
+      }
+      totalCount
+    }
+  }
+`;
