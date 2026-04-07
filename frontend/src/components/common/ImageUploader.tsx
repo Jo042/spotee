@@ -2,12 +2,25 @@
 
 import { useState, useCallback } from "react";
 import { uploadImage } from "@/lib/storage";
+import imageCompression from "browser-image-compression";
 
 interface ImageUploaderProps {
   images: string[];
   onChange: (images: string[]) => void;
   maxImages?: number;
 }
+
+const compressImage = async (file: File): Promise<File> => {
+  if (file.type === "image/gif") return file;
+
+  const options = {
+    maxSizeMB: 1,
+    maxWidthOrHeight: 1920,
+    useWebWorker: true,
+  };
+
+  return imageCompression(file, options);
+};
 
 export function ImageUploader({
   images,
@@ -34,7 +47,10 @@ export function ImageUploader({
       setError(null);
 
       try {
-        const uploadPromises = filesToUpload.map((file) => uploadImage(file));
+        const uploadPromises = filesToUpload.map(async (file) => {
+          const compressed = await compressImage(file);
+          return uploadImage(compressed);
+        });
         const newUrls = await Promise.all(uploadPromises);
 
         onChange([...images, ...newUrls]);
