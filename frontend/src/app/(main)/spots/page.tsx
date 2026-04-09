@@ -1,6 +1,7 @@
 "use client";
 
 import { useQuery } from "@apollo/client/react";
+import { useCallback, useState } from "react";
 import { GET_SPOTS } from "@/graphql/queries/spot";
 import { SpotList } from "@/components/spot/SpotList";
 import Link from "next/link";
@@ -10,10 +11,44 @@ import type { GetSpotsResponse, GetSpotsVariables } from "@/graphql/types/spot";
 export default function SpotsPage() {
   const { user } = useAuth();
 
-  const { data, loading, error } = useQuery<
+  const [loadingMore, setLoadingMore] = useState(false);
+
+  const { data, loading, error, fetchMore } = useQuery<
     GetSpotsResponse,
     GetSpotsVariables
-  >(GET_SPOTS, { variables: { first: 20 } });
+  >(GET_SPOTS, { variables: { first: 2 } });
+
+  const handleLoadMore = useCallback(async () => {
+    if (!data?.spots?.pageInfo?.endCursor) return;
+
+    setLoadingMore(true);
+
+    try {
+      await fetchMore({
+        variables: {
+          first: 20,
+          after: data.spots.pageInfo.endCursor,
+        },
+        updateQuery: (prevResult, { fetchMoreResult }) => {
+          if (!fetchMoreResult) return prevResult;
+
+          return {
+            spots: {
+              ...fetchMoreResult.spots,
+              edges: [
+                ...prevResult.spots.edges,
+                ...fetchMoreResult.spots.edges,
+              ],
+            },
+          };
+        },
+      });
+    } catch (err) {
+      console.error("Failed to load more:", err);
+    } finally {
+      setLoadingMore(false);
+    }
+  }, [data, fetchMore]);
 
   if (error) {
     return (
@@ -24,6 +59,7 @@ export default function SpotsPage() {
   }
 
   const spots = data?.spots?.edges?.map((edge) => edge.node) ?? [];
+  const hasNextPage = data?.spots?.pageInfo?.hasNextPage ?? false;
 
   return (
     <main className="min-h-screen bg-gray-50">
@@ -52,7 +88,13 @@ export default function SpotsPage() {
       </div>
 
       <div className="max-w-7xl mx-auto px-4 py-8">
-        <SpotList spots={spots} loading={loading} />
+        <SpotList
+          spots={spots}
+          loading={loading}
+          hasNextPage={hasNextPage}
+          loadingMore={loadingMore}
+          onLoadMore={handleLoadMore}
+        />
       </div>
     </main>
   );
