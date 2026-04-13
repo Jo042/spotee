@@ -15,7 +15,16 @@
     "lint": "npm run lint --workspaces --if-present",
     "test": "npm run test --workspaces --if-present"
   },
-  "keywords": ["nextjs", "nestjs", "graphql", "prisma", "supabase"],
+  "keywords": [
+    "nextjs",
+    "nestjs",
+    "graphql",
+    "prisma",
+    "supabase"
+  ],
   "author": "Jo",
-  "license": "MIT"
+  "license": "MIT",
+  "dependencies": {
+    "ts-node": "^10.9.2"
+  }
 }
