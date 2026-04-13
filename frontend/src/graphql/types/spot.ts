@@ -36,7 +36,17 @@ export type GetSpotsResponse = {
   };
 };
 
+export type SpotSortBy = "CREATED_AT" | "LIKE_COUNT" | "TITLE";
+
+export type SortOrder = "ASC" | "DESC";
+
+export type SpotSortInput = {
+  sortBy: SpotSortBy;
+  order: SortOrder;
+};
+
 export type GetSpotsVariables = {
   first: number;
   after?: string;
+  sort?: SpotSortInput;
 };

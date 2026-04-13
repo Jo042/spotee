@@ -7,16 +7,31 @@ import { SpotList } from "@/components/spot/SpotList";
 import Link from "next/link";
 import { useAuth } from "@/hooks/useAuth";
 import type { GetSpotsResponse, GetSpotsVariables } from "@/graphql/types/spot";
+import { SortSelect, SortOption } from "@/components/search/SortSelect";
+import { useRouter, useSearchParams } from "next/navigation";
 
 export default function SpotsPage() {
   const { user } = useAuth();
-
+  const router = useRouter();
+  const searchParams = useSearchParams();
   const [loadingMore, setLoadingMore] = useState(false);
+
+  const sortBy = (searchParams.get("sortBy") ??
+    "CREATED_AT") as SortOption["sortBy"];
+  const order = (searchParams.get("order") ?? "DESC") as SortOption["order"];
+  const currentSort: SortOption = { sortBy, order };
 
   const { data, loading, error, fetchMore } = useQuery<
     GetSpotsResponse,
     GetSpotsVariables
-  >(GET_SPOTS, { variables: { first: 2 } });
+  >(GET_SPOTS, { variables: { first: 2, sort: { sortBy, order } } });
+
+  const handleSortChange = (newSort: SortOption) => {
+    const params = new URLSearchParams();
+    params.set("sortBy", newSort.sortBy);
+    params.set("order", newSort.order);
+    router.push(`/spots?${params.toString()}`);
+  };
 
   const handleLoadMore = useCallback(async () => {
     if (!data?.spots?.pageInfo?.endCursor) return;
@@ -28,6 +43,7 @@ export default function SpotsPage() {
         variables: {
           first: 20,
           after: data.spots.pageInfo.endCursor,
+          sort: { sortBy, order },
         },
         updateQuery: (prevResult, { fetchMoreResult }) => {
           if (!fetchMoreResult) return prevResult;
@@ -48,7 +64,7 @@ export default function SpotsPage() {
     } finally {
       setLoadingMore(false);
     }
-  }, [data, fetchMore]);
+  }, [data, fetchMore, sortBy, order]);
 
   if (error) {
     return (
@@ -75,14 +91,18 @@ export default function SpotsPage() {
               )}
             </div>
 
-            {user && (
-              <Link
-                href="/spots/new"
-                className="bg-primary-500 text-white px-4 py-2 rounded-lg hover:bg-primary-600 transition-colors"
-              >
-                スポットを投稿
-              </Link>
-            )}
+            <div className="flex items-center gap-4">
+              <SortSelect value={currentSort} onChange={handleSortChange} />
+
+              {user && (
+                <Link
+                  href="/spots/new"
+                  className="bg-primary-500 text-white px-4 py-2 rounded-lg hover:bg-primary-600 transition-colors"
+                >
+                  スポットを投稿
+                </Link>
+              )}
+            </div>
           </div>
         </div>
       </div>

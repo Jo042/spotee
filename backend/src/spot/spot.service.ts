@@ -6,6 +6,7 @@ import {
 import { PrismaService } from '../../prisma/prisma.service';
 import { CreateSpotInput } from './dto/create-spot.input';
 import { UpdateSpotInput } from './dto/update-spot.input';
+import { SpotSortBy, SortOrder, SpotSortInput } from './dto/spot-filter.input';
 import {
   SpotConnection,
   SpotEdge,
@@ -157,21 +158,25 @@ export class SpotService {
    * @param first 取得件数
    * @param after カーソル
    */
-  async findMany(first: number = 20, after?: string): Promise<SpotConnection> {
-    const take = first + 1;
+  async findMany(
+    first: number = 20,
+    after?: string,
+    sort?: SpotSortInput,
+  ): Promise<SpotConnection> {
+    const sortBy = sort?.sortBy ?? SpotSortBy.CREATED_AT;
+    const order = sort?.order ?? SortOrder.DESC;
 
-    const where = after
-      ? {
-          createdAt: {
-            lt: this.getCursorDate(after),
-          },
-        }
+    const orderBy = this.buildOrderBy(sortBy, order);
+    const cursorCondition = after
+      ? this.buildCursorCondition(after, sortBy, order)
       : {};
 
+    const take = first + 1;
+
     const spots = await this.prisma.spot.findMany({
-      where,
+      where: cursorCondition,
       take,
-      orderBy: { createdAt: 'desc' },
+      orderBy,
       include: {
         images: { orderBy: { order: 'asc' } },
         user: true,
@@ -185,7 +190,7 @@ export class SpotService {
 
     const edges: SpotEdge[] = resultSpots.map((spot) => ({
       node: spot,
-      cursor: this.encodeCursor(spot.id, spot.createdAt),
+      cursor: this.encodeCursor(spot, sortBy),
     }));
 
     const totalCount = await this.prisma.spot.count();
@@ -205,21 +210,78 @@ export class SpotService {
   }
 
   /**
-   * カーソルをエンコード
-   * ID と createdAt を Base64 エンコード
+   * カーソル条件を構築
    */
-  private encodeCursor(id: string, createdAt: Date): string {
-    const data = JSON.stringify({ id, createdAt: createdAt.toISOString() });
-    return Buffer.from(data).toString('base64');
+  private buildCursorCondition(
+    cursor: string,
+    sortBy: SpotSortBy,
+    order: SortOrder,
+  ) {
+    const cursorData = this.decodeCursor(cursor);
+    const operator = order === SortOrder.DESC ? 'lt' : 'gt';
+
+    switch (sortBy) {
+      case SpotSortBy.LIKE_COUNT:
+        // いいね順: likeCount で比較、同数なら createdAt で比較
+        return {
+          OR: [
+            { likeCount: { [operator]: cursorData.likeCount } },
+            {
+              likeCount: cursorData.likeCount,
+              createdAt: { lt: new Date(cursorData.createdAt) },
+            },
+          ],
+        };
+      case SpotSortBy.TITLE:
+        return { title: { [operator]: cursorData.title } };
+      case SpotSortBy.CREATED_AT:
+      default:
+        return { createdAt: { [operator]: new Date(cursorData.createdAt) } };
+    }
   }
 
   /**
-   * カーソルをデコードして createdAt を取得
+   * ソート条件に応じた orderBy を構築
    */
-  private getCursorDate(cursor: string): Date {
+  private buildOrderBy(sortBy: SpotSortBy, order: SortOrder) {
+    switch (sortBy) {
+      case SpotSortBy.LIKE_COUNT:
+        // いいね順の場合、同数なら新着順
+        return [{ likeCount: order }, { createdAt: 'desc' as const }];
+      case SpotSortBy.TITLE:
+        return [{ title: order }];
+      case SpotSortBy.CREATED_AT:
+      default:
+        return [{ createdAt: order }];
+    }
+  }
+
+  /**
+   * カーソルをエンコード（ソート条件に応じた値を含める）
+   */
+  private encodeCursor(spot: any, sortBy: SpotSortBy): string {
+    const data: any = {
+      id: spot.id,
+      createdAt: spot.createdAt.toISOString(),
+    };
+
+    // ソート対象の値もカーソルに含める
+    if (sortBy === SpotSortBy.LIKE_COUNT) {
+      data.likeCount = spot.likeCount;
+    }
+    if (sortBy === SpotSortBy.TITLE) {
+      data.title = spot.title;
+    }
+
+    return Buffer.from(JSON.stringify(data)).toString('base64');
+  }
+
+  /**
+   * カーソルをデコード
+   */
+  private decodeCursor(cursor: string): any {
     try {
-      const data = JSON.parse(Buffer.from(cursor, 'base64').toString('utf-8'));
-      return new Date(data.createdAt);
+      return JSON.parse(Buffer.from(cursor, 'base64').toString('utf-8'));
     } catch {
       throw new Error('Invalid cursor');
     }
