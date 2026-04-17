@@ -37,7 +37,7 @@ export function SpotCard({ spot }: SpotCardProps) {
 
         <div className="p-4">
           <div className="flex justify-between items-start mb-2">
-            <span className="text-xs text-white bg-primary-500 px-2 py-1 rounded">
+            <span className="text-xs text-white bg-primary-700 px-2 py-1 rounded">
               {spot.category.name}
             </span>
             <span className="text-sm text-gray-500 flex items-center gap-1">

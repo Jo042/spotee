@@ -46,7 +46,7 @@ export function Header() {
             ) : (
               <Link
                 href="/login"
-                className="bg-primary-500 text-white px-4 py-2 rounded-lg hover:bg-primary-600 transition-colors"
+                className="bg-primary-700 text-white px-4 py-2 rounded-lg hover:bg-primary-800 transition-colors"
               >
                 ログイン
               </Link>

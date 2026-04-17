@@ -89,7 +89,7 @@ export function SpotDetail({ spot }: SpotDetailProps) {
       </div>
 
       <div className="bg-white rounded-xl shadow-sm p-6 space-y-4">
-        <span className="inline-block px-3 py-1 text-white bg-primary-500 text-sm rounded-full">
+        <span className="inline-block px-3 py-1 text-white bg-primary-700 text-sm rounded-full">
           {spot.category.name}
         </span>
 

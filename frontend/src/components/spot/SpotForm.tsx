@@ -271,8 +271,8 @@ export function SpotForm() {
               }
               className={`px-3 py-1 rounded-full text-sm transition-colors ${
                 selectedAttributeTags.includes(tag.id)
-                  ? "bg-primary-500 text-white"
-                  : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                  ? "bg-primary-700 text-white"
+                  : "bg-white border border-gray-300 text-gray-700 hover:bg-gray-50"
               }`}
             >
               {tag.name}
@@ -293,8 +293,8 @@ export function SpotForm() {
               onClick={() => toggleTag("moodTagIds", tag.id, selectedMoodTags)}
               className={`px-3 py-1 rounded-full text-sm transition-colors ${
                 selectedMoodTags.includes(tag.id)
-                  ? "bg-primary-500 text-white"
-                  : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                  ? "bg-primary-700 text-white"
+                  : "bg-white border border-gray-300 text-gray-700 hover:bg-gray-50"
               }`}
             >
               {tag.name}
@@ -307,7 +307,7 @@ export function SpotForm() {
         <button
           type="submit"
           disabled={creating}
-          className="w-full py-3 px-4 bg-primary-500 text-white font-medium rounded-lg hover:bg-primary-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          className="w-full py-3 px-4 bg-primary-700 text-white font-medium rounded-lg hover:bg-primary-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
         >
           {creating ? "投稿中..." : "スポットを投稿する"}
         </button>
