@@ -10,16 +10,25 @@ interface ImageUploaderProps {
   maxImages?: number;
 }
 
+const MAX_FILE_SIZE_MB = 4.5;
+
 const compressImage = async (file: File): Promise<File> => {
   if (file.type === "image/gif") return file;
 
   const options = {
     maxSizeMB: 1,
-    maxWidthOrHeight: 1920,
+    maxWidthOrHeight: 1280,
+    initialQuality: 0.8,
     useWebWorker: true,
   };
 
-  return imageCompression(file, options);
+  const compressed = await imageCompression(file, options);
+
+  if (compressed.size > MAX_FILE_SIZE_MB * 1024 * 1024) {
+    throw new Error("画像サイズが大きすぎます。別の画像をお試しください。");
+  }
+
+  return compressed;
 };
 
 export function ImageUploader({
