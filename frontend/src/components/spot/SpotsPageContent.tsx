@@ -97,7 +97,7 @@ export default function SpotsPageContent() {
               {user && (
                 <Link
                   href="/spots/new"
-                  className="bg-primary-500 text-white px-4 py-2 rounded-lg hover:bg-primary-600 transition-colors"
+                  className="bg-primary-700 text-white px-4 py-2 rounded-lg hover:bg-primary-800 transition-colors"
                 >
                   スポットを投稿
                 </Link>

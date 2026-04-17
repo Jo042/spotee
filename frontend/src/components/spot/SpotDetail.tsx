@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useState } from "react";
 
 interface SpotImage {
@@ -46,7 +47,14 @@ export function SpotDetail({ spot }: SpotDetailProps) {
 
   return (
     <div className="max-w-4xl mx-auto">
-      <div className="mb-6">
+      <Link
+        href="/spots"
+        className="inline-flex items-center gap-1 text-sm text-gray-500 hover:text-gray-700 transition-colors mb-6"
+      >
+        ← スポット一覧に戻る
+      </Link>
+
+      <div className="bg-white rounded-xl shadow-sm p-6 mb-6">
         <div className="aspect-video bg-gray-100 rounded-lg overflow-hidden mb-4">
           {currentImage && (
             <img
@@ -80,8 +88,8 @@ export function SpotDetail({ spot }: SpotDetailProps) {
         )}
       </div>
 
-      <div className="space-y-4">
-        <span className="inline-block px-3 py-1 bg-primary-100 text-primary-700 text-sm rounded-full">
+      <div className="bg-white rounded-xl shadow-sm p-6 space-y-4">
+        <span className="inline-block px-3 py-1 text-white bg-primary-700 text-sm rounded-full">
           {spot.category.name}
         </span>
 
