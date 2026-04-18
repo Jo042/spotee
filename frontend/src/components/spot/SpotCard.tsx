@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { Heart, MapPin, UserCircle } from "lucide-react";
 
 interface SpotCardProps {
   spot: {
@@ -41,7 +42,7 @@ export function SpotCard({ spot }: SpotCardProps) {
               {spot.category.name}
             </span>
             <span className="text-sm text-gray-500 flex items-center gap-1">
-              <span>❤️</span>
+              <Heart size={14} className="text-rose-400" />
               <span>{spot.likeCount}</span>
             </span>
           </div>
@@ -50,8 +51,8 @@ export function SpotCard({ spot }: SpotCardProps) {
             {spot.title}
           </h3>
 
-          <p className="text-sm text-gray-500 line-clamp-1">
-            <span className="mr-1">📍</span>
+          <p className="text-sm text-gray-500 line-clamp-1 flex items-center gap-1">
+            <MapPin size={13} className="flex-shrink-0" />
             {spot.address}
           </p>
 
@@ -64,8 +65,8 @@ export function SpotCard({ spot }: SpotCardProps) {
                   className="w-full h-full object-cover"
                 />
               ) : (
-                <div className="w-full h-full flex items-center justify-center text-gray-400 text-xs">
-                  👤
+                <div className="w-full h-full flex items-center justify-center text-gray-400">
+                  <UserCircle size={24} />
                 </div>
               )}
             </div>
