@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
+import { Heart, MapPin, Banknote, Clock, UserCircle } from "lucide-react";
 
 interface SpotImage {
   id: string;
@@ -95,18 +96,19 @@ export function SpotDetail({ spot }: SpotDetailProps) {
 
         <h1 className="text-2xl font-bold text-gray-900">{spot.title}</h1>
 
-        <div className="flex items-center gap-2 text-gray-600">
-          <span>❤️ {spot.likeCount}</span>
+        <div className="flex items-center gap-1.5 text-gray-600">
+          <Heart size={16} className="text-rose-400" />
+          <span>{spot.likeCount}</span>
         </div>
 
-        <div className="flex items-start gap-2">
-          <span className="text-gray-500">📍</span>
+        <div className="flex items-start gap-1.5">
+          <MapPin size={16} className="text-gray-400 flex-shrink-0 mt-0.5" />
           <span className="text-gray-700">{spot.address}</span>
         </div>
 
         {spot.priceRange && (
-          <div className="flex items-center gap-2">
-            <span className="text-gray-500">💰</span>
+          <div className="flex items-center gap-1.5">
+            <Banknote size={16} className="text-gray-400 flex-shrink-0" />
             <span className="text-gray-700">
               {priceRangeLabels[spot.priceRange]}
             </span>
@@ -114,8 +116,8 @@ export function SpotDetail({ spot }: SpotDetailProps) {
         )}
 
         {spot.businessHours && (
-          <div className="flex items-center gap-2">
-            <span className="text-gray-500">🕐</span>
+          <div className="flex items-center gap-1.5">
+            <Clock size={16} className="text-gray-400 flex-shrink-0" />
             <span className="text-gray-700">{spot.businessHours}</span>
           </div>
         )}
@@ -138,8 +140,8 @@ export function SpotDetail({ spot }: SpotDetailProps) {
                   className="w-full h-full object-cover"
                 />
               ) : (
-                <div className="w-full h-full flex items-center justify-center text-gray-500">
-                  👤
+                <div className="w-full h-full flex items-center justify-center text-gray-400">
+                  <UserCircle size={40} />
                 </div>
               )}
             </div>
