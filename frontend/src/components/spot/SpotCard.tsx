@@ -11,7 +11,7 @@ interface SpotCardProps {
     likeCount: number;
     images: { url: string }[];
     category: { name: string };
-    user: { name: string; avatarUrl: string | null };
+    user: { name: string; avatarUrl?: string | null };
   };
 }
 

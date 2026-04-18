@@ -1,6 +1,6 @@
-import { gql } from "@apollo/client";
+import { gql } from "@/graphql/generated";
 
-export const GET_SPOT = gql`
+export const GET_SPOT = gql(`
   query GetSpot($id: ID!) {
     spot(id: $id) {
       id
@@ -27,9 +27,9 @@ export const GET_SPOT = gql`
       }
     }
   }
-`;
+`);
 
-export const GET_SPOTS = gql`
+export const GET_SPOTS = gql(`
   query GetSpots($first: Int, $after: String, $sort: SpotSortInput) {
     spots(first: $first, after: $after, sort: $sort) {
       edges {
@@ -63,4 +63,4 @@ export const GET_SPOTS = gql`
       totalCount
     }
   }
-`;
+`);

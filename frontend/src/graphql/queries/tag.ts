@@ -1,6 +1,6 @@
-import { gql } from "@apollo/client";
+import { gql } from "@/graphql/generated";
 
-export const GET_CATEGORIES = gql`
+export const GET_CATEGORIES = gql(`
   query GetCategories {
     categories {
       id
@@ -8,9 +8,9 @@ export const GET_CATEGORIES = gql`
       slug
     }
   }
-`;
+`);
 
-export const GET_ATTRIBUTE_TAGS = gql`
+export const GET_ATTRIBUTE_TAGS = gql(`
   query GetAttributeTags {
     attributeTags {
       id
@@ -18,9 +18,9 @@ export const GET_ATTRIBUTE_TAGS = gql`
       slug
     }
   }
-`;
+`);
 
-export const GET_MOOD_TAGS = gql`
+export const GET_MOOD_TAGS = gql(`
   query GetMoodTags {
     moodTags {
       id
@@ -28,9 +28,9 @@ export const GET_MOOD_TAGS = gql`
       slug
     }
   }
-`;
+`);
 
-export const GET_ALL_TAGS = gql`
+export const GET_ALL_TAGS = gql(`
   query GetAllTags {
     categories {
       id
@@ -48,4 +48,4 @@ export const GET_ALL_TAGS = gql`
       slug
     }
   }
-`;
+`);

@@ -6,7 +6,8 @@ import { GET_SPOTS } from "@/graphql/queries/spot";
 import { SpotList } from "@/components/spot/SpotList";
 import Link from "next/link";
 import { useAuth } from "@/hooks/useAuth";
-import type { GetSpotsResponse, GetSpotsVariables } from "@/graphql/types/spot";
+import type { GetSpotsQuery, GetSpotsQueryVariables } from "@/graphql/generated/graphql";
+import { SpotSortBy, SortOrder } from "@/graphql/generated/graphql";
 import { SortSelect, SortOption } from "@/components/search/SortSelect";
 import { useRouter, useSearchParams } from "next/navigation";
 
@@ -16,14 +17,13 @@ export default function SpotsPageContent() {
   const searchParams = useSearchParams();
   const [loadingMore, setLoadingMore] = useState(false);
 
-  const sortBy = (searchParams.get("sortBy") ??
-    "CREATED_AT") as SortOption["sortBy"];
-  const order = (searchParams.get("order") ?? "DESC") as SortOption["order"];
+  const sortBy = (searchParams.get("sortBy") ?? SpotSortBy.CreatedAt) as SortOption["sortBy"];
+  const order = (searchParams.get("order") ?? SortOrder.Desc) as SortOption["order"];
   const currentSort: SortOption = { sortBy, order };
 
   const { data, loading, error, fetchMore } = useQuery<
-    GetSpotsResponse,
-    GetSpotsVariables
+    GetSpotsQuery,
+    GetSpotsQueryVariables
   >(GET_SPOTS, { variables: { first: 2, sort: { sortBy, order } } });
 
   const handleSortChange = (newSort: SortOption) => {
@@ -74,7 +74,9 @@ export default function SpotsPageContent() {
     );
   }
 
-  const spots = data?.spots?.edges?.map((edge) => edge.node) ?? [];
+  const spots = (data?.spots?.edges ?? [])
+    .map((edge) => edge.node)
+    .filter((node): node is NonNullable<typeof node> => node != null);
   const hasNextPage = data?.spots?.pageInfo?.hasNextPage ?? false;
 
   return (

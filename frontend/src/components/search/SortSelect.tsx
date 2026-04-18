@@ -1,8 +1,10 @@
 "use client";
 
+import { SpotSortBy, SortOrder } from "@/graphql/generated/graphql";
+
 export type SortOption = {
-  sortBy: "CREATED_AT" | "LIKE_COUNT" | "TITLE";
-  order: "DESC" | "ASC";
+  sortBy: SpotSortBy;
+  order: SortOrder;
 };
 
 interface SortSelectProps {
@@ -11,11 +13,11 @@ interface SortSelectProps {
 }
 
 const SORT_OPTIONS = [
-  { label: "新着順", sortBy: "CREATED_AT", order: "DESC" },
-  { label: "古い順", sortBy: "CREATED_AT", order: "ASC" },
-  { label: "いいね順", sortBy: "LIKE_COUNT", order: "DESC" },
-  { label: "名前順（A→Z）", sortBy: "TITLE", order: "ASC" },
-  { label: "名前順（Z→A）", sortBy: "TITLE", order: "DESC" },
+  { label: "新着順", sortBy: SpotSortBy.CreatedAt, order: SortOrder.Desc },
+  { label: "古い順", sortBy: SpotSortBy.CreatedAt, order: SortOrder.Asc },
+  { label: "いいね順", sortBy: SpotSortBy.LikeCount, order: SortOrder.Desc },
+  { label: "名前順（A→Z）", sortBy: SpotSortBy.Title, order: SortOrder.Asc },
+  { label: "名前順（Z→A）", sortBy: SpotSortBy.Title, order: SortOrder.Desc },
 ] as const;
 
 export function SortSelect({ value, onChange }: SortSelectProps) {
