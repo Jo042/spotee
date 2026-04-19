@@ -59,30 +59,6 @@ export function FilterPanel() {
       </div>
 
       <div>
-        <h3 className="text-sm font-semibold text-gray-700 mb-2">タグの絞り込み方</h3>
-        <div className="inline-flex rounded-lg border border-gray-200 overflow-hidden">
-          {([['OR', 'いずれか'], ['AND', 'すべて']] as [TagSearchMode, string][]).map(([mode, label]) => (
-            <button
-              key={mode}
-              onClick={() => updateFilter({ tagSearchMode: mode })}
-              className={`px-4 py-1.5 text-sm transition-colors ${
-                currentFilter.tagSearchMode === mode
-                  ? 'bg-primary-700 text-white'
-                  : 'bg-white text-gray-600 hover:bg-gray-50'
-              }`}
-            >
-              {label}
-            </button>
-          ))}
-        </div>
-        <p className="text-xs text-gray-400 mt-1">
-          {currentFilter.tagSearchMode === 'AND'
-            ? '選択したタグをすべて持つスポットを表示'
-            : '選択したタグのうちどれかを持つスポットを表示'}
-        </p>
-      </div>
-
-      <div>
         <h3 className="text-sm font-semibold text-gray-700 mb-2">特徴タグ</h3>
         <div className="flex flex-wrap gap-2">
           {data?.attributeTags?.map((tag: { id: string; name: string }) => (
@@ -118,6 +94,30 @@ export function FilterPanel() {
             </button>
           ))}
         </div>
+      </div>
+
+      <div>
+        <h3 className="text-sm font-semibold text-gray-700 mb-2">タグの絞り込み方</h3>
+        <div className="inline-flex rounded-lg border border-gray-200 overflow-hidden">
+          {([['OR', 'いずれか'], ['AND', 'すべて']] as [TagSearchMode, string][]).map(([mode, label]) => (
+            <button
+              key={mode}
+              onClick={() => updateFilter({ tagSearchMode: mode })}
+              className={`px-4 py-1.5 text-sm transition-colors ${
+                currentFilter.tagSearchMode === mode
+                  ? 'bg-primary-700 text-white'
+                  : 'bg-white text-gray-600 hover:bg-gray-50'
+              }`}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+        <p className="text-xs text-gray-400 mt-1">
+          {currentFilter.tagSearchMode === 'AND'
+            ? '選択したタグをすべて持つスポットを表示'
+            : '選択したタグのうちどれかを持つスポットを表示'}
+        </p>
       </div>
     </div>
   );
