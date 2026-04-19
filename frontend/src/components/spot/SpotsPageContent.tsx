@@ -7,24 +7,35 @@ import { SpotList } from "@/components/spot/SpotList";
 import Link from "next/link";
 import { useAuth } from "@/hooks/useAuth";
 import type { GetSpotsQuery, GetSpotsQueryVariables } from "@/graphql/generated/graphql";
-import { SpotSortBy, SortOrder } from "@/graphql/generated/graphql";
+import { SpotSortBy, SortOrder, TagSearchMode } from "@/graphql/generated/graphql";
 import { SortSelect, SortOption } from "@/components/search/SortSelect";
+import { FilterPanel } from "@/components/search/FilterPanel";
 import { useRouter, useSearchParams } from "next/navigation";
+import { useSpotFilter } from "@/hooks/useSpotFilter";
 
 export default function SpotsPageContent() {
   const { user } = useAuth();
   const router = useRouter();
   const searchParams = useSearchParams();
   const [loadingMore, setLoadingMore] = useState(false);
+  const { currentFilter, hasActiveFilter } = useSpotFilter();
 
   const sortBy = (searchParams.get("sortBy") ?? SpotSortBy.CreatedAt) as SortOption["sortBy"];
   const order = (searchParams.get("order") ?? SortOrder.Desc) as SortOption["order"];
   const currentSort: SortOption = { sortBy, order };
 
+  const filterVariables = {
+    categoryId: currentFilter.categoryId,
+    attributeTagIds: currentFilter.attributeTagIds.length > 0 ? currentFilter.attributeTagIds : undefined,
+    moodTagIds: currentFilter.moodTagIds.length > 0 ? currentFilter.moodTagIds : undefined,
+    tagSearchMode: currentFilter.tagSearchMode as TagSearchMode,
+    keyword: currentFilter.keyword,
+  };
+
   const { data, loading, error, fetchMore } = useQuery<
     GetSpotsQuery,
     GetSpotsQueryVariables
-  >(GET_SPOTS, { variables: { first: 2, sort: { sortBy, order } } });
+  >(GET_SPOTS, { variables: { first: 20, sort: { sortBy, order }, filter: filterVariables } });
 
   const handleSortChange = (newSort: SortOption) => {
     const params = new URLSearchParams();
@@ -76,7 +87,15 @@ export default function SpotsPageContent() {
 
   const spots = (data?.spots?.edges ?? [])
     .map((edge) => edge.node)
-    .filter((node): node is NonNullable<typeof node> => node != null);
+    .filter((node): node is NonNullable<typeof node> => node != null) as Array<{
+      id: string;
+      title: string;
+      address: string;
+      likeCount: number;
+      images: { url: string }[];
+      category: { name: string };
+      user: { name: string; avatarUrl?: string | null };
+    }>;
   const hasNextPage = data?.spots?.pageInfo?.hasNextPage ?? false;
 
   return (
@@ -89,6 +108,9 @@ export default function SpotsPageContent() {
               {data?.spots?.totalCount !== undefined && (
                 <p className="text-sm text-gray-500 mt-1">
                   全 {data.spots.totalCount} 件
+                  {hasActiveFilter && (
+                    <span className="ml-1 text-primary-700">（フィルター適用中）</span>
+                  )}
                 </p>
               )}
             </div>
@@ -110,13 +132,20 @@ export default function SpotsPageContent() {
       </div>
 
       <div className="max-w-7xl mx-auto px-4 py-8">
-        <SpotList
-          spots={spots}
-          loading={loading}
-          hasNextPage={hasNextPage}
-          loadingMore={loadingMore}
-          onLoadMore={handleLoadMore}
-        />
+        <div className="flex gap-6">
+          <aside className="hidden lg:block w-72 flex-shrink-0">
+            <FilterPanel />
+          </aside>
+          <div className="flex-1 min-w-0">
+            <SpotList
+              spots={spots}
+              loading={loading}
+              hasNextPage={hasNextPage}
+              loadingMore={loadingMore}
+              onLoadMore={handleLoadMore}
+            />
+          </div>
+        </div>
       </div>
     </main>
   );
