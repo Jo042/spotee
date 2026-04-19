@@ -55,19 +55,19 @@ export function FilterPanel() {
       </div>
 
       <div>
-        <h3 className="text-sm font-semibold text-gray-700 mb-2">タグ検索モード</h3>
-        <div className="flex gap-2">
-          {(['OR', 'AND'] as TagSearchMode[]).map((mode) => (
+        <h3 className="text-sm font-semibold text-gray-700 mb-2">タグの絞り込み方</h3>
+        <div className="inline-flex rounded-lg border border-gray-200 overflow-hidden">
+          {([['OR', 'いずれか'], ['AND', 'すべて']] as [TagSearchMode, string][]).map(([mode, label]) => (
             <button
               key={mode}
               onClick={() => updateFilter({ tagSearchMode: mode })}
-              className={`px-4 py-1.5 rounded-full text-sm border transition-colors ${
+              className={`px-4 py-1.5 text-sm transition-colors ${
                 currentFilter.tagSearchMode === mode
-                  ? 'bg-primary-700 text-white border-primary-700'
-                  : 'bg-white text-gray-600 border-gray-300 hover:border-primary-400'
+                  ? 'bg-primary-700 text-white'
+                  : 'bg-white text-gray-600 hover:bg-gray-50'
               }`}
             >
-              {mode === 'OR' ? 'いずれか（OR）' : 'すべて（AND）'}
+              {label}
             </button>
           ))}
         </div>
