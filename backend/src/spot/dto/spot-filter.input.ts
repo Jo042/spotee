@@ -12,7 +12,10 @@ export class SpotFilterInput {
   @Field(() => [ID], { nullable: true })
   moodTagIds?: string[];
 
-  @Field(() => TagSearchMode, { nullable: true, defaultValue: TagSearchMode.OR })
+  @Field(() => TagSearchMode, {
+    nullable: true,
+    defaultValue: TagSearchMode.OR,
+  })
   tagSearchMode?: TagSearchMode;
 
   @Field(() => String, { nullable: true })
