@@ -1,31 +1,19 @@
-import { InputType, Field, registerEnumType } from '@nestjs/graphql';
-
-export enum SpotSortBy {
-  LIKE_COUNT = 'likeCount',
-  CREATED_AT = 'createdAt',
-  TITLE = 'title',
-}
-
-registerEnumType(SpotSortBy, {
-  name: 'SpotSortBy',
-  description: 'スポットのソート対象',
-});
-
-export enum SortOrder {
-  ASC = 'asc',
-  DESC = 'desc',
-}
-
-registerEnumType(SortOrder, {
-  name: 'SortOrder',
-  description: 'ソート順序',
-});
+import { InputType, Field, ID } from '@nestjs/graphql';
 
 @InputType()
-export class SpotSortInput {
-  @Field(() => SpotSortBy, { defaultValue: SpotSortBy.CREATED_AT })
-  sortBy: SpotSortBy;
+export class SpotFilterInput {
+  @Field(() => ID, { nullable: true })
+  categoryId?: string;
 
-  @Field(() => SortOrder, { defaultValue: SortOrder.DESC })
-  order: SortOrder;
+  @Field(() => [ID], { nullable: true })
+  attributeTagIds?: string[];
+
+  @Field(() => [ID], { nullable: true })
+  moodTagIds?: string[];
+
+  @Field(() => String, { nullable: true })
+  tagSearchMode?: 'AND' | 'OR';
+
+  @Field(() => String, { nullable: true })
+  keyword?: string;
 }

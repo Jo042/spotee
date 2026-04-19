@@ -22,7 +22,8 @@ import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import type { AuthUser } from 'src/auth/types/auth-user.type';
 import { SpotLoader } from './spot.loader';
 import { SpotConnection } from './dto/spot-connection.object';
-import { SpotSortInput } from './dto/spot-filter.input';
+import { SpotSortInput } from './dto/spot-sort.input';
+import { SpotFilterInput } from './dto/spot-filter.input';
 
 @Resolver(() => Spot)
 export class SpotResolver {
@@ -56,8 +57,10 @@ export class SpotResolver {
     @Args('after', { type: () => String, nullable: true }) after?: string,
     @Args('sort', { type: () => SpotSortInput, nullable: true })
     sort?: SpotSortInput,
+    @Args('filter', { type: () => SpotFilterInput, nullable: true })
+    filter?: SpotFilterInput,
   ): Promise<SpotConnection> {
-    return this.spotService.findMany(first, after, sort);
+    return this.spotService.findMany(first, after, sort, filter);
   }
 
   @Mutation(() => Spot)

@@ -4,9 +4,11 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
+import { Prisma } from '@prisma/client';
 import { CreateSpotInput } from './dto/create-spot.input';
 import { UpdateSpotInput } from './dto/update-spot.input';
-import { SpotSortBy, SortOrder, SpotSortInput } from './dto/spot-filter.input';
+import { SpotSortBy, SortOrder, SpotSortInput } from './dto/spot-sort.input';
+import { SpotFilterInput } from './dto/spot-filter.input';
 import {
   SpotConnection,
   SpotEdge,
@@ -162,19 +164,25 @@ export class SpotService {
     first: number = 20,
     after?: string,
     sort?: SpotSortInput,
+    filter?: SpotFilterInput,
   ): Promise<SpotConnection> {
     const sortBy = sort?.sortBy ?? SpotSortBy.CREATED_AT;
     const order = sort?.order ?? SortOrder.DESC;
 
     const orderBy = this.buildOrderBy(sortBy, order);
+    const filterWhere = this.buildWhereClause(filter);
     const cursorCondition = after
       ? this.buildCursorCondition(after, sortBy, order)
-      : {};
+      : null;
+
+    const where: Prisma.SpotWhereInput = cursorCondition
+      ? { AND: [filterWhere, cursorCondition] }
+      : filterWhere;
 
     const take = first + 1;
 
     const spots = await this.prisma.spot.findMany({
-      where: cursorCondition,
+      where,
       take,
       orderBy,
       include: {
@@ -193,7 +201,7 @@ export class SpotService {
       cursor: this.encodeCursor(spot, sortBy),
     }));
 
-    const totalCount = await this.prisma.spot.count();
+    const totalCount = await this.prisma.spot.count({ where: filterWhere });
 
     const pageInfo: PageInfo = {
       hasNextPage,
@@ -207,6 +215,37 @@ export class SpotService {
       pageInfo,
       totalCount,
     };
+  }
+
+  private buildWhereClause(filter?: SpotFilterInput): Prisma.SpotWhereInput {
+    if (!filter) return {};
+
+    const where: Prisma.SpotWhereInput = {};
+
+    if (filter.categoryId) {
+      where.categoryId = filter.categoryId;
+    }
+
+    if (filter.attributeTagIds && filter.attributeTagIds.length > 0) {
+      where.attributeTags = {
+        some: { tagId: { in: filter.attributeTagIds } },
+      };
+    }
+
+    if (filter.moodTagIds && filter.moodTagIds.length > 0) {
+      where.moodTags = {
+        some: { tagId: { in: filter.moodTagIds } },
+      };
+    }
+
+    if (filter.keyword) {
+      where.OR = [
+        { title: { contains: filter.keyword, mode: 'insensitive' } },
+        { description: { contains: filter.keyword, mode: 'insensitive' } },
+      ];
+    }
+
+    return where;
   }
 
   /**
