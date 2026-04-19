@@ -15,6 +15,7 @@ export function SearchBar() {
   }, [debouncedValue]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setInputValue(currentFilter.keyword ?? '');
   }, [currentFilter.keyword]);
 
