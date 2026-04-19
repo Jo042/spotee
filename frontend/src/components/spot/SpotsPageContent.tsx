@@ -26,7 +26,7 @@ export default function SpotsPageContent() {
   const currentSort: SortOption = { sortBy, order };
 
   const filterVariables = {
-    categoryId: currentFilter.categoryId,
+    categoryIds: currentFilter.categoryIds.length > 0 ? currentFilter.categoryIds : undefined,
     attributeTagIds: currentFilter.attributeTagIds.length > 0 ? currentFilter.attributeTagIds : undefined,
     moodTagIds: currentFilter.moodTagIds.length > 0 ? currentFilter.moodTagIds : undefined,
     tagSearchMode: currentFilter.tagSearchMode as TagSearchMode,

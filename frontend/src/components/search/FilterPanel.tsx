@@ -34,23 +34,27 @@ export function FilterPanel() {
       <div>
         <h3 className="text-sm font-semibold text-gray-700 mb-2">カテゴリ</h3>
         <div className="flex flex-wrap gap-2">
-          {data?.categories?.map((cat: { id: string; name: string }) => (
-            <button
-              key={cat.id}
-              onClick={() =>
-                updateFilter({
-                  categoryId: currentFilter.categoryId === cat.id ? undefined : cat.id,
-                })
-              }
-              className={`px-3 py-1 rounded-full text-sm border transition-colors ${
-                currentFilter.categoryId === cat.id
-                  ? 'bg-primary-700 text-white border-primary-700'
-                  : 'bg-white text-gray-600 border-gray-300 hover:border-primary-400'
-              }`}
-            >
-              {cat.name}
-            </button>
-          ))}
+          {data?.categories?.map((cat: { id: string; name: string }) => {
+            const selected = currentFilter.categoryIds.includes(cat.id);
+            return (
+              <button
+                key={cat.id}
+                onClick={() => {
+                  const next = selected
+                    ? currentFilter.categoryIds.filter((id) => id !== cat.id)
+                    : [...currentFilter.categoryIds, cat.id];
+                  updateFilter({ categoryIds: next });
+                }}
+                className={`px-3 py-1 rounded-full text-sm border transition-colors ${
+                  selected
+                    ? 'bg-primary-700 text-white border-primary-700'
+                    : 'bg-white text-gray-600 border-gray-300 hover:border-primary-400'
+                }`}
+              >
+                {cat.name}
+              </button>
+            );
+          })}
         </div>
       </div>
 

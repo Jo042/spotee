@@ -184,7 +184,7 @@ export type SpotEdge = {
 
 export type SpotFilterInput = {
   attributeTagIds?: InputMaybe<Array<Scalars['ID']['input']>>;
-  categoryId?: InputMaybe<Scalars['ID']['input']>;
+  categoryIds?: InputMaybe<Array<Scalars['ID']['input']>>;
   keyword?: InputMaybe<Scalars['String']['input']>;
   moodTagIds?: InputMaybe<Array<Scalars['ID']['input']>>;
   tagSearchMode?: InputMaybe<TagSearchMode>;

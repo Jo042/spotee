@@ -3,8 +3,8 @@ import { TagSearchMode } from './tag-search-mode.enum';
 
 @InputType()
 export class SpotFilterInput {
-  @Field(() => ID, { nullable: true })
-  categoryId?: string;
+  @Field(() => [ID], { nullable: true })
+  categoryIds?: string[];
 
   @Field(() => [ID], { nullable: true })
   attributeTagIds?: string[];

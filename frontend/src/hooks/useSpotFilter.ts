@@ -6,7 +6,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 export type TagSearchMode = 'AND' | 'OR';
 
 export interface SpotFilter {
-  categoryId?: string;
+  categoryIds: string[];
   attributeTagIds: string[];
   moodTagIds: string[];
   tagSearchMode: TagSearchMode;
@@ -18,7 +18,9 @@ export function useSpotFilter() {
   const searchParams = useSearchParams();
 
   const currentFilter: SpotFilter = {
-    categoryId: searchParams.get('categoryId') ?? undefined,
+    categoryIds: searchParams.get('categoryIds')
+      ? searchParams.get('categoryIds')!.split(',').filter(Boolean)
+      : [],
     attributeTagIds: searchParams.get('attributeTagIds')
       ? searchParams.get('attributeTagIds')!.split(',').filter(Boolean)
       : [],
@@ -34,10 +36,10 @@ export function useSpotFilter() {
       const params = new URLSearchParams(searchParams.toString());
       const next = { ...currentFilter, ...patch };
 
-      if (next.categoryId) {
-        params.set('categoryId', next.categoryId);
+      if (next.categoryIds.length > 0) {
+        params.set('categoryIds', next.categoryIds.join(','));
       } else {
-        params.delete('categoryId');
+        params.delete('categoryIds');
       }
 
       if (next.attributeTagIds.length > 0) {
@@ -75,7 +77,7 @@ export function useSpotFilter() {
   }, [searchParams, router]);
 
   const hasActiveFilter =
-    !!currentFilter.categoryId ||
+    currentFilter.categoryIds.length > 0 ||
     currentFilter.attributeTagIds.length > 0 ||
     currentFilter.moodTagIds.length > 0 ||
     !!currentFilter.keyword;
