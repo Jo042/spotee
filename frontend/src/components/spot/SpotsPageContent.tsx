@@ -10,6 +10,7 @@ import type { GetSpotsQuery, GetSpotsQueryVariables } from "@/graphql/generated/
 import { SpotSortBy, SortOrder, TagSearchMode } from "@/graphql/generated/graphql";
 import { SortSelect, SortOption } from "@/components/search/SortSelect";
 import { FilterPanel } from "@/components/search/FilterPanel";
+import { SearchBar } from "@/components/search/SearchBar";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useSpotFilter } from "@/hooks/useSpotFilter";
 
@@ -172,6 +173,9 @@ export default function SpotsPageContent() {
             <FilterPanel />
           </aside>
           <div className="flex-1 min-w-0">
+            <div className="mb-4">
+              <SearchBar />
+            </div>
             <SpotList
               spots={spots}
               loading={loading}
