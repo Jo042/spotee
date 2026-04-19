@@ -83,7 +83,7 @@ export function FilterPanel() {
       </div>
 
       <div>
-        <h3 className="text-sm font-semibold text-gray-700 mb-2">属性タグ</h3>
+        <h3 className="text-sm font-semibold text-gray-700 mb-2">特徴タグ</h3>
         <div className="flex flex-wrap gap-2">
           {data?.attributeTags?.map((tag: { id: string; name: string }) => (
             <button
@@ -102,7 +102,7 @@ export function FilterPanel() {
       </div>
 
       <div>
-        <h3 className="text-sm font-semibold text-gray-700 mb-2">ムード</h3>
+        <h3 className="text-sm font-semibold text-gray-700 mb-2">ムードタグ</h3>
         <div className="flex flex-wrap gap-2">
           {data?.moodTags?.map((tag: { id: string; name: string }) => (
             <button
