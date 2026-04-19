@@ -9,6 +9,7 @@ import { CreateSpotInput } from './dto/create-spot.input';
 import { UpdateSpotInput } from './dto/update-spot.input';
 import { SpotSortBy, SortOrder, SpotSortInput } from './dto/spot-sort.input';
 import { SpotFilterInput } from './dto/spot-filter.input';
+import { TagSearchMode } from './dto/tag-search-mode.enum';
 import {
   SpotConnection,
   SpotEdge,
@@ -226,16 +227,32 @@ export class SpotService {
       where.categoryId = filter.categoryId;
     }
 
+    const mode = filter.tagSearchMode ?? TagSearchMode.OR;
+
     if (filter.attributeTagIds && filter.attributeTagIds.length > 0) {
-      where.attributeTags = {
-        some: { tagId: { in: filter.attributeTagIds } },
-      };
+      if (mode === TagSearchMode.AND) {
+        const conditions = filter.attributeTagIds.map((tagId) => ({
+          attributeTags: { some: { tagId } },
+        }));
+        where.AND = [...((where.AND as object[]) ?? []), ...conditions];
+      } else {
+        where.attributeTags = {
+          some: { tagId: { in: filter.attributeTagIds } },
+        };
+      }
     }
 
     if (filter.moodTagIds && filter.moodTagIds.length > 0) {
-      where.moodTags = {
-        some: { tagId: { in: filter.moodTagIds } },
-      };
+      if (mode === TagSearchMode.AND) {
+        const conditions = filter.moodTagIds.map((tagId) => ({
+          moodTags: { some: { tagId } },
+        }));
+        where.AND = [...((where.AND as object[]) ?? []), ...conditions];
+      } else {
+        where.moodTags = {
+          some: { tagId: { in: filter.moodTagIds } },
+        };
+      }
     }
 
     if (filter.keyword) {

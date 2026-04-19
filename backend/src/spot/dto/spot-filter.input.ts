@@ -1,4 +1,5 @@
 import { InputType, Field, ID } from '@nestjs/graphql';
+import { TagSearchMode } from './tag-search-mode.enum';
 
 @InputType()
 export class SpotFilterInput {
@@ -11,8 +12,8 @@ export class SpotFilterInput {
   @Field(() => [ID], { nullable: true })
   moodTagIds?: string[];
 
-  @Field(() => String, { nullable: true })
-  tagSearchMode?: 'AND' | 'OR';
+  @Field(() => TagSearchMode, { nullable: true, defaultValue: TagSearchMode.OR })
+  tagSearchMode?: TagSearchMode;
 
   @Field(() => String, { nullable: true })
   keyword?: string;
