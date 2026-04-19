@@ -30,8 +30,8 @@ export const GET_SPOT = gql(`
 `);
 
 export const GET_SPOTS = gql(`
-  query GetSpots($first: Int, $after: String, $sort: SpotSortInput) {
-    spots(first: $first, after: $after, sort: $sort) {
+  query GetSpots($first: Int, $after: String, $sort: SpotSortInput, $filter: SpotFilterInput) {
+    spots(first: $first, after: $after, sort: $sort, filter: $filter) {
       edges {
         node {
           id

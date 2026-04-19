@@ -223,8 +223,8 @@ export class SpotService {
 
     const where: Prisma.SpotWhereInput = {};
 
-    if (filter.categoryId) {
-      where.categoryId = filter.categoryId;
+    if (filter.categoryIds && filter.categoryIds.length > 0) {
+      where.categoryId = { in: filter.categoryIds };
     }
 
     const mode = filter.tagSearchMode ?? TagSearchMode.OR;
