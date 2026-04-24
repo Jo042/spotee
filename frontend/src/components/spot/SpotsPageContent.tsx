@@ -11,6 +11,7 @@ import { SpotSortBy, SortOrder, TagSearchMode } from "@/graphql/generated/graphq
 import { SortSelect, SortOption } from "@/components/search/SortSelect";
 import { FilterPanel } from "@/components/search/FilterPanel";
 import { SearchBar } from "@/components/search/SearchBar";
+import { ActiveFilterChips } from "@/components/search/ActiveFilterChips";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useSpotFilter } from "@/hooks/useSpotFilter";
 
@@ -176,6 +177,7 @@ export default function SpotsPageContent() {
             <div className="mb-4">
               <SearchBar />
             </div>
+            <ActiveFilterChips />
             <SpotList
               spots={spots}
               loading={loading}
