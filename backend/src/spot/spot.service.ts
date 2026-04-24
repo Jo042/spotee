@@ -256,10 +256,13 @@ export class SpotService {
     }
 
     if (filter.keyword) {
-      where.OR = [
-        { title: { contains: filter.keyword, mode: 'insensitive' } },
-        { description: { contains: filter.keyword, mode: 'insensitive' } },
-      ];
+      const keywordCondition: Prisma.SpotWhereInput = {
+        OR: [
+          { title: { contains: filter.keyword, mode: 'insensitive' } },
+          { description: { contains: filter.keyword, mode: 'insensitive' } },
+        ],
+      };
+      where.AND = [...((where.AND as object[]) ?? []), keywordCondition];
     }
 
     return where;
