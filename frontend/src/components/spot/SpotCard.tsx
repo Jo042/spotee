@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { Heart, MapPin, UserCircle } from "lucide-react";
+import { MapPin, UserCircle } from "lucide-react";
+import { LikeButton } from "@/components/spot/LikeButton";
 
 interface SpotCardProps {
   spot: {
@@ -9,6 +10,7 @@ interface SpotCardProps {
     title: string;
     address: string;
     likeCount: number;
+    isLiked?: boolean | null;
     images: { url: string }[];
     category: { name: string };
     user: { name: string; avatarUrl?: string | null };
@@ -41,10 +43,11 @@ export function SpotCard({ spot }: SpotCardProps) {
             <span className="text-xs text-white bg-primary-700 px-2 py-1 rounded">
               {spot.category.name}
             </span>
-            <span className="text-sm text-gray-500 flex items-center gap-1">
-              <Heart size={14} className="text-rose-400" />
-              <span>{spot.likeCount}</span>
-            </span>
+            <LikeButton
+              spotId={spot.id}
+              likeCount={spot.likeCount}
+              isLiked={spot.isLiked ?? null}
+            />
           </div>
 
           <h3 className="font-semibold text-gray-900 mb-1 line-clamp-1">
