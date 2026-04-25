@@ -16,7 +16,7 @@ export function LikeButton({ spotId, likeCount, isLiked }: LikeButtonProps) {
   const { user } = useAuth();
   const router = useRouter();
 
-  const [toggleLike] = useMutation(TOGGLE_LIKE, {
+  const [toggleLike, { loading }] = useMutation(TOGGLE_LIKE, {
     variables: { spotId },
     optimisticResponse: {
       toggleLike: {
@@ -50,7 +50,8 @@ export function LikeButton({ spotId, likeCount, isLiked }: LikeButtonProps) {
   return (
     <button
       onClick={handleClick}
-      className={`flex items-center gap-1 text-sm transition-colors ${
+      disabled={loading}
+      className={`flex items-center gap-1 text-sm transition-colors disabled:opacity-50 ${
         isLiked
           ? "text-rose-500"
           : "text-gray-400 hover:text-rose-400"
