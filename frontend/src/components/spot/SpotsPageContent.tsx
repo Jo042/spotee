@@ -95,6 +95,7 @@ export default function SpotsPageContent() {
       title: string;
       address: string;
       likeCount: number;
+      isLiked?: boolean | null;
       images: { url: string }[];
       category: { name: string };
       user: { name: string; avatarUrl?: string | null };

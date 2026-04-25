@@ -10,6 +10,7 @@ export const GET_SPOT = gql(`
       priceRange
       businessHours
       likeCount
+      isLiked
       createdAt
       images {
         id
@@ -38,6 +39,7 @@ export const GET_SPOTS = gql(`
           title
           address
           likeCount
+          isLiked
           createdAt
           images {
             id
