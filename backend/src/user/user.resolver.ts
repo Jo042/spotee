@@ -1,7 +1,8 @@
-import { Resolver, Query, Mutation, Args } from '@nestjs/graphql';
+import { Resolver, Query, Mutation, Args, Int } from '@nestjs/graphql';
 import { UseGuards } from '@nestjs/common';
 import { UserService } from './user.service';
 import { User } from './dto/user.object';
+import { SpotConnection } from '../spot/dto/spot-connection.object';
 import { GqlAuthGuard } from '../auth/auth.guard';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import type { AuthUser } from 'src/auth/types/auth-user.type';
@@ -20,6 +21,30 @@ export class UserResolver {
   @Query(() => User, { name: 'user', nullable: true })
   getUser(@Args('id') id: string): Promise<User | null> {
     return this.userService.findById(id);
+  }
+
+  @Query(() => SpotConnection, { name: 'mySpots' })
+  @UseGuards(GqlAuthGuard)
+  async getMySpots(
+    @CurrentUser() authUser: AuthUser,
+    @Args('first', { type: () => Int, nullable: true, defaultValue: 20 })
+    first: number,
+    @Args('after', { type: () => String, nullable: true }) after?: string,
+  ): Promise<SpotConnection> {
+    const user = await this.userService.getOrCreateUser(authUser);
+    return this.userService.mySpots(user.id, first, after);
+  }
+
+  @Query(() => SpotConnection, { name: 'myLikedSpots' })
+  @UseGuards(GqlAuthGuard)
+  async getMyLikedSpots(
+    @CurrentUser() authUser: AuthUser,
+    @Args('first', { type: () => Int, nullable: true, defaultValue: 20 })
+    first: number,
+    @Args('after', { type: () => String, nullable: true }) after?: string,
+  ): Promise<SpotConnection> {
+    const user = await this.userService.getOrCreateUser(authUser);
+    return this.userService.myLikedSpots(user.id, first, after);
   }
 
   @Mutation(() => User)
