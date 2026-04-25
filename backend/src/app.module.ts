@@ -10,6 +10,7 @@ import { CategoryModule } from './category/category.module';
 import { AuthModule } from './auth/auth.module';
 import { UserModule } from './user/user.module';
 import { SpotModule } from './spot/spot.module';
+import { LikeModule } from './like/like.module';
 
 @Module({
   imports: [
@@ -30,6 +31,7 @@ import { SpotModule } from './spot/spot.module';
     AuthModule,
     UserModule,
     SpotModule,
+    LikeModule,
   ],
   controllers: [AppController],
   providers: [AppService],

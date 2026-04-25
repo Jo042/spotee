@@ -76,4 +76,7 @@ export class Spot {
 
   @Field(() => [SpotImage])
   images: SpotImage[];
+
+  @Field(() => Boolean, { nullable: true })
+  isLiked?: boolean | null;
 }
