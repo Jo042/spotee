@@ -7,6 +7,7 @@ import {
   ID,
   ResolveField,
   Parent,
+  Context,
 } from '@nestjs/graphql';
 import { UseGuards } from '@nestjs/common';
 import { SpotService } from './spot.service';
@@ -17,10 +18,11 @@ import { Category } from 'src/category/dto/category.object';
 import { SpotImage } from './dto/spot.object';
 import { CreateSpotInput } from './dto/create-spot.input';
 import { UpdateSpotInput } from './dto/update-spot.input';
-import { GqlAuthGuard } from '../auth/auth.guard';
+import { GqlAuthGuard, OptionalGqlAuthGuard } from '../auth/auth.guard';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import type { AuthUser } from 'src/auth/types/auth-user.type';
 import { SpotLoader } from './spot.loader';
+import { LikeLoader } from '../like/like.loader';
 import { SpotConnection } from './dto/spot-connection.object';
 import { SpotSortInput } from './dto/spot-sort.input';
 import { SpotFilterInput } from './dto/spot-filter.input';
@@ -31,6 +33,7 @@ export class SpotResolver {
     private spotService: SpotService,
     private spotLoader: SpotLoader,
     private userService: UserService,
+    private likeLoader: LikeLoader,
   ) {}
 
   @Mutation(() => Spot)
@@ -43,6 +46,7 @@ export class SpotResolver {
     return this.spotService.create(user.id, input);
   }
 
+  @UseGuards(OptionalGqlAuthGuard)
   @Query(() => Spot, { name: 'spot', nullable: true })
   async getSpot(
     @Args('id', { type: () => ID }) id: string,
@@ -50,6 +54,7 @@ export class SpotResolver {
     return this.spotService.findById(id);
   }
 
+  @UseGuards(OptionalGqlAuthGuard)
   @Query(() => SpotConnection, { name: 'spots' })
   async getSpots(
     @Args('first', { type: () => Int, nullable: true, defaultValue: 20 })
@@ -97,5 +102,16 @@ export class SpotResolver {
   @ResolveField(() => [SpotImage])
   async images(@Parent() spot: { id: string }): Promise<SpotImage[]> {
     return this.spotLoader.imagesLoader.load(spot.id);
+  }
+
+  @ResolveField(() => Boolean, { nullable: true })
+  async isLiked(
+    @Parent() spot: { id: string },
+    @Context() ctx: { req: { user?: AuthUser } },
+  ): Promise<boolean | null> {
+    if (!ctx.req.user) return null;
+    return this.likeLoader.isLikedLoader.load(
+      `${ctx.req.user.supabaseId}:${spot.id}`,
+    );
   }
 }

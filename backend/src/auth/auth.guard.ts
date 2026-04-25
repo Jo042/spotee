@@ -9,3 +9,15 @@ export class GqlAuthGuard extends AuthGuard('jwt') {
     return ctx.getContext().req;
   }
 }
+
+@Injectable()
+export class OptionalGqlAuthGuard extends AuthGuard('jwt') {
+  getRequest(context: ExecutionContext) {
+    const ctx = GqlExecutionContext.create(context);
+    return ctx.getContext().req;
+  }
+
+  handleRequest(_err: any, user: any) {
+    return user || null;
+  }
+}
