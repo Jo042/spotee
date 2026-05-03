@@ -1,0 +1,40 @@
+"use client";
+
+import { useRouter } from "next/navigation";
+import { useQuery } from "@apollo/client/react";
+import { useAuth } from "@/hooks/useAuth";
+import { ProfileEditForm } from "@/components/mypage/ProfileEditForm";
+import { GET_ME } from "@/graphql/queries/user";
+
+export function ProfileEditContent() {
+  const { user, loading: authLoading } = useAuth();
+  const router = useRouter();
+
+  const { data, loading } = useQuery(GET_ME, { skip: !user });
+
+  if (authLoading || loading) {
+    return <div className="min-h-screen flex items-center justify-center">読み込み中...</div>;
+  }
+
+  if (!user) {
+    router.push("/login");
+    return null;
+  }
+
+  const me = data?.me;
+
+  return (
+    <main className="min-h-screen bg-gray-50">
+      <div className="max-w-lg mx-auto px-4 py-8">
+        <h1 className="text-xl font-bold text-gray-900 mb-6">プロフィール編集</h1>
+        {me && (
+          <ProfileEditForm
+            initialName={me.name}
+            initialBio={me.bio}
+            initialAvatarUrl={me.avatarUrl}
+          />
+        )}
+      </div>
+    </main>
+  );
+}
