@@ -2,7 +2,11 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import { Heart, MapPin, Banknote, Clock, UserCircle } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { Heart, MapPin, Banknote, Clock, UserCircle, Pencil, Trash2 } from "lucide-react";
+import { useMutation } from "@apollo/client/react";
+import { DELETE_SPOT } from "@/graphql/mutations/spot";
+import { PriceRange } from "@/graphql/generated/graphql";
 
 interface SpotImage {
   id: string;
@@ -11,13 +15,14 @@ interface SpotImage {
 }
 
 interface SpotDetailProps {
+  isOwner?: boolean;
   spot: {
     id: string;
     title: string;
-    description: string | null;
+    description?: string | null;
     address: string;
-    priceRange: number | null;
-    businessHours: string | null;
+    priceRange?: PriceRange | null;
+    businessHours?: string | null;
     likeCount: number;
     createdAt: string;
     images: SpotImage[];
@@ -28,32 +33,83 @@ interface SpotDetailProps {
     user: {
       id: string;
       name: string;
-      avatarUrl: string | null;
+      avatarUrl?: string | null;
     };
   };
 }
 
-const priceRangeLabels: Record<number, string> = {
-  1: "~1,000円",
-  2: "1,000~3,000円",
-  3: "3,000~5,000円",
-  4: "5,000円~",
+const priceRangeLabels: Record<PriceRange, string> = {
+  [PriceRange.Under_1000]: "~1,000円",
+  [PriceRange.Range_1000_3000]: "1,000~3,000円",
+  [PriceRange.Range_3000_5000]: "3,000~5,000円",
+  [PriceRange.Over_5000]: "5,000円~",
 };
 
-export function SpotDetail({ spot }: SpotDetailProps) {
+export function SpotDetail({ spot, isOwner = false }: SpotDetailProps) {
+  const router = useRouter();
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [confirmDelete, setConfirmDelete] = useState(false);
+  const [deleteSpot, { loading: deleting }] = useMutation(DELETE_SPOT);
+
+  const handleDelete = async () => {
+    try {
+      await deleteSpot({ variables: { id: spot.id } });
+      router.push("/spots");
+    } catch {
+      alert("削除に失敗しました");
+    }
+  };
 
   const sortedImages = [...spot.images].sort((a, b) => a.order - b.order);
   const currentImage = sortedImages[currentImageIndex];
 
   return (
     <div className="max-w-4xl mx-auto">
-      <Link
-        href="/spots"
-        className="inline-flex items-center gap-1 text-sm text-gray-500 hover:text-gray-700 transition-colors mb-6"
-      >
-        ← スポット一覧に戻る
-      </Link>
+      <div className="flex items-center justify-between mb-6">
+        <Link
+          href="/spots"
+          className="inline-flex items-center gap-1 text-sm text-gray-500 hover:text-gray-700 transition-colors"
+        >
+          ← スポット一覧に戻る
+        </Link>
+        {isOwner && (
+          <div className="flex items-center gap-2">
+            <Link
+              href={`/spots/${spot.id}/edit`}
+              className="flex items-center gap-1 px-3 py-1.5 text-sm text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+            >
+              <Pencil size={14} />
+              編集
+            </Link>
+            {confirmDelete ? (
+              <div className="flex items-center gap-2">
+                <span className="text-sm text-gray-600">本当に削除しますか？</span>
+                <button
+                  onClick={handleDelete}
+                  disabled={deleting}
+                  className="px-3 py-1.5 text-sm text-white bg-red-500 rounded-lg hover:bg-red-600 disabled:opacity-50 transition-colors"
+                >
+                  削除する
+                </button>
+                <button
+                  onClick={() => setConfirmDelete(false)}
+                  className="px-3 py-1.5 text-sm text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+                >
+                  キャンセル
+                </button>
+              </div>
+            ) : (
+              <button
+                onClick={() => setConfirmDelete(true)}
+                className="flex items-center gap-1 px-3 py-1.5 text-sm text-red-500 border border-red-300 rounded-lg hover:bg-red-50 transition-colors"
+              >
+                <Trash2 size={14} />
+                削除
+              </button>
+            )}
+          </div>
+        )}
+      </div>
 
       <div className="bg-white rounded-xl shadow-sm p-6 mb-6">
         <div className="aspect-video bg-gray-100 rounded-lg overflow-hidden mb-4">

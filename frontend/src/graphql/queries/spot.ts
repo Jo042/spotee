@@ -26,6 +26,14 @@ export const GET_SPOT = gql(`
         name
         avatarUrl
       }
+      attributeTags {
+        id
+        name
+      }
+      moodTags {
+        id
+        name
+      }
     }
   }
 `);
