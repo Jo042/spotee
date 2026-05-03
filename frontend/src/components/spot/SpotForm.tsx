@@ -4,9 +4,10 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { useMutation, useQuery } from "@apollo/client/react";
-import { CREATE_SPOT } from "@/graphql/mutations/spot";
+import { CREATE_SPOT, UPDATE_SPOT } from "@/graphql/mutations/spot";
 import { GET_ALL_TAGS } from "@/graphql/queries/tag";
 import { ImageUploader } from "@/components/common/ImageUploader";
+import { PriceRange } from "@/graphql/generated/graphql";
 
 interface SpotFormData {
   title: string;
@@ -19,10 +20,18 @@ interface SpotFormData {
   moodTagIds: string[];
 }
 
-interface CreateSpotResult {
-  createSpot: {
-    id: string;
+interface SpotFormProps {
+  spotId?: string;
+  initialValues?: {
     title: string;
+    description: string | null;
+    address: string;
+    categoryId: string;
+    priceRange: number | null;
+    businessHours: string | null;
+    imageUrls: string[];
+    attributeTagIds: string[];
+    moodTagIds: string[];
   };
 }
 
@@ -32,16 +41,27 @@ interface GetAllTagsResult {
   moodTags: { id: string; name: string; slug: string }[];
 }
 
-export function SpotForm() {
-  const router = useRouter();
+const priceRangeEnumMap: Record<number, PriceRange> = {
+  1: PriceRange.Under_1000,
+  2: PriceRange.Range_1000_3000,
+  3: PriceRange.Range_3000_5000,
+  4: PriceRange.Over_5000,
+};
 
-  const [imageUrls, setImageUrls] = useState<string[]>([]);
+export function SpotForm({ spotId, initialValues }: SpotFormProps) {
+  const router = useRouter();
+  const isEditMode = !!spotId;
+
+  const [imageUrls, setImageUrls] = useState<string[]>(
+    initialValues?.imageUrls ?? [],
+  );
 
   const { data: tagData, loading: tagLoading } =
     useQuery<GetAllTagsResult>(GET_ALL_TAGS);
 
-  const [createSpot, { loading: creating }] =
-    useMutation<CreateSpotResult>(CREATE_SPOT);
+  const [createSpot, { loading: creating }] = useMutation(CREATE_SPOT);
+  const [updateSpot, { loading: updating }] = useMutation(UPDATE_SPOT);
+  const loading = isEditMode ? updating : creating;
 
   const {
     register,
@@ -51,14 +71,14 @@ export function SpotForm() {
     watch,
   } = useForm<SpotFormData>({
     defaultValues: {
-      title: "",
-      description: "",
-      address: "",
-      categoryId: "",
-      priceRange: null,
-      businessHours: "",
-      attributeTagIds: [],
-      moodTagIds: [],
+      title: initialValues?.title ?? "",
+      description: initialValues?.description ?? "",
+      address: initialValues?.address ?? "",
+      categoryId: initialValues?.categoryId ?? "",
+      priceRange: initialValues?.priceRange ?? null,
+      businessHours: initialValues?.businessHours ?? "",
+      attributeTagIds: initialValues?.attributeTagIds ?? [],
+      moodTagIds: initialValues?.moodTagIds ?? [],
     },
   });
 
@@ -71,20 +91,10 @@ export function SpotForm() {
     currentValue: string[],
   ) => {
     if (currentValue.includes(tagId)) {
-      setValue(
-        field,
-        currentValue.filter((id) => id !== tagId),
-      );
+      setValue(field, currentValue.filter((id) => id !== tagId));
     } else {
       setValue(field, [...currentValue, tagId]);
     }
-  };
-
-  const priceRangeEnumMap: Record<number, string> = {
-    1: "UNDER_1000",
-    2: "RANGE_1000_3000",
-    3: "RANGE_3000_5000",
-    4: "OVER_5000",
   };
 
   const onSubmit = async (data: SpotFormData) => {
@@ -93,29 +103,28 @@ export function SpotForm() {
       return;
     }
 
-    try {
-      const result = await createSpot({
-        variables: {
-          input: {
-            title: data.title,
-            description: data.description || null,
-            address: data.address,
-            categoryId: data.categoryId,
-            priceRange: data.priceRange
-              ? priceRangeEnumMap[data.priceRange]
-              : null,
-            businessHours: data.businessHours || null,
-            imageUrls,
-            attributeTagIds: data.attributeTagIds,
-            moodTagIds: data.moodTagIds,
-          },
-        },
-      });
+    const input = {
+      title: data.title,
+      description: data.description || null,
+      address: data.address,
+      categoryId: data.categoryId,
+      priceRange: data.priceRange ? priceRangeEnumMap[data.priceRange] : null,
+      businessHours: data.businessHours || null,
+      imageUrls,
+      attributeTagIds: data.attributeTagIds,
+      moodTagIds: data.moodTagIds,
+    };
 
-      router.push(`/spots/${result.data?.createSpot.id}`);
-    } catch (error) {
-      console.error("Failed to create spot:", error);
-      alert("スポットの投稿に失敗しました");
+    try {
+      if (isEditMode) {
+        await updateSpot({ variables: { id: spotId, input } });
+        router.push(`/spots/${spotId}`);
+      } else {
+        const result = await createSpot({ variables: { input } });
+        router.push(`/spots/${result.data?.createSpot.id}`);
+      }
+    } catch {
+      alert(isEditMode ? "スポットの更新に失敗しました" : "スポットの投稿に失敗しました");
     }
   };
 
@@ -192,7 +201,7 @@ export function SpotForm() {
           className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
         >
           <option value="">選択してください</option>
-          {tagData?.categories.map((category: { id: string; name: string }) => (
+          {tagData?.categories.map((category) => (
             <option key={category.id} value={category.id}>
               {category.name}
             </option>
@@ -262,7 +271,7 @@ export function SpotForm() {
           属性タグ（複数選択可）
         </label>
         <div className="flex flex-wrap gap-2">
-          {tagData?.attributeTags.map((tag: { id: string; name: string }) => (
+          {tagData?.attributeTags.map((tag) => (
             <button
               key={tag.id}
               type="button"
@@ -286,7 +295,7 @@ export function SpotForm() {
           ムードタグ（複数選択可）
         </label>
         <div className="flex flex-wrap gap-2">
-          {tagData?.moodTags.map((tag: { id: string; name: string }) => (
+          {tagData?.moodTags.map((tag) => (
             <button
               key={tag.id}
               type="button"
@@ -306,10 +315,12 @@ export function SpotForm() {
       <div className="pt-4">
         <button
           type="submit"
-          disabled={creating}
+          disabled={loading}
           className="w-full py-3 px-4 bg-primary-700 text-white font-medium rounded-lg hover:bg-primary-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
         >
-          {creating ? "投稿中..." : "スポットを投稿する"}
+          {loading
+            ? isEditMode ? "更新中..." : "投稿中..."
+            : isEditMode ? "スポットを更新する" : "スポットを投稿する"}
         </button>
       </div>
     </form>

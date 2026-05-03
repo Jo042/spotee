@@ -15,6 +15,7 @@ import { UserService } from '../user/user.service';
 import { Spot } from './dto/spot.object';
 import { User } from 'src/user/dto/user.object';
 import { Category } from 'src/category/dto/category.object';
+import { AttributeTag, MoodTag } from 'src/category/dto/tag.object';
 import { SpotImage } from './dto/spot.object';
 import { CreateSpotInput } from './dto/create-spot.input';
 import { UpdateSpotInput } from './dto/update-spot.input';
@@ -102,6 +103,20 @@ export class SpotResolver {
   @ResolveField(() => [SpotImage])
   async images(@Parent() spot: { id: string }): Promise<SpotImage[]> {
     return this.spotLoader.imagesLoader.load(spot.id);
+  }
+
+  @ResolveField(() => [AttributeTag], { nullable: true })
+  attributeTags(
+    @Parent() spot: { attributeTags?: { tag: AttributeTag }[] },
+  ): AttributeTag[] {
+    return (spot.attributeTags ?? []).map((sat) => sat.tag);
+  }
+
+  @ResolveField(() => [MoodTag], { nullable: true })
+  moodTags(
+    @Parent() spot: { moodTags?: { tag: MoodTag }[] },
+  ): MoodTag[] {
+    return (spot.moodTags ?? []).map((smt) => smt.tag);
   }
 
   @ResolveField(() => Boolean, { nullable: true })

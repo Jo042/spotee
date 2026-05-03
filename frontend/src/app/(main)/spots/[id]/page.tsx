@@ -2,32 +2,18 @@
 
 import { useQuery } from "@apollo/client/react";
 import { useParams } from "next/navigation";
+import { useAuth } from "@/hooks/useAuth";
 import { GET_SPOT } from "@/graphql/queries/spot";
+import { GET_ME } from "@/graphql/queries/user";
 import { SpotDetail } from "@/components/spot/SpotDetail";
-
-interface GetSpotResult {
-  spot: {
-    id: string;
-    title: string;
-    description: string | null;
-    address: string;
-    priceRange: number | null;
-    businessHours: string | null;
-    likeCount: number;
-    createdAt: string;
-    images: { id: string; url: string; order: number }[];
-    category: { id: string; name: string };
-    user: { id: string; name: string; avatarUrl: string | null };
-  } | null;
-}
 
 export default function SpotDetailPage() {
   const params = useParams();
   const id = params.id as string;
 
-  const { data, loading, error } = useQuery<GetSpotResult>(GET_SPOT, {
-    variables: { id },
-  });
+  const { user } = useAuth();
+  const { data: meData } = useQuery(GET_ME, { skip: !user });
+  const { data, loading, error } = useQuery(GET_SPOT, { variables: { id } });
 
   if (loading) {
     return (
@@ -45,9 +31,11 @@ export default function SpotDetailPage() {
     );
   }
 
+  const isOwner = !!meData?.me && meData.me.id === data.spot.user.id;
+
   return (
     <main className="min-h-screen bg-gray-50 py-8 px-4">
-      <SpotDetail spot={data.spot} />
+      <SpotDetail spot={data.spot} isOwner={isOwner} />
     </main>
   );
 }
