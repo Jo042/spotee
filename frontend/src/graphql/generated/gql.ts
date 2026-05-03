@@ -14,13 +14,14 @@ import { TypedDocumentNode as DocumentNode } from '@graphql-typed-document-node/
  * Learn more about it here: https://the-guild.dev/graphql/codegen/plugins/presets/preset-client#reducing-bundle-size
  */
 type Documents = {
-    "\n  query GetCategories {\n    categories {\n      id\n      name\n      slug\n    }\n  }\n": typeof types.GetCategoriesDocument,
     "\n  mutation ToggleLike($spotId: ID!) {\n    toggleLike(spotId: $spotId) {\n      liked\n      likeCount\n    }\n  }\n": typeof types.ToggleLikeDocument,
     "\n  mutation CreateSpot($input: CreateSpotInput!) {\n    createSpot(input: $input) {\n      id\n      title\n    }\n  }\n": typeof types.CreateSpotDocument,
     "\n  mutation UpdateSpot($id: ID!, $input: UpdateSpotInput!) {\n    updateSpot(id: $id, input: $input) {\n      id\n      title\n    }\n  }\n": typeof types.UpdateSpotDocument,
     "\n  mutation DeleteSpot($id: ID!) {\n    deleteSpot(id: $id)\n  }\n": typeof types.DeleteSpotDocument,
+    "\n  mutation UpdateProfile($name: String, $bio: String, $avatarUrl: String) {\n    updateProfile(name: $name, bio: $bio, avatarUrl: $avatarUrl) {\n      id\n      name\n      bio\n      avatarUrl\n    }\n  }\n": typeof types.UpdateProfileDocument,
     "\n  query GetSpot($id: ID!) {\n    spot(id: $id) {\n      id\n      title\n      description\n      address\n      priceRange\n      businessHours\n      likeCount\n      isLiked\n      createdAt\n      images {\n        id\n        url\n        order\n      }\n      category {\n        id\n        name\n      }\n      user {\n        id\n        name\n        avatarUrl\n      }\n    }\n  }\n": typeof types.GetSpotDocument,
     "\n  query GetSpots($first: Int, $after: String, $sort: SpotSortInput, $filter: SpotFilterInput) {\n    spots(first: $first, after: $after, sort: $sort, filter: $filter) {\n      edges {\n        node {\n          id\n          title\n          address\n          likeCount\n          isLiked\n          createdAt\n          images {\n            id\n            url\n            order\n          }\n          category {\n            id\n            name\n          }\n          user {\n            id\n            name\n            avatarUrl\n          }\n        }\n        cursor\n      }\n      pageInfo {\n        hasNextPage\n        endCursor\n      }\n      totalCount\n    }\n  }\n": typeof types.GetSpotsDocument,
+    "\n  query GetCategories {\n    categories {\n      id\n      name\n      slug\n    }\n  }\n": typeof types.GetCategoriesDocument,
     "\n  query GetAttributeTags {\n    attributeTags {\n      id\n      name\n      slug\n    }\n  }\n": typeof types.GetAttributeTagsDocument,
     "\n  query GetMoodTags {\n    moodTags {\n      id\n      name\n      slug\n    }\n  }\n": typeof types.GetMoodTagsDocument,
     "\n  query GetAllTags {\n    categories {\n      id\n      name\n      slug\n    }\n    attributeTags {\n      id\n      name\n      slug\n    }\n    moodTags {\n      id\n      name\n      slug\n    }\n  }\n": typeof types.GetAllTagsDocument,
@@ -29,13 +30,14 @@ type Documents = {
     "\n  query GetMyLikedSpots($first: Int, $after: String) {\n    myLikedSpots(first: $first, after: $after) {\n      edges {\n        node {\n          id\n          title\n          address\n          likeCount\n          isLiked\n          images {\n            id\n            url\n            order\n          }\n          category {\n            id\n            name\n          }\n          user {\n            id\n            name\n            avatarUrl\n          }\n        }\n        cursor\n      }\n      pageInfo {\n        hasNextPage\n        endCursor\n      }\n      totalCount\n    }\n  }\n": typeof types.GetMyLikedSpotsDocument,
 };
 const documents: Documents = {
-    "\n  query GetCategories {\n    categories {\n      id\n      name\n      slug\n    }\n  }\n": types.GetCategoriesDocument,
     "\n  mutation ToggleLike($spotId: ID!) {\n    toggleLike(spotId: $spotId) {\n      liked\n      likeCount\n    }\n  }\n": types.ToggleLikeDocument,
     "\n  mutation CreateSpot($input: CreateSpotInput!) {\n    createSpot(input: $input) {\n      id\n      title\n    }\n  }\n": types.CreateSpotDocument,
     "\n  mutation UpdateSpot($id: ID!, $input: UpdateSpotInput!) {\n    updateSpot(id: $id, input: $input) {\n      id\n      title\n    }\n  }\n": types.UpdateSpotDocument,
     "\n  mutation DeleteSpot($id: ID!) {\n    deleteSpot(id: $id)\n  }\n": types.DeleteSpotDocument,
+    "\n  mutation UpdateProfile($name: String, $bio: String, $avatarUrl: String) {\n    updateProfile(name: $name, bio: $bio, avatarUrl: $avatarUrl) {\n      id\n      name\n      bio\n      avatarUrl\n    }\n  }\n": types.UpdateProfileDocument,
     "\n  query GetSpot($id: ID!) {\n    spot(id: $id) {\n      id\n      title\n      description\n      address\n      priceRange\n      businessHours\n      likeCount\n      isLiked\n      createdAt\n      images {\n        id\n        url\n        order\n      }\n      category {\n        id\n        name\n      }\n      user {\n        id\n        name\n        avatarUrl\n      }\n    }\n  }\n": types.GetSpotDocument,
     "\n  query GetSpots($first: Int, $after: String, $sort: SpotSortInput, $filter: SpotFilterInput) {\n    spots(first: $first, after: $after, sort: $sort, filter: $filter) {\n      edges {\n        node {\n          id\n          title\n          address\n          likeCount\n          isLiked\n          createdAt\n          images {\n            id\n            url\n            order\n          }\n          category {\n            id\n            name\n          }\n          user {\n            id\n            name\n            avatarUrl\n          }\n        }\n        cursor\n      }\n      pageInfo {\n        hasNextPage\n        endCursor\n      }\n      totalCount\n    }\n  }\n": types.GetSpotsDocument,
+    "\n  query GetCategories {\n    categories {\n      id\n      name\n      slug\n    }\n  }\n": types.GetCategoriesDocument,
     "\n  query GetAttributeTags {\n    attributeTags {\n      id\n      name\n      slug\n    }\n  }\n": types.GetAttributeTagsDocument,
     "\n  query GetMoodTags {\n    moodTags {\n      id\n      name\n      slug\n    }\n  }\n": types.GetMoodTagsDocument,
     "\n  query GetAllTags {\n    categories {\n      id\n      name\n      slug\n    }\n    attributeTags {\n      id\n      name\n      slug\n    }\n    moodTags {\n      id\n      name\n      slug\n    }\n  }\n": types.GetAllTagsDocument,
@@ -61,10 +63,6 @@ export function gql(source: string): unknown;
 /**
  * The gql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
-export function gql(source: "\n  query GetCategories {\n    categories {\n      id\n      name\n      slug\n    }\n  }\n"): (typeof documents)["\n  query GetCategories {\n    categories {\n      id\n      name\n      slug\n    }\n  }\n"];
-/**
- * The gql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
- */
 export function gql(source: "\n  mutation ToggleLike($spotId: ID!) {\n    toggleLike(spotId: $spotId) {\n      liked\n      likeCount\n    }\n  }\n"): (typeof documents)["\n  mutation ToggleLike($spotId: ID!) {\n    toggleLike(spotId: $spotId) {\n      liked\n      likeCount\n    }\n  }\n"];
 /**
  * The gql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
@@ -81,11 +79,19 @@ export function gql(source: "\n  mutation DeleteSpot($id: ID!) {\n    deleteSpot
 /**
  * The gql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
+export function gql(source: "\n  mutation UpdateProfile($name: String, $bio: String, $avatarUrl: String) {\n    updateProfile(name: $name, bio: $bio, avatarUrl: $avatarUrl) {\n      id\n      name\n      bio\n      avatarUrl\n    }\n  }\n"): (typeof documents)["\n  mutation UpdateProfile($name: String, $bio: String, $avatarUrl: String) {\n    updateProfile(name: $name, bio: $bio, avatarUrl: $avatarUrl) {\n      id\n      name\n      bio\n      avatarUrl\n    }\n  }\n"];
+/**
+ * The gql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
 export function gql(source: "\n  query GetSpot($id: ID!) {\n    spot(id: $id) {\n      id\n      title\n      description\n      address\n      priceRange\n      businessHours\n      likeCount\n      isLiked\n      createdAt\n      images {\n        id\n        url\n        order\n      }\n      category {\n        id\n        name\n      }\n      user {\n        id\n        name\n        avatarUrl\n      }\n    }\n  }\n"): (typeof documents)["\n  query GetSpot($id: ID!) {\n    spot(id: $id) {\n      id\n      title\n      description\n      address\n      priceRange\n      businessHours\n      likeCount\n      isLiked\n      createdAt\n      images {\n        id\n        url\n        order\n      }\n      category {\n        id\n        name\n      }\n      user {\n        id\n        name\n        avatarUrl\n      }\n    }\n  }\n"];
 /**
  * The gql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
 export function gql(source: "\n  query GetSpots($first: Int, $after: String, $sort: SpotSortInput, $filter: SpotFilterInput) {\n    spots(first: $first, after: $after, sort: $sort, filter: $filter) {\n      edges {\n        node {\n          id\n          title\n          address\n          likeCount\n          isLiked\n          createdAt\n          images {\n            id\n            url\n            order\n          }\n          category {\n            id\n            name\n          }\n          user {\n            id\n            name\n            avatarUrl\n          }\n        }\n        cursor\n      }\n      pageInfo {\n        hasNextPage\n        endCursor\n      }\n      totalCount\n    }\n  }\n"): (typeof documents)["\n  query GetSpots($first: Int, $after: String, $sort: SpotSortInput, $filter: SpotFilterInput) {\n    spots(first: $first, after: $after, sort: $sort, filter: $filter) {\n      edges {\n        node {\n          id\n          title\n          address\n          likeCount\n          isLiked\n          createdAt\n          images {\n            id\n            url\n            order\n          }\n          category {\n            id\n            name\n          }\n          user {\n            id\n            name\n            avatarUrl\n          }\n        }\n        cursor\n      }\n      pageInfo {\n        hasNextPage\n        endCursor\n      }\n      totalCount\n    }\n  }\n"];
+/**
+ * The gql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function gql(source: "\n  query GetCategories {\n    categories {\n      id\n      name\n      slug\n    }\n  }\n"): (typeof documents)["\n  query GetCategories {\n    categories {\n      id\n      name\n      slug\n    }\n  }\n"];
 /**
  * The gql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
