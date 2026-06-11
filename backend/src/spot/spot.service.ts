@@ -11,6 +11,11 @@ import { SpotSortBy, SortOrder, SpotSortInput } from './dto/spot-sort.input';
 import { SpotFilterInput } from './dto/spot-filter.input';
 import { buildWhereClause } from './spot-filter.util';
 import {
+  encodeCursor,
+  decodeCursor,
+  buildCursorCondition,
+} from './spot-cursor.util';
+import {
   SpotConnection,
   SpotEdge,
   PageInfo,
@@ -173,7 +178,7 @@ export class SpotService {
     const orderBy = this.buildOrderBy(sortBy, order);
     const filterWhere = buildWhereClause(filter);
     const cursorCondition = after
-      ? this.buildCursorCondition(after, sortBy, order)
+      ? buildCursorCondition(decodeCursor(after), sortBy, order)
       : null;
 
     const where: Prisma.SpotWhereInput = cursorCondition
@@ -199,7 +204,7 @@ export class SpotService {
 
     const edges: SpotEdge[] = resultSpots.map((spot) => ({
       node: spot,
-      cursor: this.encodeCursor(spot, sortBy),
+      cursor: encodeCursor(spot, sortBy),
     }));
 
     const totalCount = await this.prisma.spot.count({ where: filterWhere });
@@ -219,37 +224,6 @@ export class SpotService {
   }
 
   /**
-   * カーソル条件を構築
-   */
-  private buildCursorCondition(
-    cursor: string,
-    sortBy: SpotSortBy,
-    order: SortOrder,
-  ) {
-    const cursorData = this.decodeCursor(cursor);
-    const operator = order === SortOrder.DESC ? 'lt' : 'gt';
-
-    switch (sortBy) {
-      case SpotSortBy.LIKE_COUNT:
-        // いいね順: likeCount で比較、同数なら createdAt で比較
-        return {
-          OR: [
-            { likeCount: { [operator]: cursorData.likeCount } },
-            {
-              likeCount: cursorData.likeCount,
-              createdAt: { lt: new Date(cursorData.createdAt) },
-            },
-          ],
-        };
-      case SpotSortBy.TITLE:
-        return { title: { [operator]: cursorData.title } };
-      case SpotSortBy.CREATED_AT:
-      default:
-        return { createdAt: { [operator]: new Date(cursorData.createdAt) } };
-    }
-  }
-
-  /**
    * ソート条件に応じた orderBy を構築
    */
   private buildOrderBy(sortBy: SpotSortBy, order: SortOrder) {
@@ -265,34 +239,4 @@ export class SpotService {
     }
   }
 
-  /**
-   * カーソルをエンコード（ソート条件に応じた値を含める）
-   */
-  private encodeCursor(spot: any, sortBy: SpotSortBy): string {
-    const data: any = {
-      id: spot.id,
-      createdAt: spot.createdAt.toISOString(),
-    };
-
-    // ソート対象の値もカーソルに含める
-    if (sortBy === SpotSortBy.LIKE_COUNT) {
-      data.likeCount = spot.likeCount;
-    }
-    if (sortBy === SpotSortBy.TITLE) {
-      data.title = spot.title;
-    }
-
-    return Buffer.from(JSON.stringify(data)).toString('base64');
-  }
-
-  /**
-   * カーソルをデコード
-   */
-  private decodeCursor(cursor: string): any {
-    try {
-      return JSON.parse(Buffer.from(cursor, 'base64').toString('utf-8'));
-    } catch {
-      throw new Error('Invalid cursor');
-    }
-  }
 }
