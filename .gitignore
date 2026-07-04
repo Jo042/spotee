@@ -74,6 +74,25 @@ yarn-error.log*
 
 
 # =============================================================================
+# OpenTofu / IaC（infra/aws）
+# =============================================================================
+.terraform/
+*.tfstate
+*.tfstate.*
+*.tfplan
+crash.log
+crash.*.log
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+.terraformrc
+terraform.rc
+infra/aws/.keys/
+infra/aws/bootstrap/.keys/
+
+
+# =============================================================================
 # デプロイ
 # =============================================================================
 .vercel
