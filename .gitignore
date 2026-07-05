@@ -90,6 +90,7 @@ override.tf.json
 terraform.rc
 infra/aws/.keys/
 infra/aws/bootstrap/.keys/
+infra/aws/.secret/
 
 
 # =============================================================================
