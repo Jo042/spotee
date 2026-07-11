@@ -188,12 +188,19 @@ components:
     textColor: "{colors.on-primary}"
     border: "1px solid {colors.primary-600}"
   segmented-toggle:
-    backgroundColor: "{colors.canvas}"
-    rounded: "{rounded.sm}"
-    border: "1px solid {colors.hairline}"
+    backgroundColor: "{colors.surface-strong}"
+    rounded: "{rounded.full}"
+    padding: 2px
   segmented-toggle-active:
     backgroundColor: "{colors.primary-600}"
     textColor: "{colors.on-primary}"
+    rounded: "{rounded.full}"
+    transition: "transform 200ms ease-out"
+  filter-panel:
+    backgroundColor: "{colors.canvas}"
+    rounded: "{rounded.md}"
+    border: "1px solid {colors.hairline}"
+    padding: "{spacing.md}"
   text-input:
     backgroundColor: "{colors.canvas}"
     textColor: "{colors.ink}"
@@ -323,7 +330,16 @@ Noto Sans JP（`var(--font-noto-sans-jp)`、既存の`next/font/google`設定を
 - **ムードタグ**（`{component.mood-chip}` / `-active`）: 3層目。未選択時はグレーのアウトライン、選択時のみパープルのソフトチップに変わる。
 
 属性・ムードタグはカテゴリと違って複数同時選択が前提のため、選択時も`category-pill-active`のような濃い単色塗りにはしない。同時に複数選択されたときに濃い色のピルが並ぶと視覚的にうるさくなるため、選択状態は「薄色塗り＋同系色ボーダー」程度の弱いコントラストに留める。カテゴリは1つしか選択できないため、濃い単色塗りで強調しても画面がうるさくならない。
-- **AND/OR切り替え**（`{component.segmented-toggle}`）: 「いずれか」「すべて」の2択セグメントコントロール。選択側は`{colors.primary-600}`実線、非選択側は白背景。
+- **AND/OR切り替え**（`{component.segmented-toggle}`）: 「いずれか」「すべて」の2択セグメントコントロール。`{colors.surface-strong}`のグレーのピル型トラックの中を、`{colors.primary-600}`のサムが`translateX`（200ms・ease-out）でスライドする。動かすのはtransformのみで、レイアウトプロパティはアニメーションさせない。
+
+#### フィルターパネル（`{component.filter-panel}`）
+
+- パネルは`{rounded.md}`のカード（白背景＋hairlineボーダー、内側`{spacing.md}`）。カードの器は配置側（デスクトップの左サイドバー／モバイルのボトムシート）が持ち、パネル本体はコンテンツのみを描画する。
+- セクションは`{colors.hairline-soft}`の区切り線で分節する。見出し⇔チップ間は8pxで密に、セクションの上下は20pxで疎にし、均一な等間隔を避ける（SpotCardと同じ分節手法）。
+- パネル先頭に「絞り込み」見出し行を置き、フィルター選択中のみ右端に「クリア」テキストボタンを表示する。
+- セクション見出しには層の色相ドット（カテゴリ=ブルー、属性=ティール、ムード=パープル）と選択数バッジ（同系色のソフト配色・10px）を添え、3層×3色の対応をパネル自体でも視覚化する。
+- チップの演出: ホバーは同系色の薄背景＋ボーダー強調、押下時は`scale(0.95)`。選択時はチェックアイコンが`scale`イン（200ms）で出現し、`shadow-sm`（影1段階ルールの範囲内）で浮かせる。動きはtransform・色・影に限定する。
+- モバイル（lg未満）はボトムシート表示: `rounded-t-2xl`・上端にドラッグハンドル・黒40%の背景オーバーレイ。開閉はslide-up（300ms）＋背景フェード（200ms）。表示中は背景スクロールをロックし、下部固定フッターの「◯件のスポットを表示」全幅`button-primary`で閉じる。`prefers-reduced-motion`時はアニメーションを無効化する。
 
 ### スポットカード（`{component.spot-card}`）
 

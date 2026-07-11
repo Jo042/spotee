@@ -23,6 +23,29 @@
   --color-primary-700: #1b34b8;
   --color-primary-800: #142883;
   --color-primary-900: #0e1c5c;
+
+  --animate-fade-in: fade-in 200ms ease-out;
+  --animate-sheet-up: sheet-up 300ms cubic-bezier(0.16, 1, 0.3, 1);
+  --animate-scale-in: scale-in 200ms ease-out;
+
+  @keyframes fade-in {
+    from {
+      opacity: 0;
+    }
+  }
+
+  @keyframes sheet-up {
+    from {
+      transform: translateY(100%);
+    }
+  }
+
+  @keyframes scale-in {
+    from {
+      transform: scale(0);
+      opacity: 0;
+    }
+  }
 }
 
 @media (prefers-color-scheme: dark) {
