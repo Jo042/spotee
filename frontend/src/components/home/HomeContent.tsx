@@ -35,7 +35,7 @@ export function HomeContent() {
 
   return (
     <main>
-      <section className="bg-gradient-to-br from-primary-700 to-primary-500 py-20 px-4">
+      <section className="bg-gradient-to-br from-primary-600 to-primary-500 py-20 px-4">
         <div className="max-w-2xl mx-auto text-center">
           <h1 className="text-3xl md:text-4xl font-bold text-white mb-3">
             次の「行きたい場所」に出会おう

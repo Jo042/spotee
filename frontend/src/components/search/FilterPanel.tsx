@@ -47,7 +47,7 @@ export function FilterPanel() {
                 }}
                 className={`px-3 py-1 rounded-full text-sm border transition-colors ${
                   selected
-                    ? 'bg-primary-700 text-white border-primary-700'
+                    ? 'bg-primary-600 text-white border-primary-600'
                     : 'bg-white text-gray-600 border-gray-300 hover:border-primary-400'
                 }`}
               >
@@ -67,8 +67,8 @@ export function FilterPanel() {
               onClick={() => toggleAttributeTag(tag.id)}
               className={`px-3 py-1 rounded-full text-sm border transition-colors ${
                 currentFilter.attributeTagIds.includes(tag.id)
-                  ? 'bg-blue-100 text-blue-700 border-blue-300'
-                  : 'bg-white text-gray-600 border-gray-300 hover:border-blue-300'
+                  ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                  : 'bg-white text-gray-600 border-gray-300 hover:border-emerald-300'
               }`}
             >
               {tag.name}
@@ -86,7 +86,7 @@ export function FilterPanel() {
               onClick={() => toggleMoodTag(tag.id)}
               className={`px-3 py-1 rounded-full text-sm border transition-colors ${
                 currentFilter.moodTagIds.includes(tag.id)
-                  ? 'bg-purple-100 text-purple-700 border-purple-300'
+                  ? 'bg-purple-50 text-purple-700 border-purple-200'
                   : 'bg-white text-gray-600 border-gray-300 hover:border-purple-300'
               }`}
             >
@@ -105,7 +105,7 @@ export function FilterPanel() {
               onClick={() => updateFilter({ tagSearchMode: mode })}
               className={`px-4 py-1.5 text-sm transition-colors ${
                 currentFilter.tagSearchMode === mode
-                  ? 'bg-primary-700 text-white'
+                  ? 'bg-primary-600 text-white'
                   : 'bg-white text-gray-600 hover:bg-gray-50'
               }`}
             >
