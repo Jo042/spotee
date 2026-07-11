@@ -1,7 +1,7 @@
 "use client";
 
 import { useQuery } from "@apollo/client/react";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { GET_SPOTS } from "@/graphql/queries/spot";
 import { SpotList } from "@/components/spot/SpotList";
 import Link from "next/link";
@@ -22,6 +22,14 @@ export default function SpotsPageContent() {
   const [loadingMore, setLoadingMore] = useState(false);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const { currentFilter, hasActiveFilter } = useSpotFilter();
+
+  useEffect(() => {
+    if (!isFilterOpen) return;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [isFilterOpen]);
 
   const sortBy = (searchParams.get("sortBy") ?? SpotSortBy.CreatedAt) as SortOption["sortBy"];
   const order = (searchParams.get("order") ?? SortOrder.Desc) as SortOption["order"];
@@ -101,6 +109,7 @@ export default function SpotsPageContent() {
       user: { name: string; avatarUrl?: string | null };
     }>;
   const hasNextPage = data?.spots?.pageInfo?.hasNextPage ?? false;
+  const totalCount = data?.spots?.totalCount;
 
   return (
     <main className="min-h-screen bg-gray-50">
@@ -147,23 +156,39 @@ export default function SpotsPageContent() {
       {isFilterOpen && (
         <div className="fixed inset-0 z-50 lg:hidden">
           <div
-            className="absolute inset-0 bg-black/40"
+            className="absolute inset-0 bg-black/40 animate-fade-in motion-reduce:animate-none"
             onClick={() => setIsFilterOpen(false)}
           />
-          <div className="absolute bottom-0 left-0 right-0 bg-white rounded-t-2xl max-h-[80vh] overflow-y-auto">
-            <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100">
-              <span className="font-semibold text-gray-800">絞り込み</span>
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-label="絞り込み"
+            className="absolute bottom-0 left-0 right-0 flex flex-col bg-white rounded-t-2xl max-h-[85vh] animate-sheet-up motion-reduce:animate-none"
+          >
+            <div className="relative flex justify-center pt-3 pb-2">
+              <span className="w-10 h-1 rounded-full bg-gray-300" aria-hidden="true" />
               <button
                 onClick={() => setIsFilterOpen(false)}
-                className="text-gray-400 hover:text-gray-600"
+                aria-label="閉じる"
+                className="absolute right-3 top-2 p-1.5 text-gray-400 hover:text-gray-600 transition-colors"
               >
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                 </svg>
               </button>
             </div>
-            <div className="p-4">
+            <div className="overflow-y-auto px-5 py-4">
               <FilterPanel />
+            </div>
+            <div className="border-t border-gray-100 px-5 py-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))]">
+              <button
+                onClick={() => setIsFilterOpen(false)}
+                className="w-full bg-primary-600 text-white text-sm font-bold py-3 rounded-lg hover:bg-primary-700 active:scale-[0.98] transition"
+              >
+                {typeof totalCount === "number"
+                  ? `${totalCount}件のスポットを表示`
+                  : "スポットを表示"}
+              </button>
             </div>
           </div>
         </div>
@@ -172,7 +197,9 @@ export default function SpotsPageContent() {
       <div className="max-w-7xl mx-auto px-4 py-8">
         <div className="flex gap-6">
           <aside className="hidden lg:block w-72 flex-shrink-0">
-            <FilterPanel />
+            <div className="bg-white border border-gray-200 rounded-xl p-4">
+              <FilterPanel />
+            </div>
           </aside>
           <div className="flex-1 min-w-0">
             <div className="mb-4">
