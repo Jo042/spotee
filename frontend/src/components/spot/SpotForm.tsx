@@ -278,10 +278,10 @@ export function SpotForm({ spotId, initialValues }: SpotFormProps) {
               onClick={() =>
                 toggleTag("attributeTagIds", tag.id, selectedAttributeTags)
               }
-              className={`px-3 py-1 rounded-full text-sm transition-colors ${
+              className={`px-3 py-1 rounded-full text-sm border transition-colors ${
                 selectedAttributeTags.includes(tag.id)
-                  ? "bg-primary-700 text-white"
-                  : "bg-white border border-gray-300 text-gray-700 hover:bg-gray-50"
+                  ? "bg-emerald-50 text-emerald-700 border-emerald-200"
+                  : "bg-white border-gray-300 text-gray-700 hover:bg-gray-50"
               }`}
             >
               {tag.name}
@@ -300,10 +300,10 @@ export function SpotForm({ spotId, initialValues }: SpotFormProps) {
               key={tag.id}
               type="button"
               onClick={() => toggleTag("moodTagIds", tag.id, selectedMoodTags)}
-              className={`px-3 py-1 rounded-full text-sm transition-colors ${
+              className={`px-3 py-1 rounded-full text-sm border transition-colors ${
                 selectedMoodTags.includes(tag.id)
-                  ? "bg-primary-700 text-white"
-                  : "bg-white border border-gray-300 text-gray-700 hover:bg-gray-50"
+                  ? "bg-purple-50 text-purple-700 border-purple-200"
+                  : "bg-white border-gray-300 text-gray-700 hover:bg-gray-50"
               }`}
             >
               {tag.name}
@@ -316,7 +316,7 @@ export function SpotForm({ spotId, initialValues }: SpotFormProps) {
         <button
           type="submit"
           disabled={loading}
-          className="w-full py-3 px-4 bg-primary-700 text-white font-medium rounded-lg hover:bg-primary-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          className="w-full py-3 px-4 bg-primary-600 text-white font-medium rounded-lg hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
         >
           {loading
             ? isEditMode ? "更新中..." : "投稿中..."

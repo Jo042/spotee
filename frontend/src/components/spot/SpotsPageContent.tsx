@@ -128,13 +128,13 @@ export default function SpotsPageContent() {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2a1 1 0 01-.293.707L13 13.414V19a1 1 0 01-.553.894l-4 2A1 1 0 017 21v-7.586L3.293 6.707A1 1 0 013 6V4z" />
                 </svg>
                 絞り込み
-                {hasActiveFilter && <span className="w-2 h-2 bg-primary-700 rounded-full" />}
+                {hasActiveFilter && <span className="w-2 h-2 bg-primary-600 rounded-full" />}
               </button>
               <SortSelect value={currentSort} onChange={handleSortChange} />
               {user && (
                 <Link
                   href="/spots/new"
-                  className="bg-primary-700 text-white px-4 py-2 rounded-lg hover:bg-primary-800 transition-colors"
+                  className="bg-primary-600 text-white px-4 py-2 rounded-lg hover:bg-primary-700 transition-colors"
                 >
                   スポットを投稿
                 </Link>
