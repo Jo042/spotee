@@ -133,11 +133,24 @@ components:
     backgroundColor: "{colors.canvas}"
     rounded: "{rounded.md}"
     border: "1px solid {colors.hairline-soft}"
+  spot-card-hover:
+    transform: "translateY(-2px)"
+    transition: "300ms"
   spot-card-image:
     rounded: "{rounded.md} {rounded.md} 0 0"
+  spot-card-image-hover:
+    transform: "scale(1.05)"
+    transition: "500ms ease-out"
   category-badge:
     backgroundColor: "{colors.primary-600}"
     textColor: "{colors.on-primary}"
+    typography: "{typography.caption}"
+    rounded: "{rounded.full}"
+    padding: "4px 10px"
+  category-badge-overlay:
+    backgroundColor: "rgba(255, 255, 255, 0.9)"
+    backdropFilter: "blur(8px)"
+    textColor: "{colors.primary-700}"
     typography: "{typography.caption}"
     rounded: "{rounded.full}"
     padding: "4px 10px"
@@ -225,7 +238,7 @@ Spotee固有の設計判断として、**3層タグ構造をそのまま3つの�
 
 **Key Characteristics:**
 - 単色アクセント: `{colors.primary-600}`（通常表示）と`{colors.primary-700}`（ホバー・押下）の2段階がCTA・カテゴリバッジ・選択状態のすべてを担う。コード上は`bg-primary-600` / `hover:bg-primary-700` / `text-primary-500`という使い分けになる。
-- タグ3層 = 3色相: カテゴリ=ブルー実線バッジ、属性タグ=ティール、ムードタグ=パープル。いずれもソフトチップ（薄色背景＋濃色文字＋同系色ボーダー）で統一。
+- タグ3層 = 3色相: カテゴリ=ブルー、属性タグ=ティール、ムードタグ=パープル。カテゴリバッジは白背景上では`{colors.primary-600}`実線ピル（`{component.category-badge}`）、写真上では半透明白＋`{colors.primary-700}`文字のオーバーレイピル（`{component.category-badge-overlay}`）を使い、どちらもブルーの対応関係は維持する。属性・ムードはソフトチップ（薄色背景＋濃色文字＋同系色ボーダー）で統一。
 - 「いいね」はブランドカラーと独立させ、既存実装どおり`{colors.like}`（rose）を維持する。SNSの慣習（ブランド色と「いいね」色を分ける）に沿う。
 - 形状は控えめな丸み: カード12px、ボタン・入力欄8px、タグ・バッジ・アバターは完全ピル。角の丸さで層を作らず、色と塗り（実線かソフトかアウトラインか）で階層を作る。
 - キャンバスは純白。写真の発色を最優先し、暖色トーンのクリームは採用しない（Clayとの差別化にもなる）。
@@ -313,12 +326,17 @@ Noto Sans JP（`var(--font-noto-sans-jp)`、既存の`next/font/google`設定を
 - **AND/OR切り替え**（`{component.segmented-toggle}`）: 「いずれか」「すべて」の2択セグメントコントロール。選択側は`{colors.primary-600}`実線、非選択側は白背景。
 
 ### スポットカード（`{component.spot-card}`）
+
+写真ファーストの構成。視線が「写真 → タイトル → 住所 → 投稿者・いいね」の順に流れるよう、カテゴリバッジは画像上のオーバーレイに、いいねボタンは最下段のソーシャル情報行に配置する。
+
 - 画像: `aspect-video`、`{rounded.md}`の上2角のみ丸め。画像がない場合は`{colors.surface}`背景に「No Image」表示（既存実装を踏襲）。
-- カテゴリバッジ（`{component.category-badge}`）: 画像下、カード左上に`{colors.primary-600}`の実線ピル。
-- いいねボタン（`{component.like-button}` / `-active`）: カテゴリバッジと同じ行の右側。非アクティブは`{colors.muted}`、アクティブは`{colors.like}`塗りつぶしハート。
-- タイトル: `{typography.heading-sm}`、1行省略。
-- 住所: `{typography.body-sm}`、`{colors.muted}`、ピンアイコン付き1行省略。
-- 投稿者: 24pxの円形アバター＋名前（`{typography.body-sm}`）。
+- カテゴリバッジ（`{component.category-badge-overlay}`）: **画像左上のオーバーレイ**。半透明白（`bg-white/90` + `backdrop-blur`）のピルに`{colors.primary-700}`の文字。「カテゴリ＝ブルー」の対応は文字色で維持する。グリッドに実線ブルーのピルが並ぶ視覚ノイズを避けるため、またどんな写真の上でも喧嘩しないよう、塗りは白にする。
+- タイトル: `{typography.heading-sm}`、1行省略。コンテンツ部の先頭に置き、ホバー時に`{colors.primary-700}`へ変化してカード全体がリンクであることを示す。
+- 住所: `{typography.body-sm}`、`{colors.muted}`、ピンアイコン付き1行省略。タイトル直下に密に寄せ、スポット情報のグループを作る。
+- ソーシャル情報行: `{colors.hairline-soft}`の区切り線で上と分節し、左に投稿者（24px円形アバター＋名前`{typography.body-sm}`）、右にいいねボタン（`{component.like-button}` / `-active`）を配置。非アクティブは`{colors.muted}`、アクティブは`{colors.like}`塗りつぶしハート。
+- 余白リズム: コンテンツ部は16px（モバイル2カラム時は12px）。タイトル〜住所間は4pxで密に、区切り線の上下は12pxで疎に、均一な等間隔を避ける。
+- ホバー: 画像を`scale(1.05)`（500ms・ease-out）、カードは`shadow-sm → shadow-md` + 2pxのリフト（`{component.spot-card-hover}`）。動きは`transform`と影のみに限定する。
+- フォーカス: `focus-visible`時に`{colors.primary-300}`のリングを表示。
 
 ### スポット詳細
 - 画像ギャラリー: カルーセルまたはグリッド、`{rounded.lg}`。
