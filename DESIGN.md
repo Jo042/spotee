@@ -196,10 +196,18 @@ components:
   like-button-active:
     textColor: "{colors.like}"
   top-nav:
-    backgroundColor: "{colors.canvas}"
+    backgroundColor: "rgba(255, 255, 255, 0.9)"
+    backdropFilter: "blur(12px)"
     textColor: "{colors.ink}"
     border: "0 0 1px {colors.hairline} solid"
     height: 64px
+  top-nav-link:
+    textColor: "{colors.muted}"
+    fontSize: 14px
+    fontWeight: 500
+  top-nav-link-active:
+    textColor: "{colors.ink}"
+    underline: "2px solid {colors.primary-600}"
   avatar:
     backgroundColor: "{colors.surface-strong}"
     rounded: "{rounded.full}"
@@ -289,7 +297,12 @@ Noto Sans JP（`var(--font-noto-sans-jp)`、既存の`next/font/google`設定を
 ## Components
 
 ### ナビゲーション（`{component.top-nav}`）
-白背景・高さ64px・下端1pxのhairline。左にSpoteeロゴ（`text-primary-500`、大サイズなのでコントラスト要件を満たす）、右にナビゲーションリンクとログイン状態に応じたCTA。既存Header.tsxの構造をそのまま維持し、色トークンのみ差し替える。
+半透明の白背景（`bg-white/90` + `backdrop-blur`）・高さ64px・下端1pxのhairline。影は使わない。スクロール時にコンテンツがヘッダー下をうっすら透けて通る演出のため、キャンバス純白原則の唯一の例外としてヘッダーのみ半透明を許可する。
+
+- **ロゴ**: 左端に「Spotee」ワードマーク（24px・700・`text-primary-500`）＋末尾に`{colors.primary-600}`のドット。ナビリンク（14px・500）とのサイズ・ウェイト差で階層を作る。
+- **リンク**（`{component.top-nav-link}` / `-active`）: 通常は`{colors.muted}`相当のグレー、ホバーで`{colors.ink}`相当へ。ホバー・アクティブ時はリンク下端に2pxの`{colors.primary-600}`バーを`scale-x`（origin-left、200ms ease-out）で伸ばす。アクティブ状態はURLのパス前方一致で判定し、下線を常時表示する。
+- **CTA**: ログイン時は「スポットを投稿」、未ログイン時は「ログイン」を`button-primary`スタイルで右端に配置。押下時に`scale-95`の縮小を加える。
+- **モバイル（md未満）**: ナビを畳み、右端のハンバーガーボタン（44pxタップ領域、`aria-expanded`付き）でヘッダー直下にスライドダウンパネルを開閉する。パネル内はリンクを縦積みし、アクティブリンクは`{colors.primary-50}`背景＋`{colors.primary-700}`文字、CTAは全幅ボタンにする。ルート遷移時に自動で閉じる。
 
 ### 検索・フィルター
 - **カテゴリ選択**（`{component.category-pill}` / `{component.category-pill-active}`）: 1層目。アウトライン→選択時は`{colors.primary-600}`実線塗りのピル。
