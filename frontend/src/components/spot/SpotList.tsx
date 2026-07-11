@@ -100,22 +100,20 @@ export function SpotList({
 
 function SpotCardSkeleton() {
   return (
-    <div className="bg-white rounded-lg shadow-sm overflow-hidden animate-pulse">
+    <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden animate-pulse">
       <div className="aspect-video bg-gray-200" />
 
-      <div className="p-4 space-y-3">
-        <div className="flex justify-between">
-          <div className="h-5 w-16 bg-gray-200 rounded" />
-          <div className="h-5 w-10 bg-gray-200 rounded" />
-        </div>
-
+      <div className="p-3 sm:px-4 sm:pb-4">
         <div className="h-5 w-3/4 bg-gray-200 rounded" />
 
-        <div className="h-4 w-1/2 bg-gray-200 rounded" />
+        <div className="mt-2 h-4 w-1/2 bg-gray-200 rounded" />
 
-        <div className="flex items-center gap-2 pt-2">
-          <div className="w-6 h-6 bg-gray-200 rounded-full" />
-          <div className="h-4 w-20 bg-gray-200 rounded" />
+        <div className="mt-3 pt-3 border-t border-gray-100 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <div className="w-6 h-6 bg-gray-200 rounded-full" />
+            <div className="h-4 w-20 bg-gray-200 rounded" />
+          </div>
+          <div className="h-4 w-10 bg-gray-200 rounded" />
         </div>
       </div>
     </div>

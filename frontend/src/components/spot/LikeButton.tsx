@@ -51,7 +51,7 @@ export function LikeButton({ spotId, likeCount, isLiked }: LikeButtonProps) {
     <button
       onClick={handleClick}
       disabled={loading}
-      className={`flex items-center gap-1 text-sm transition-colors disabled:opacity-50 ${
+      className={`flex items-center gap-1 p-2 -m-2 text-sm transition-colors disabled:opacity-50 ${
         isLiked
           ? "text-rose-500"
           : "text-gray-400 hover:text-rose-400"
