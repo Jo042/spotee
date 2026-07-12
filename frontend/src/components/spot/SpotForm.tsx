@@ -148,7 +148,7 @@ export function SpotForm({ spotId, initialValues }: SpotFormProps) {
           id="title"
           type="text"
           {...register("title", { required: "スポット名は必須です" })}
-          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+          className="w-full rounded-lg border border-gray-300 px-3.5 py-2.5 text-[15px] text-gray-900 placeholder:text-gray-400 transition focus:border-primary-700 focus:outline-none focus:ring-1 focus:ring-primary-700"
           placeholder="例: 渋谷のおしゃれカフェ"
         />
         {errors.title && (
@@ -178,7 +178,7 @@ export function SpotForm({ spotId, initialValues }: SpotFormProps) {
           id="address"
           type="text"
           {...register("address", { required: "住所は必須です" })}
-          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+          className="w-full rounded-lg border border-gray-300 px-3.5 py-2.5 text-[15px] text-gray-900 placeholder:text-gray-400 transition focus:border-primary-700 focus:outline-none focus:ring-1 focus:ring-primary-700"
           placeholder="例: 東京都渋谷区〇〇1-2-3"
         />
         {errors.address && (
@@ -198,7 +198,7 @@ export function SpotForm({ spotId, initialValues }: SpotFormProps) {
           {...register("categoryId", {
             required: "カテゴリを選択してください",
           })}
-          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+          className="w-full rounded-lg border border-gray-300 px-3.5 py-2.5 text-[15px] text-gray-900 placeholder:text-gray-400 transition focus:border-primary-700 focus:outline-none focus:ring-1 focus:ring-primary-700"
         >
           <option value="">選択してください</option>
           {tagData?.categories.map((category) => (
@@ -225,7 +225,7 @@ export function SpotForm({ spotId, initialValues }: SpotFormProps) {
           id="description"
           {...register("description")}
           rows={4}
-          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+          className="w-full rounded-lg border border-gray-300 px-3.5 py-2.5 text-[15px] text-gray-900 placeholder:text-gray-400 transition focus:border-primary-700 focus:outline-none focus:ring-1 focus:ring-primary-700"
           placeholder="このスポットの魅力を教えてください"
         />
       </div>
@@ -240,7 +240,7 @@ export function SpotForm({ spotId, initialValues }: SpotFormProps) {
         <select
           id="priceRange"
           {...register("priceRange", { valueAsNumber: true })}
-          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+          className="w-full rounded-lg border border-gray-300 px-3.5 py-2.5 text-[15px] text-gray-900 placeholder:text-gray-400 transition focus:border-primary-700 focus:outline-none focus:ring-1 focus:ring-primary-700"
         >
           <option value="">選択してください</option>
           <option value={1}>~1,000円</option>
@@ -261,7 +261,7 @@ export function SpotForm({ spotId, initialValues }: SpotFormProps) {
           id="businessHours"
           type="text"
           {...register("businessHours")}
-          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+          className="w-full rounded-lg border border-gray-300 px-3.5 py-2.5 text-[15px] text-gray-900 placeholder:text-gray-400 transition focus:border-primary-700 focus:outline-none focus:ring-1 focus:ring-primary-700"
           placeholder="例: 10:00-22:00（定休日: 月曜）"
         />
       </div>
