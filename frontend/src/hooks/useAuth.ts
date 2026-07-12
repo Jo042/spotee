@@ -20,6 +20,8 @@ interface UseAuthReturn {
   ) => Promise<{ error: Error | null }>;
   signOut: () => Promise<{ error: Error | null }>;
   getAccessToken: () => string | undefined;
+  resetPasswordForEmail: (email: string) => Promise<{ error: Error | null }>;
+  updatePassword: (password: string) => Promise<{ error: Error | null }>;
 }
 
 export function useAuth(): UseAuthReturn {
@@ -94,6 +96,18 @@ export function useAuth(): UseAuthReturn {
     return session?.access_token;
   }, [session]);
 
+  const resetPasswordForEmail = useCallback(async (email: string) => {
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: `${window.location.origin}/reset-password`,
+    });
+    return { error };
+  }, []);
+
+  const updatePassword = useCallback(async (password: string) => {
+    const { error } = await supabase.auth.updateUser({ password });
+    return { error };
+  }, []);
+
   return {
     user,
     session,
@@ -103,5 +117,7 @@ export function useAuth(): UseAuthReturn {
     signUp,
     signOut,
     getAccessToken,
+    resetPasswordForEmail,
+    updatePassword,
   };
 }
