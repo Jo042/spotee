@@ -1,31 +1,98 @@
 "use client";
 
-import { useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useQuery } from "@apollo/client/react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { Camera, Heart, Pencil, UserCircle } from "lucide-react";
+import { Camera, Heart, Loader2, Pencil, UserCircle } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
+import { useIntersectionObserver } from "@/hooks/useIntersectionObserver";
 import { SpotCard } from "@/components/spot/SpotCard";
 import { SpotCardSkeleton } from "@/components/spot/SpotList";
 import { GET_ME, GET_MY_SPOTS, GET_MY_LIKED_SPOTS } from "@/graphql/queries/user";
 
 type Tab = "spots" | "liked";
 
+const PAGE_SIZE = 20;
+
 export function MyPageContent() {
   const { user, loading: authLoading } = useAuth();
   const router = useRouter();
   const [activeTab, setActiveTab] = useState<Tab>("spots");
+  const [loadingMore, setLoadingMore] = useState(false);
 
   const { data: meData, loading: meLoading } = useQuery(GET_ME, { skip: !user });
-  const { data: spotsData, loading: spotsLoading } = useQuery(GET_MY_SPOTS, {
-    variables: { first: 20 },
+  const {
+    data: spotsData,
+    loading: spotsLoading,
+    fetchMore: fetchMoreSpots,
+  } = useQuery(GET_MY_SPOTS, {
+    variables: { first: PAGE_SIZE },
     skip: !user,
   });
-  const { data: likedData, loading: likedLoading } = useQuery(GET_MY_LIKED_SPOTS, {
-    variables: { first: 20 },
+  const {
+    data: likedData,
+    loading: likedLoading,
+    fetchMore: fetchMoreLiked,
+  } = useQuery(GET_MY_LIKED_SPOTS, {
+    variables: { first: PAGE_SIZE },
     skip: !user,
   });
+
+  const spotsPageInfo = spotsData?.mySpots?.pageInfo;
+  const likedPageInfo = likedData?.myLikedSpots?.pageInfo;
+  const activePageInfo = activeTab === "spots" ? spotsPageInfo : likedPageInfo;
+  const hasNextPage = activePageInfo?.hasNextPage ?? false;
+
+  const handleLoadMore = useCallback(async () => {
+    const endCursor = activePageInfo?.endCursor;
+    if (!endCursor || loadingMore) return;
+
+    setLoadingMore(true);
+    try {
+      if (activeTab === "spots") {
+        await fetchMoreSpots({
+          variables: { first: PAGE_SIZE, after: endCursor },
+          updateQuery: (prevResult, { fetchMoreResult }) => {
+            if (!fetchMoreResult) return prevResult;
+            return {
+              mySpots: {
+                ...fetchMoreResult.mySpots,
+                edges: [...prevResult.mySpots.edges, ...fetchMoreResult.mySpots.edges],
+              },
+            };
+          },
+        });
+      } else {
+        await fetchMoreLiked({
+          variables: { first: PAGE_SIZE, after: endCursor },
+          updateQuery: (prevResult, { fetchMoreResult }) => {
+            if (!fetchMoreResult) return prevResult;
+            return {
+              myLikedSpots: {
+                ...fetchMoreResult.myLikedSpots,
+                edges: [...prevResult.myLikedSpots.edges, ...fetchMoreResult.myLikedSpots.edges],
+              },
+            };
+          },
+        });
+      }
+    } catch (err) {
+      console.error("Failed to load more:", err);
+    } finally {
+      setLoadingMore(false);
+    }
+  }, [activeTab, activePageInfo, loadingMore, fetchMoreSpots, fetchMoreLiked]);
+
+  const { targetRef, isIntersecting } = useIntersectionObserver<HTMLDivElement>({
+    enabled: hasNextPage && !loadingMore,
+  });
+
+  useEffect(() => {
+    if (isIntersecting && hasNextPage && !loadingMore) {
+      handleLoadMore();
+    }
+  }, [isIntersecting, hasNextPage, loadingMore, handleLoadMore]);
 
   if (authLoading) {
     return <div className="min-h-screen flex items-center justify-center">読み込み中...</div>;
@@ -173,11 +240,20 @@ export function MyPageContent() {
             )}
           </div>
         ) : (
-          <div className="grid grid-cols-2 gap-4 sm:gap-6 lg:grid-cols-3">
-            {activeSpots.map((spot) => (
-              <SpotCard key={spot.id} spot={spot} />
-            ))}
-          </div>
+          <>
+            <div className="grid grid-cols-2 gap-4 sm:gap-6 lg:grid-cols-3">
+              {activeSpots.map((spot) => (
+                <SpotCard key={spot.id} spot={spot} />
+              ))}
+            </div>
+            {loadingMore && (
+              <div className="flex items-center justify-center gap-2 py-8 text-sm text-gray-500">
+                <Loader2 size={18} className="animate-spin" aria-hidden="true" />
+                読み込み中...
+              </div>
+            )}
+            {hasNextPage && <div ref={targetRef} className="h-1" />}
+          </>
         )}
       </div>
     </main>
