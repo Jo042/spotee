@@ -144,7 +144,7 @@ export function ProfileEditForm({
           value={name}
           onChange={(e) => setName(e.target.value)}
           maxLength={50}
-          className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-400"
+          className="block w-full rounded-lg border border-gray-300 px-3.5 py-2.5 text-[15px] text-gray-900 transition focus:border-primary-700 focus:outline-none focus:ring-1 focus:ring-primary-700"
         />
       </div>
 
@@ -161,7 +161,7 @@ export function ProfileEditForm({
           onChange={(e) => setBio(e.target.value)}
           maxLength={200}
           rows={4}
-          className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-400 resize-none"
+          className="block w-full rounded-lg border border-gray-300 px-3.5 py-2.5 text-[15px] text-gray-900 transition focus:border-primary-700 focus:outline-none focus:ring-1 focus:ring-primary-700 resize-none"
         />
       </div>
 
