@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { Mail } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 
 function Spinner({ className }: { className: string }) {
@@ -30,34 +30,26 @@ function Spinner({ className }: { className: string }) {
   );
 }
 
-export default function LoginPage() {
-  const router = useRouter();
-  const { signInWithEmail, signInWithGoogle, loading } = useAuth();
+export default function ForgotPasswordPage() {
+  const { resetPasswordForEmail, loading } = useAuth();
 
   const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submittedEmail, setSubmittedEmail] = useState<string | null>(null);
 
-  const handleEmailLogin = async (e: React.SubmitEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.SubmitEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError(null);
     setIsSubmitting(true);
 
-    const { error } = await signInWithEmail(email, password);
+    const { error } = await resetPasswordForEmail(email);
 
     if (error) {
       setError(error.message);
       setIsSubmitting(false);
     } else {
-      router.push("/");
-    }
-  };
-
-  const handleGoogleLogin = async () => {
-    const { error } = await signInWithGoogle();
-    if (error) {
-      setError(error.message);
+      setSubmittedEmail(email);
     }
   };
 
@@ -73,6 +65,50 @@ export default function LoginPage() {
   const inputClassName =
     "block w-full rounded-lg border border-gray-300 px-3.5 py-2.5 text-[15px] text-gray-900 placeholder:text-gray-400 transition focus:border-primary-700 focus:outline-none focus:ring-1 focus:ring-primary-700";
 
+  if (submittedEmail) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-gray-50 px-4 py-12">
+        <main className="w-full max-w-md">
+          <div className="rounded-2xl border border-gray-200 bg-white px-6 py-10 shadow-sm sm:px-10">
+            <div className="text-center">
+              <Link
+                href="/"
+                className="inline-block text-2xl font-bold tracking-tight text-primary-500"
+              >
+                Spotee
+                <span className="text-primary-600">.</span>
+              </Link>
+
+              <div
+                role="status"
+                className="mx-auto mt-8 flex h-12 w-12 items-center justify-center rounded-full bg-primary-50 text-primary-600"
+              >
+                <Mail className="h-6 w-6" aria-hidden="true" />
+              </div>
+
+              <h1 className="mt-6 text-[22px] font-bold leading-snug text-gray-900">
+                リセット用メールを送信しました
+              </h1>
+              <p className="mt-2 text-sm text-gray-500">
+                <span className="font-medium text-gray-700">
+                  {submittedEmail}
+                </span>{" "}
+                宛にパスワード再設定用のメールを送信しました。メール内のリンクから新しいパスワードを設定してください。
+              </p>
+            </div>
+
+            <Link
+              href="/login"
+              className="mt-8 flex w-full items-center justify-center rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm font-bold text-gray-900 transition hover:bg-gray-50 active:scale-95"
+            >
+              ログイン画面へ
+            </Link>
+          </div>
+        </main>
+      </div>
+    );
+  }
+
   return (
     <div className="flex min-h-screen items-center justify-center bg-gray-50 px-4 py-12">
       <main className="w-full max-w-md">
@@ -86,10 +122,10 @@ export default function LoginPage() {
               <span className="text-primary-600">.</span>
             </Link>
             <h1 className="mt-6 text-[22px] font-bold leading-snug text-gray-900">
-              Spotee にログイン
+              パスワードをお忘れですか？
             </h1>
             <p className="mt-2 text-sm text-gray-500">
-              お気に入りの場所を見つけて、共有しよう
+              登録済みのメールアドレスにリセット用のリンクを送ります
             </p>
           </div>
 
@@ -114,7 +150,7 @@ export default function LoginPage() {
             </div>
           )}
 
-          <form className="mt-8 space-y-5" onSubmit={handleEmailLogin}>
+          <form className="mt-8 space-y-5" onSubmit={handleSubmit}>
             <div>
               <label
                 htmlFor="email"
@@ -135,82 +171,23 @@ export default function LoginPage() {
               />
             </div>
 
-            <div>
-              <div className="mb-1.5 flex items-baseline justify-between">
-                <label
-                  htmlFor="password"
-                  className="text-sm font-medium text-gray-700"
-                >
-                  パスワード
-                </label>
-                <Link
-                  href="/forgot-password"
-                  className="text-xs font-medium text-primary-600 transition-colors hover:text-primary-700 hover:underline"
-                >
-                  パスワードをお忘れですか？
-                </Link>
-              </div>
-              <input
-                id="password"
-                name="password"
-                type="password"
-                autoComplete="current-password"
-                required
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className={inputClassName}
-              />
-            </div>
-
             <button
               type="submit"
               disabled={isSubmitting}
               className="mt-2 flex w-full items-center justify-center gap-2 rounded-lg bg-primary-600 px-4 py-2.5 text-sm font-bold text-white transition hover:bg-primary-700 active:scale-95 disabled:pointer-events-none disabled:opacity-50"
             >
               {isSubmitting && <Spinner className="h-4 w-4 text-white" />}
-              {isSubmitting ? "ログイン中..." : "ログイン"}
+              {isSubmitting ? "送信中..." : "リセットメールを送る"}
             </button>
           </form>
-
-          <div className="mt-6 flex items-center gap-3">
-            <span className="h-px flex-1 bg-gray-200" />
-            <span className="text-xs text-gray-500">または</span>
-            <span className="h-px flex-1 bg-gray-200" />
-          </div>
-
-          <button
-            onClick={handleGoogleLogin}
-            className="mt-6 flex w-full items-center justify-center gap-2.5 rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm font-bold text-gray-900 transition hover:bg-gray-50 active:scale-95"
-          >
-            <svg className="h-4 w-4" viewBox="0 0 24 24" aria-hidden="true">
-              <path
-                fill="#4285F4"
-                d="M23.49 12.27c0-.79-.07-1.54-.19-2.27H12v4.51h6.47a5.57 5.57 0 01-2.4 3.58v3h3.86c2.26-2.09 3.56-5.17 3.56-8.82z"
-              />
-              <path
-                fill="#34A853"
-                d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.86-3c-1.08.72-2.45 1.16-4.07 1.16-3.13 0-5.78-2.11-6.73-4.96H1.29v3.09A11.99 11.99 0 0012 24z"
-              />
-              <path
-                fill="#FBBC05"
-                d="M5.27 14.29a7.19 7.19 0 010-4.58V6.62H1.29a11.99 11.99 0 000 10.76l3.98-3.09z"
-              />
-              <path
-                fill="#EA4335"
-                d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0A11.99 11.99 0 001.29 6.62l3.98 3.09C6.22 6.86 8.87 4.75 12 4.75z"
-              />
-            </svg>
-            Google でログイン
-          </button>
         </div>
 
         <p className="mt-6 text-center text-sm text-gray-600">
-          アカウントをお持ちでない方は{" "}
           <Link
-            href="/register"
+            href="/login"
             className="font-medium text-primary-600 transition-colors hover:text-primary-700 hover:underline"
           >
-            新規登録
+            ログイン画面に戻る
           </Link>
         </p>
       </main>
