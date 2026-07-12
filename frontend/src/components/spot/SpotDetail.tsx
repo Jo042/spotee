@@ -211,46 +211,7 @@ export function SpotDetail({ spot, isOwner = false }: SpotDetailProps) {
       </div>
 
       <div className="grid gap-8 lg:grid-cols-3 lg:gap-10">
-        <div className="space-y-8 lg:col-span-2">
-          {spot.description && (
-            <section>
-              <h2 className="text-lg font-bold text-gray-900">
-                このスポットについて
-              </h2>
-              <p className="mt-3 whitespace-pre-wrap leading-relaxed text-gray-700">
-                {spot.description}
-              </p>
-            </section>
-          )}
-
-          {hasTags && (
-            <section>
-              <h2 className="text-lg font-bold text-gray-900">
-                このスポットの特徴
-              </h2>
-              <div className="mt-3 flex flex-wrap gap-2">
-                {attributeTags.map((tag) => (
-                  <span
-                    key={tag.id}
-                    className="rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1.5 text-xs font-medium text-emerald-700"
-                  >
-                    {tag.name}
-                  </span>
-                ))}
-                {moodTags.map((tag) => (
-                  <span
-                    key={tag.id}
-                    className="rounded-full border border-purple-200 bg-purple-50 px-3 py-1.5 text-xs font-medium text-purple-700"
-                  >
-                    {tag.name}
-                  </span>
-                ))}
-              </div>
-            </section>
-          )}
-        </div>
-
-        <aside className="space-y-4">
+        <aside className="space-y-4 lg:order-2">
           <div className="rounded-xl border border-gray-200 p-5">
             <h2 className="text-sm font-bold text-gray-900">基本情報</h2>
             <dl className="mt-4 space-y-4 text-sm">
@@ -314,6 +275,45 @@ export function SpotDetail({ spot, isOwner = false }: SpotDetailProps) {
             </div>
           </div>
         </aside>
+
+        <div className="space-y-8 lg:col-span-2 lg:order-1">
+          {spot.description && (
+            <section>
+              <h2 className="text-lg font-bold text-gray-900">
+                このスポットについて
+              </h2>
+              <p className="mt-3 whitespace-pre-wrap leading-relaxed text-gray-700">
+                {spot.description}
+              </p>
+            </section>
+          )}
+
+          {hasTags && (
+            <section>
+              <h2 className="text-lg font-bold text-gray-900">
+                このスポットの特徴
+              </h2>
+              <div className="mt-3 flex flex-wrap gap-2">
+                {attributeTags.map((tag) => (
+                  <span
+                    key={tag.id}
+                    className="rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1.5 text-xs font-medium text-emerald-700"
+                  >
+                    {tag.name}
+                  </span>
+                ))}
+                {moodTags.map((tag) => (
+                  <span
+                    key={tag.id}
+                    className="rounded-full border border-purple-200 bg-purple-50 px-3 py-1.5 text-xs font-medium text-purple-700"
+                  >
+                    {tag.name}
+                  </span>
+                ))}
+              </div>
+            </section>
+          )}
+        </div>
       </div>
     </div>
   );
