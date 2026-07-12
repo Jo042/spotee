@@ -1,5 +1,6 @@
 "use client";
 
+import { ArrowDownUp, ChevronDown } from "lucide-react";
 import { SpotSortBy, SortOrder } from "@/graphql/generated/graphql";
 
 export type SortOption = {
@@ -32,15 +33,20 @@ export function SortSelect({ value, onChange }: SortSelectProps) {
   };
 
   return (
-    <div className="flex items-center gap-2">
-      <label htmlFor="sort" className="text-sm text-gray-600">
-        並び替え:
+    <div className="relative">
+      <label htmlFor="sort" className="sr-only">
+        並び替え
       </label>
+      <ArrowDownUp
+        size={14}
+        className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+        aria-hidden="true"
+      />
       <select
         id="sort"
         value={currentIndex}
         onChange={handleChange}
-        className="px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
+        className="w-full appearance-none rounded-lg border border-gray-200 bg-white py-2.5 pl-9 pr-9 text-sm text-gray-700 shadow-sm transition hover:border-gray-300 focus:border-primary-700 focus:outline-none focus:ring-1 focus:ring-primary-700"
       >
         {SORT_OPTIONS.map((option, index) => (
           <option key={index} value={index}>
@@ -48,6 +54,11 @@ export function SortSelect({ value, onChange }: SortSelectProps) {
           </option>
         ))}
       </select>
+      <ChevronDown
+        size={15}
+        className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-gray-400"
+        aria-hidden="true"
+      />
     </div>
   );
 }
