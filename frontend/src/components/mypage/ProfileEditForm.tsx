@@ -2,7 +2,7 @@
 
 import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
-import { UserCircle } from "lucide-react";
+import { Camera, UserCircle } from "lucide-react";
 import { useMutation } from "@apollo/client/react";
 import { UPDATE_PROFILE } from "@/graphql/mutations/user";
 import { uploadImage } from "@/lib/storage";
@@ -80,8 +80,9 @@ export function ProfileEditForm({
         <button
           type="button"
           onClick={() => fileInputRef.current?.click()}
-          className="relative w-24 h-24 rounded-full overflow-hidden bg-gray-200 hover:opacity-80 transition-opacity"
+          className="group relative w-24 h-24 rounded-full overflow-hidden bg-gray-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-300 focus-visible:ring-offset-2"
           disabled={avatarUploading}
+          aria-label="アバター画像を変更"
         >
           {avatarUrl ? (
             <img src={avatarUrl} alt="アバター" className="w-full h-full object-cover" />
@@ -90,13 +91,37 @@ export function ProfileEditForm({
               <UserCircle size={48} />
             </div>
           )}
-          {avatarUploading && (
-            <div className="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center">
-              <span className="text-white text-xs">アップロード中</span>
+          {avatarUploading ? (
+            <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
+              <svg
+                className="animate-spin h-5 w-5 text-white"
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+              >
+                <circle
+                  className="opacity-25"
+                  cx="12"
+                  cy="12"
+                  r="10"
+                  stroke="currentColor"
+                  strokeWidth="4"
+                />
+                <path
+                  className="opacity-75"
+                  fill="currentColor"
+                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+                />
+              </svg>
+            </div>
+          ) : (
+            <div className="absolute inset-0 bg-black/40 flex flex-col items-center justify-center gap-0.5 opacity-0 transition-opacity group-hover:opacity-100 group-focus-visible:opacity-100">
+              <Camera size={18} className="text-white" />
+              <span className="text-[10px] font-medium text-white">変更</span>
             </div>
           )}
         </button>
-        <span className="text-sm text-gray-500">タップして画像を変更</span>
+        <span className="text-xs text-gray-500">タップして画像を変更</span>
         <input
           ref={fileInputRef}
           type="file"
@@ -107,41 +132,57 @@ export function ProfileEditForm({
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">名前</label>
+        <div className="flex items-baseline justify-between mb-1.5">
+          <label htmlFor="profile-name" className="text-sm font-medium text-gray-700">
+            名前
+          </label>
+          <span className="text-xs text-gray-400">{name.length}/50</span>
+        </div>
         <input
+          id="profile-name"
           type="text"
           value={name}
           onChange={(e) => setName(e.target.value)}
           maxLength={50}
-          className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-400"
+          className="block w-full rounded-lg border border-gray-300 px-3.5 py-2.5 text-[15px] text-gray-900 transition focus:border-primary-700 focus:outline-none focus:ring-1 focus:ring-primary-700"
         />
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">自己紹介</label>
+        <div className="flex items-baseline justify-between mb-1.5">
+          <label htmlFor="profile-bio" className="text-sm font-medium text-gray-700">
+            自己紹介
+          </label>
+          <span className="text-xs text-gray-400">{bio.length}/200</span>
+        </div>
         <textarea
+          id="profile-bio"
           value={bio}
           onChange={(e) => setBio(e.target.value)}
           maxLength={200}
           rows={4}
-          className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-400 resize-none"
+          className="block w-full rounded-lg border border-gray-300 px-3.5 py-2.5 text-[15px] text-gray-900 transition focus:border-primary-700 focus:outline-none focus:ring-1 focus:ring-primary-700 resize-none"
         />
       </div>
 
-      {error && <p className="text-red-500 text-sm">{error}</p>}
+      {error && (
+        <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600">
+          {error}
+        </div>
+      )}
 
       <div className="flex gap-3">
         <button
           type="button"
           onClick={() => router.back()}
-          className="flex-1 py-2 border border-gray-300 rounded-lg text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+          className="flex-1 py-2.5 border border-gray-200 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
         >
           キャンセル
         </button>
         <button
           type="submit"
           disabled={loading || avatarUploading}
-          className="flex-1 py-2 bg-primary-600 text-white rounded-lg text-sm font-medium hover:bg-primary-700 transition-colors disabled:opacity-50"
+          className="flex-1 py-2.5 bg-primary-600 text-white rounded-lg text-sm font-bold hover:bg-primary-700 active:scale-[0.98] transition disabled:opacity-50"
         >
           {loading ? "保存中..." : "保存"}
         </button>
