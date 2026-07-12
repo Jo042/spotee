@@ -50,7 +50,7 @@ export default function SpotsPageContent() {
   >(GET_SPOTS, { variables: { first: 20, sort: { sortBy, order }, filter: filterVariables } });
 
   const handleSortChange = (newSort: SortOption) => {
-    const params = new URLSearchParams();
+    const params = new URLSearchParams(searchParams.toString());
     params.set("sortBy", newSort.sortBy);
     params.set("order", newSort.order);
     router.push(`/spots?${params.toString()}`);
