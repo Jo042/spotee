@@ -2,6 +2,7 @@
 
 import { useQuery } from "@apollo/client/react";
 import { useCallback, useEffect, useState } from "react";
+import { SlidersHorizontal } from "lucide-react";
 import { GET_SPOTS } from "@/graphql/queries/spot";
 import { SpotList } from "@/components/spot/SpotList";
 import Link from "next/link";
@@ -49,7 +50,7 @@ export default function SpotsPageContent() {
   >(GET_SPOTS, { variables: { first: 20, sort: { sortBy, order }, filter: filterVariables } });
 
   const handleSortChange = (newSort: SortOption) => {
-    const params = new URLSearchParams();
+    const params = new URLSearchParams(searchParams.toString());
     params.set("sortBy", newSort.sortBy);
     params.set("order", newSort.order);
     router.push(`/spots?${params.toString()}`);
@@ -115,40 +116,32 @@ export default function SpotsPageContent() {
     <main className="min-h-screen bg-gray-50">
       <div className="bg-white shadow-sm">
         <div className="max-w-7xl mx-auto px-4 py-6">
-          <div className="flex justify-between items-center">
+          <div className="flex items-center justify-between gap-4">
             <div>
               <h1 className="text-2xl font-bold text-gray-900">スポット一覧</h1>
               {data?.spots?.totalCount !== undefined && (
-                <p className="text-sm text-gray-500 mt-1">
-                  全 {data.spots.totalCount} 件
+                <p className="mt-1 flex flex-wrap items-center gap-2 text-sm text-gray-500">
+                  <span>
+                    全 <span className="font-bold text-gray-900">{data.spots.totalCount}</span> 件
+                  </span>
                   {hasActiveFilter && (
-                    <span className="ml-1 text-primary-700">（フィルター適用中）</span>
+                    <span className="inline-flex items-center gap-1.5 rounded-full bg-primary-50 px-2.5 py-0.5 text-xs font-medium text-primary-700">
+                      <span className="w-1.5 h-1.5 rounded-full bg-primary-600" aria-hidden="true" />
+                      フィルター適用中
+                    </span>
                   )}
                 </p>
               )}
             </div>
 
-            <div className="flex items-center gap-3">
-              <button
-                onClick={() => setIsFilterOpen(true)}
-                className="lg:hidden flex items-center gap-1.5 px-3 py-2 border border-gray-300 rounded-lg text-sm text-gray-600 hover:bg-gray-50 transition-colors"
+            {user && (
+              <Link
+                href="/spots/new"
+                className="shrink-0 rounded-lg bg-primary-600 px-4 py-2.5 text-sm font-bold text-white transition hover:bg-primary-700 active:scale-95"
               >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2a1 1 0 01-.293.707L13 13.414V19a1 1 0 01-.553.894l-4 2A1 1 0 017 21v-7.586L3.293 6.707A1 1 0 013 6V4z" />
-                </svg>
-                絞り込み
-                {hasActiveFilter && <span className="w-2 h-2 bg-primary-600 rounded-full" />}
-              </button>
-              <SortSelect value={currentSort} onChange={handleSortChange} />
-              {user && (
-                <Link
-                  href="/spots/new"
-                  className="bg-primary-600 text-white px-4 py-2 rounded-lg hover:bg-primary-700 transition-colors"
-                >
-                  スポットを投稿
-                </Link>
-              )}
-            </div>
+                スポットを投稿
+              </Link>
+            )}
           </div>
         </div>
       </div>
@@ -196,14 +189,31 @@ export default function SpotsPageContent() {
 
       <div className="max-w-7xl mx-auto px-4 py-8">
         <div className="flex gap-6">
-          <aside className="hidden lg:block w-72 flex-shrink-0">
+          <aside className="hidden lg:block w-72 shrink-0">
             <div className="bg-white border border-gray-200 rounded-xl p-4">
               <FilterPanel />
             </div>
           </aside>
           <div className="flex-1 min-w-0">
-            <div className="mb-4">
-              <SearchBar />
+            <div className="mb-4 flex flex-col gap-3 sm:flex-row">
+              <div className="flex-1 min-w-0">
+                <SearchBar />
+              </div>
+              <div className="flex items-center gap-3">
+                <button
+                  onClick={() => setIsFilterOpen(true)}
+                  className="lg:hidden flex flex-1 items-center justify-center gap-1.5 rounded-lg border border-gray-200 bg-white px-4 py-2.5 text-sm text-gray-700 shadow-sm transition hover:border-gray-300 hover:bg-gray-50 active:scale-95 sm:flex-none"
+                >
+                  <SlidersHorizontal size={15} aria-hidden="true" />
+                  絞り込み
+                  {hasActiveFilter && (
+                    <span className="w-2 h-2 rounded-full bg-primary-600" aria-hidden="true" />
+                  )}
+                </button>
+                <div className="flex-1 sm:flex-none">
+                  <SortSelect value={currentSort} onChange={handleSortChange} />
+                </div>
+              </div>
             </div>
             <ActiveFilterChips />
             <SpotList
