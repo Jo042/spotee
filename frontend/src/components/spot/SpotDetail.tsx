@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
@@ -162,10 +163,13 @@ export function SpotDetail({ spot, isOwner = false }: SpotDetailProps) {
       <div className="mb-8">
         <div className="relative aspect-video overflow-hidden rounded-2xl bg-gray-100">
           {currentImage ? (
-            <img
+            <Image
               src={currentImage.url}
               alt={spot.title}
-              className="w-full h-full object-cover"
+              fill
+              priority
+              sizes="(min-width: 896px) 864px, 100vw"
+              className="object-cover"
             />
           ) : (
             <div className="w-full h-full flex items-center justify-center text-gray-400">
@@ -193,9 +197,11 @@ export function SpotDetail({ spot, isOwner = false }: SpotDetailProps) {
                     : "opacity-60 hover:opacity-100"
                 }`}
               >
-                <img
+                <Image
                   src={image.url}
                   alt={`${spot.title} ${index + 1}`}
+                  width={64}
+                  height={64}
                   className="w-full h-full object-cover"
                 />
               </button>
@@ -284,9 +290,11 @@ export function SpotDetail({ spot, isOwner = false }: SpotDetailProps) {
             <div className="flex items-center gap-3">
               <div className="h-10 w-10 shrink-0 overflow-hidden rounded-full bg-gray-200">
                 {spot.user.avatarUrl ? (
-                  <img
+                  <Image
                     src={spot.user.avatarUrl}
                     alt={spot.user.name}
+                    width={40}
+                    height={40}
                     className="w-full h-full object-cover"
                   />
                 ) : (

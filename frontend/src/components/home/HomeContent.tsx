@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight, Search } from "lucide-react";
 import { useQuery } from "@apollo/client/react";
@@ -39,10 +40,12 @@ function CollageCard({ spot, aspect }: CollageCardProps) {
       href={`/spots/${spot.id}`}
       className={`group relative block overflow-hidden rounded-xl border border-gray-100 shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-300 focus-visible:ring-offset-2 ${aspect}`}
     >
-      <img
+      <Image
         src={imageUrl}
         alt={spot.title}
-        className="h-full w-full object-cover transition-transform duration-500 ease-out group-hover:scale-105"
+        fill
+        sizes="(min-width: 1024px) 220px, 50vw"
+        className="object-cover transition-transform duration-500 ease-out group-hover:scale-105"
       />
       <span className="absolute left-2.5 top-2.5 max-w-[calc(100%-20px)] truncate rounded-full bg-white/90 px-2.5 py-1 text-xs font-medium text-primary-700 backdrop-blur">
         {spot.category.name}

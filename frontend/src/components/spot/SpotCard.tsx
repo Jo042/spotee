@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { MapPin, UserCircle } from "lucide-react";
 import { LikeButton } from "@/components/spot/LikeButton";
@@ -28,11 +29,12 @@ export function SpotCard({ spot }: SpotCardProps) {
       <article className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden transition duration-300 group-hover:shadow-md group-hover:-translate-y-0.5">
         <div className="aspect-video bg-gray-100 relative overflow-hidden">
           {firstImage ? (
-            <img
+            <Image
               src={firstImage}
               alt={spot.title}
-              className="w-full h-full object-cover transition-transform duration-500 ease-out group-hover:scale-105"
-              loading="lazy"
+              fill
+              sizes="(min-width: 1024px) 300px, (min-width: 640px) 50vw, 100vw"
+              className="object-cover transition-transform duration-500 ease-out group-hover:scale-105"
             />
           ) : (
             <div className="w-full h-full flex items-center justify-center text-gray-400">
@@ -58,9 +60,11 @@ export function SpotCard({ spot }: SpotCardProps) {
             <div className="flex items-center gap-2 min-w-0">
               <div className="w-6 h-6 bg-gray-200 rounded-full overflow-hidden shrink-0">
                 {spot.user.avatarUrl ? (
-                  <img
+                  <Image
                     src={spot.user.avatarUrl}
                     alt={spot.user.name}
+                    width={24}
+                    height={24}
                     className="w-full h-full object-cover"
                   />
                 ) : (
