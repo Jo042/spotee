@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useCallback } from "react";
+import Image from "next/image";
 import { uploadImage } from "@/lib/storage";
 import imageCompression from "browser-image-compression";
 
@@ -116,10 +117,12 @@ export function ImageUploader({
               onDrop={(e) => handleDrop(e, index)}
               onDragOver={handleDragOver}
             >
-              <img
+              <Image
                 src={url}
                 alt={`アップロード画像 ${index + 1}`}
-                className="w-full h-full object-cover"
+                fill
+                sizes="(min-width: 768px) 20vw, (min-width: 640px) 33vw, 50vw"
+                className="object-cover"
               />
               <button
                 type="button"

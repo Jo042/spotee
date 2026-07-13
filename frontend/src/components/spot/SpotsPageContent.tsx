@@ -1,7 +1,7 @@
 "use client";
 
 import { useQuery } from "@apollo/client/react";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 import { SlidersHorizontal } from "lucide-react";
 import { GET_SPOTS } from "@/graphql/queries/spot";
 import { SpotList } from "@/components/spot/SpotList";
@@ -11,6 +11,7 @@ import type { GetSpotsQuery, GetSpotsQueryVariables } from "@/graphql/generated/
 import { SpotSortBy, SortOrder, TagSearchMode } from "@/graphql/generated/graphql";
 import { SortSelect, SortOption } from "@/components/search/SortSelect";
 import { FilterPanel } from "@/components/search/FilterPanel";
+import { FilterBottomSheet } from "@/components/search/FilterBottomSheet";
 import { SearchBar } from "@/components/search/SearchBar";
 import { ActiveFilterChips } from "@/components/search/ActiveFilterChips";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -23,14 +24,6 @@ export default function SpotsPageContent() {
   const [loadingMore, setLoadingMore] = useState(false);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const { currentFilter, hasActiveFilter } = useSpotFilter();
-
-  useEffect(() => {
-    if (!isFilterOpen) return;
-    document.body.style.overflow = "hidden";
-    return () => {
-      document.body.style.overflow = "";
-    };
-  }, [isFilterOpen]);
 
   const sortBy = (searchParams.get("sortBy") ?? SpotSortBy.CreatedAt) as SortOption["sortBy"];
   const order = (searchParams.get("order") ?? SortOrder.Desc) as SortOption["order"];
@@ -146,46 +139,11 @@ export default function SpotsPageContent() {
         </div>
       </div>
 
-      {isFilterOpen && (
-        <div className="fixed inset-0 z-50 lg:hidden">
-          <div
-            className="absolute inset-0 bg-black/40 animate-fade-in motion-reduce:animate-none"
-            onClick={() => setIsFilterOpen(false)}
-          />
-          <div
-            role="dialog"
-            aria-modal="true"
-            aria-label="絞り込み"
-            className="absolute bottom-0 left-0 right-0 flex flex-col bg-white rounded-t-2xl max-h-[85vh] animate-sheet-up motion-reduce:animate-none"
-          >
-            <div className="relative flex justify-center pt-3 pb-2">
-              <span className="w-10 h-1 rounded-full bg-gray-300" aria-hidden="true" />
-              <button
-                onClick={() => setIsFilterOpen(false)}
-                aria-label="閉じる"
-                className="absolute right-3 top-2 p-1.5 text-gray-400 hover:text-gray-600 transition-colors"
-              >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </button>
-            </div>
-            <div className="overflow-y-auto px-5 py-4">
-              <FilterPanel />
-            </div>
-            <div className="border-t border-gray-100 px-5 py-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))]">
-              <button
-                onClick={() => setIsFilterOpen(false)}
-                className="w-full bg-primary-600 text-white text-sm font-bold py-3 rounded-lg hover:bg-primary-700 active:scale-[0.98] transition"
-              >
-                {typeof totalCount === "number"
-                  ? `${totalCount}件のスポットを表示`
-                  : "スポットを表示"}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <FilterBottomSheet
+        open={isFilterOpen}
+        totalCount={totalCount}
+        onClose={() => setIsFilterOpen(false)}
+      />
 
       <div className="max-w-7xl mx-auto px-4 py-8">
         <div className="flex gap-6">

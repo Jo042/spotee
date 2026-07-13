@@ -2,6 +2,7 @@
 
 import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 import { Camera, UserCircle } from "lucide-react";
 import { useMutation } from "@apollo/client/react";
 import { UPDATE_PROFILE } from "@/graphql/mutations/user";
@@ -85,7 +86,13 @@ export function ProfileEditForm({
           aria-label="アバター画像を変更"
         >
           {avatarUrl ? (
-            <img src={avatarUrl} alt="アバター" className="w-full h-full object-cover" />
+            <Image
+              src={avatarUrl}
+              alt="アバター"
+              width={96}
+              height={96}
+              className="w-full h-full object-cover"
+            />
           ) : (
             <div className="w-full h-full flex items-center justify-center text-gray-400">
               <UserCircle size={48} />
