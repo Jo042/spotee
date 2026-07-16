@@ -2,10 +2,10 @@ import { Resolver, Query, Args, ID } from '@nestjs/graphql';
 import { Category } from './dto/category.object';
 import { CategoryService } from './category.service';
 import { UseGuards } from '@nestjs/common';
-import { CurrentUser } from 'src/auth/decorators/current-user.decorator';
-import { GqlAuthGuard } from 'src/auth/auth.guard';
+import { CurrentUser } from '../auth/decorators/current-user.decorator';
+import { GqlAuthGuard } from '../auth/auth.guard';
 import { AttributeTag, MoodTag } from './dto/tag.object';
-import { PrismaService } from 'prisma/prisma.service';
+import { PrismaService } from '../../prisma/prisma.service';
 
 @Resolver(() => Category)
 export class CategoryResolver {

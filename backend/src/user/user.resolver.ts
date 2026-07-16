@@ -5,7 +5,7 @@ import { User } from './dto/user.object';
 import { SpotConnection } from '../spot/dto/spot-connection.object';
 import { GqlAuthGuard } from '../auth/auth.guard';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
-import type { AuthUser } from 'src/auth/types/auth-user.type';
+import type { AuthUser } from '../auth/types/auth-user.type';
 
 @Resolver(() => User)
 export class UserResolver {

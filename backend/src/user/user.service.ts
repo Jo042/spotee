@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
-import { PrismaService } from 'prisma/prisma.service';
+import { PrismaService } from '../../prisma/prisma.service';
 import { Prisma } from '@prisma/client';
-import type { AuthUser } from 'src/auth/types/auth-user.type';
+import type { AuthUser } from '../auth/types/auth-user.type';
 import {
   SpotConnection,
   SpotEdge,
