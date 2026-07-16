@@ -238,5 +238,4 @@ export class SpotService {
         return [{ createdAt: order }];
     }
   }
-
 }

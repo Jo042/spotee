@@ -113,9 +113,7 @@ export class SpotResolver {
   }
 
   @ResolveField(() => [MoodTag], { nullable: true })
-  moodTags(
-    @Parent() spot: { moodTags?: { tag: MoodTag }[] },
-  ): MoodTag[] {
+  moodTags(@Parent() spot: { moodTags?: { tag: MoodTag }[] }): MoodTag[] {
     return (spot.moodTags ?? []).map((smt) => smt.tag);
   }
 
