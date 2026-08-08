@@ -9,10 +9,30 @@ import {
 
 const prisma = new PrismaClient();
 
-const USER_COUNT = 30;
-const SPOT_COUNT = 3000;
+const DEFAULT_USER_COUNT = 30;
+const DEFAULT_SPOT_COUNT = 3000;
 const INSERT_CHUNK_SIZE = 500;
 const CREATED_AT_RANGE_DAYS = 180;
+
+// 生成した行をメモリに溜め込まずに済むよう、この単位で生成と投入を繰り返す
+const SPOT_BATCH_SIZE = 1000;
+
+function readCount(name: string, fallback: number): number {
+  const raw = process.env[name];
+  if (raw === undefined || raw === '') return fallback;
+
+  const parsed = Number(raw);
+  if (!Number.isInteger(parsed) || parsed <= 0) {
+    throw new Error(
+      `${name} には正の整数を指定してください（受け取った値: ${raw}）`,
+    );
+  }
+  return parsed;
+}
+
+const USER_COUNT = readCount('USER_COUNT', DEFAULT_USER_COUNT);
+const SPOT_COUNT = readCount('SPOT_COUNT', DEFAULT_SPOT_COUNT);
+const SHOULD_RESET = process.env.SEED_RESET === 'true';
 
 const WARDS = [
   '渋谷区',
@@ -144,26 +164,30 @@ interface GeneratedSpots {
   moodTagLinks: Prisma.SpotMoodTagCreateManyInput[];
 }
 
-function generateSpots(
-  categories: Category[],
-  attributeTags: AttributeTag[],
-  moodTags: MoodTag[],
-  userIds: string[],
-): GeneratedSpots {
-  const categoryWeights = buildZipfWeights(categories);
-  const userWeights = buildZipfWeights(userIds);
-  const attributeTagWeights = buildZipfWeights(attributeTags);
-  const moodTagWeights = buildZipfWeights(moodTags);
+interface SpotWeights {
+  categories: WeightedItem<Category>[];
+  users: WeightedItem<string>[];
+  attributeTags: WeightedItem<AttributeTag>[];
+  moodTags: WeightedItem<MoodTag>[];
+}
 
+function generateSpotBatch(
+  weights: SpotWeights,
+  startIndex: number,
+  batchSize: number,
+): GeneratedSpots {
   const spots: Prisma.SpotCreateManyInput[] = [];
   const images: Prisma.SpotImageCreateManyInput[] = [];
   const attributeTagLinks: Prisma.SpotAttributeTagCreateManyInput[] = [];
   const moodTagLinks: Prisma.SpotMoodTagCreateManyInput[] = [];
 
-  for (let i = 0; i < SPOT_COUNT; i++) {
+  for (let offset = 0; offset < batchSize; offset++) {
     const spotId = randomUUID();
-    const category = pickWeighted(categoryWeights);
-    const { title, description, address } = buildSpotContent(category, i);
+    const category = pickWeighted(weights.categories);
+    const { title, description, address } = buildSpotContent(
+      category,
+      startIndex + offset,
+    );
 
     spots.push({
       id: spotId,
@@ -174,7 +198,7 @@ function generateSpots(
       businessHours: pickOne(BUSINESS_HOURS_OPTIONS),
       likeCount: randomLikeCount(),
       createdAt: randomPastDate(CREATED_AT_RANGE_DAYS),
-      userId: pickWeighted(userWeights),
+      userId: pickWeighted(weights.users),
       categoryId: category.id,
     });
 
@@ -188,11 +212,14 @@ function generateSpots(
       });
     }
 
-    for (const tag of pickManyWeighted(attributeTagWeights, randomInt(1, 4))) {
+    for (const tag of pickManyWeighted(
+      weights.attributeTags,
+      randomInt(1, 4),
+    )) {
       attributeTagLinks.push({ id: randomUUID(), spotId, tagId: tag.id });
     }
 
-    for (const tag of pickManyWeighted(moodTagWeights, randomInt(1, 3))) {
+    for (const tag of pickManyWeighted(weights.moodTags, randomInt(1, 3))) {
       moodTagLinks.push({ id: randomUUID(), spotId, tagId: tag.id });
     }
   }
@@ -201,14 +228,35 @@ function generateSpots(
 }
 
 async function insertInChunks<T>(
-  label: string,
   rows: T[],
   insert: (batch: T[]) => Promise<unknown>,
 ): Promise<void> {
-  console.log(`Inserting ${rows.length} ${label}...`);
   for (const batch of chunk(rows, INSERT_CHUNK_SIZE)) {
     await insert(batch);
   }
+}
+
+async function insertBatch(batch: GeneratedSpots): Promise<void> {
+  await insertInChunks(batch.spots, (rows) =>
+    prisma.spot.createMany({ data: rows, skipDuplicates: true }),
+  );
+  await insertInChunks(batch.images, (rows) =>
+    prisma.spotImage.createMany({ data: rows, skipDuplicates: true }),
+  );
+  await insertInChunks(batch.attributeTagLinks, (rows) =>
+    prisma.spotAttributeTag.createMany({ data: rows, skipDuplicates: true }),
+  );
+  await insertInChunks(batch.moodTagLinks, (rows) =>
+    prisma.spotMoodTag.createMany({ data: rows, skipDuplicates: true }),
+  );
+}
+
+// 計測水準を変えて投入し直すため、マスタ（カテゴリ・タグ）は残してスポット系のみ削除する
+async function resetSpotData(): Promise<void> {
+  await prisma.$executeRaw`TRUNCATE TABLE spot_mood_tags, spot_attribute_tags, spot_images, spots RESTART IDENTITY CASCADE`;
+  await prisma.user.deleteMany({
+    where: { email: { startsWith: 'loadtest-user-' } },
+  });
 }
 
 async function main(): Promise<void> {
@@ -228,33 +276,41 @@ async function main(): Promise<void> {
     );
   }
 
+  if (SHOULD_RESET) {
+    console.log('Resetting existing spot data...');
+    await resetSpotData();
+  }
+
   console.log('Creating dummy users...');
   const userIds = await createDummyUsers();
   console.log(`Created ${userIds.length} users`);
 
+  const weights: SpotWeights = {
+    categories: buildZipfWeights(categories),
+    users: buildZipfWeights(userIds),
+    attributeTags: buildZipfWeights(attributeTags),
+    moodTags: buildZipfWeights(moodTags),
+  };
+
   console.log(`Generating ${SPOT_COUNT} spots...`);
-  const { spots, images, attributeTagLinks, moodTagLinks } = generateSpots(
-    categories,
-    attributeTags,
-    moodTags,
-    userIds,
-  );
+  const startedAt = Date.now();
+  const totals = { spots: 0, images: 0, attributeTagLinks: 0, moodTagLinks: 0 };
 
-  await insertInChunks('spots', spots, (batch) =>
-    prisma.spot.createMany({ data: batch, skipDuplicates: true }),
-  );
-  await insertInChunks('spot images', images, (batch) =>
-    prisma.spotImage.createMany({ data: batch, skipDuplicates: true }),
-  );
-  await insertInChunks('spot attribute tag links', attributeTagLinks, (batch) =>
-    prisma.spotAttributeTag.createMany({ data: batch, skipDuplicates: true }),
-  );
-  await insertInChunks('spot mood tag links', moodTagLinks, (batch) =>
-    prisma.spotMoodTag.createMany({ data: batch, skipDuplicates: true }),
-  );
+  for (let start = 0; start < SPOT_COUNT; start += SPOT_BATCH_SIZE) {
+    const batchSize = Math.min(SPOT_BATCH_SIZE, SPOT_COUNT - start);
+    const batch = generateSpotBatch(weights, start, batchSize);
+    await insertBatch(batch);
 
+    totals.spots += batch.spots.length;
+    totals.images += batch.images.length;
+    totals.attributeTagLinks += batch.attributeTagLinks.length;
+    totals.moodTagLinks += batch.moodTagLinks.length;
+    console.log(`  ${totals.spots}/${SPOT_COUNT} spots`);
+  }
+
+  const elapsedSec = ((Date.now() - startedAt) / 1000).toFixed(1);
   console.log(
-    `Done. spots=${spots.length} images=${images.length} attributeTagLinks=${attributeTagLinks.length} moodTagLinks=${moodTagLinks.length}`,
+    `Done in ${elapsedSec}s. spots=${totals.spots} images=${totals.images} attributeTagLinks=${totals.attributeTagLinks} moodTagLinks=${totals.moodTagLinks}`,
   );
 }
 
