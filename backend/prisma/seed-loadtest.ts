@@ -13,6 +13,7 @@ const DEFAULT_USER_COUNT = 30;
 const DEFAULT_SPOT_COUNT = 3000;
 const INSERT_CHUNK_SIZE = 500;
 const CREATED_AT_RANGE_DAYS = 180;
+const LOADTEST_USER_EMAIL_PREFIX = 'loadtest-user-';
 
 // 生成した行をメモリに溜め込まずに済むよう、この単位で生成と投入を繰り返す
 const SPOT_BATCH_SIZE = 1000;
@@ -144,17 +145,23 @@ function buildSpotContent(
 }
 
 async function createDummyUsers(): Promise<string[]> {
-  const userIds = Array.from({ length: USER_COUNT }, () => randomUUID());
   await prisma.user.createMany({
-    data: userIds.map((id, index) => ({
-      id,
+    data: Array.from({ length: USER_COUNT }, (_, index) => ({
+      id: randomUUID(),
       supabaseId: randomUUID(),
-      email: `loadtest-user-${index}@example.com`,
+      email: `${LOADTEST_USER_EMAIL_PREFIX}${index}@example.com`,
       name: `負荷検証ユーザー${index}`,
     })),
     skipDuplicates: true,
   });
-  return userIds;
+
+  // 既存ユーザーが残っている場合 createMany は email の重複でスキップされ、
+  // 生成したidはDBに存在しない。スポットの外部キーに使うため実際のidを取り直す
+  const users = await prisma.user.findMany({
+    where: { email: { startsWith: LOADTEST_USER_EMAIL_PREFIX } },
+    select: { id: true },
+  });
+  return users.map((user) => user.id);
 }
 
 interface GeneratedSpots {
@@ -255,7 +262,7 @@ async function insertBatch(batch: GeneratedSpots): Promise<void> {
 async function resetSpotData(): Promise<void> {
   await prisma.$executeRaw`TRUNCATE TABLE spot_mood_tags, spot_attribute_tags, spot_images, spots RESTART IDENTITY CASCADE`;
   await prisma.user.deleteMany({
-    where: { email: { startsWith: 'loadtest-user-' } },
+    where: { email: { startsWith: LOADTEST_USER_EMAIL_PREFIX } },
   });
 }
 
