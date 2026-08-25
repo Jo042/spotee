@@ -44,23 +44,39 @@ export function buildCursorCondition(
   sortBy: SpotSortBy,
   order: SortOrder,
 ): Prisma.SpotWhereInput {
-  const operator = order === SortOrder.DESC ? 'lt' : 'gt';
+  // 第1キーは等号を含む範囲条件（lte/gte）として独立させ、同値の除外は OR 側に寄せる。
+  // OR だけで表現すると PostgreSQL が Index Cond を導出できず、
+  // インデックスの先頭からカーソル位置まで読み捨てる（＝OFFSET と同じ劣化になる）
+  const rangeOperator = order === SortOrder.DESC ? 'lte' : 'gte';
+  const strictOperator = order === SortOrder.DESC ? 'lt' : 'gt';
+  const cursorCreatedAt = new Date(cursorData.createdAt);
 
   switch (sortBy) {
     case SpotSortBy.LIKE_COUNT:
       return {
+        likeCount: { [rangeOperator]: cursorData.likeCount },
         OR: [
-          { likeCount: { [operator]: cursorData.likeCount } },
-          {
-            likeCount: cursorData.likeCount,
-            createdAt: { lt: new Date(cursorData.createdAt) },
-          },
+          { likeCount: { not: cursorData.likeCount } },
+          { createdAt: { lt: cursorCreatedAt } },
+          { createdAt: cursorCreatedAt, id: { lt: cursorData.id } },
         ],
       };
     case SpotSortBy.TITLE:
-      return { title: { [operator]: cursorData.title } };
+      return {
+        title: { [rangeOperator]: cursorData.title },
+        OR: [
+          { title: { not: cursorData.title } },
+          { id: { [strictOperator]: cursorData.id } },
+        ],
+      };
     case SpotSortBy.CREATED_AT:
     default:
-      return { createdAt: { [operator]: new Date(cursorData.createdAt) } };
+      return {
+        createdAt: { [rangeOperator]: cursorCreatedAt },
+        OR: [
+          { createdAt: { not: cursorCreatedAt } },
+          { id: { [strictOperator]: cursorData.id } },
+        ],
+      };
   }
 }
