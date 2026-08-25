@@ -1,0 +1,27 @@
+# 設定値の根拠と使い方は README.md を参照
+
+services:
+  bench-db:
+    image: postgres:16
+    container_name: spotee-bench
+    ports:
+      # 既存のローカル PostgreSQL(5432) と衝突させない
+      - '5433:5432'
+    environment:
+      POSTGRES_PASSWORD: bench
+    # RDS(db.t3.micro / 1GiB) の既定パラメータに合わせる
+    command:
+      - postgres
+      - -c
+      - shared_buffers=256MB
+      - -c
+      - effective_cache_size=512MB
+      - -c
+      - work_mem=4MB
+      - -c
+      - random_page_cost=4.0
+    # db.t3.micro と同じメモリ量に制限し、ホストの潤沢なメモリで
+    # 全データがキャッシュされてしまう状況を避ける
+    mem_limit: 1g
+    # パラレルクエリが使う共有メモリ。既定の64MBだと大きめのスキャンで不足する
+    shm_size: 256mb
