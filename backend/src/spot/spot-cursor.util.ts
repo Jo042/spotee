@@ -45,6 +45,7 @@ export function buildCursorCondition(
   order: SortOrder,
 ): Prisma.SpotWhereInput {
   const operator = order === SortOrder.DESC ? 'lt' : 'gt';
+  const cursorCreatedAt = new Date(cursorData.createdAt);
 
   switch (sortBy) {
     case SpotSortBy.LIKE_COUNT:
@@ -53,14 +54,29 @@ export function buildCursorCondition(
           { likeCount: { [operator]: cursorData.likeCount } },
           {
             likeCount: cursorData.likeCount,
-            createdAt: { lt: new Date(cursorData.createdAt) },
+            createdAt: { lt: cursorCreatedAt },
+          },
+          {
+            likeCount: cursorData.likeCount,
+            createdAt: cursorCreatedAt,
+            id: { lt: cursorData.id },
           },
         ],
       };
     case SpotSortBy.TITLE:
-      return { title: { [operator]: cursorData.title } };
+      return {
+        OR: [
+          { title: { [operator]: cursorData.title } },
+          { title: cursorData.title, id: { [operator]: cursorData.id } },
+        ],
+      };
     case SpotSortBy.CREATED_AT:
     default:
-      return { createdAt: { [operator]: new Date(cursorData.createdAt) } };
+      return {
+        OR: [
+          { createdAt: { [operator]: cursorCreatedAt } },
+          { createdAt: cursorCreatedAt, id: { [operator]: cursorData.id } },
+        ],
+      };
   }
 }

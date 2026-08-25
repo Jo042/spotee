@@ -227,15 +227,21 @@ export class SpotService {
    * ソート条件に応じた orderBy を構築
    */
   private buildOrderBy(sortBy: SpotSortBy, order: SortOrder) {
+    // 末尾の id は一意なタイブレーカ。無いと同値レコードの順序が不定になり、
+    // カーソル条件が「続き」を正しく指せなくなる
     switch (sortBy) {
       case SpotSortBy.LIKE_COUNT:
         // いいね順の場合、同数なら新着順
-        return [{ likeCount: order }, { createdAt: 'desc' as const }];
+        return [
+          { likeCount: order },
+          { createdAt: 'desc' as const },
+          { id: 'desc' as const },
+        ];
       case SpotSortBy.TITLE:
-        return [{ title: order }];
+        return [{ title: order }, { id: order }];
       case SpotSortBy.CREATED_AT:
       default:
-        return [{ createdAt: order }];
+        return [{ createdAt: order }, { id: order }];
     }
   }
 }

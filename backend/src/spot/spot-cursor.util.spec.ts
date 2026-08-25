@@ -81,47 +81,83 @@ describe('buildCursorCondition', () => {
   };
 
   describe('CREATED_AT ソート', () => {
-    it('DESC のとき createdAt の lt 条件になる', () => {
+    it('DESC のとき createdAt の lt 条件と同値タイの id 条件を OR で返す', () => {
       const result = buildCursorCondition(
         cursorData,
         SpotSortBy.CREATED_AT,
         SortOrder.DESC,
       );
-      expect(result).toEqual({ createdAt: { lt: new Date(BASE_DATE_ISO) } });
+      expect(result).toEqual({
+        OR: [
+          { createdAt: { lt: new Date(BASE_DATE_ISO) } },
+          { createdAt: new Date(BASE_DATE_ISO), id: { lt: 'spot-1' } },
+        ],
+      });
     });
 
-    it('ASC のとき createdAt の gt 条件になる', () => {
+    it('ASC のとき createdAt の gt 条件と同値タイの id 条件を OR で返す', () => {
       const result = buildCursorCondition(
         cursorData,
         SpotSortBy.CREATED_AT,
         SortOrder.ASC,
       );
-      expect(result).toEqual({ createdAt: { gt: new Date(BASE_DATE_ISO) } });
+      expect(result).toEqual({
+        OR: [
+          { createdAt: { gt: new Date(BASE_DATE_ISO) } },
+          { createdAt: new Date(BASE_DATE_ISO), id: { gt: 'spot-1' } },
+        ],
+      });
+    });
+
+    it('id のタイブレーク条件の向きが createdAt の向きと一致する', () => {
+      const desc = buildCursorCondition(
+        cursorData,
+        SpotSortBy.CREATED_AT,
+        SortOrder.DESC,
+      );
+      const asc = buildCursorCondition(
+        cursorData,
+        SpotSortBy.CREATED_AT,
+        SortOrder.ASC,
+      );
+
+      expect(desc.OR?.[1]).toHaveProperty('id.lt');
+      expect(asc.OR?.[1]).toHaveProperty('id.gt');
     });
   });
 
   describe('TITLE ソート', () => {
-    it('DESC のとき title の lt 条件になる', () => {
+    it('DESC のとき title の lt 条件と同値タイの id 条件を OR で返す', () => {
       const result = buildCursorCondition(
         cursorData,
         SpotSortBy.TITLE,
         SortOrder.DESC,
       );
-      expect(result).toEqual({ title: { lt: '渋谷カフェ' } });
+      expect(result).toEqual({
+        OR: [
+          { title: { lt: '渋谷カフェ' } },
+          { title: '渋谷カフェ', id: { lt: 'spot-1' } },
+        ],
+      });
     });
 
-    it('ASC のとき title の gt 条件になる', () => {
+    it('ASC のとき title の gt 条件と同値タイの id 条件を OR で返す', () => {
       const result = buildCursorCondition(
         cursorData,
         SpotSortBy.TITLE,
         SortOrder.ASC,
       );
-      expect(result).toEqual({ title: { gt: '渋谷カフェ' } });
+      expect(result).toEqual({
+        OR: [
+          { title: { gt: '渋谷カフェ' } },
+          { title: '渋谷カフェ', id: { gt: 'spot-1' } },
+        ],
+      });
     });
   });
 
   describe('LIKE_COUNT ソート', () => {
-    it('DESC のとき likeCount の lt 条件と同数タイの createdAt 条件を OR で返す', () => {
+    it('DESC のとき likeCount・createdAt・id の3段の OR を返す', () => {
       const result = buildCursorCondition(
         cursorData,
         SpotSortBy.LIKE_COUNT,
@@ -131,11 +167,16 @@ describe('buildCursorCondition', () => {
         OR: [
           { likeCount: { lt: 5 } },
           { likeCount: 5, createdAt: { lt: new Date(BASE_DATE_ISO) } },
+          {
+            likeCount: 5,
+            createdAt: new Date(BASE_DATE_ISO),
+            id: { lt: 'spot-1' },
+          },
         ],
       });
     });
 
-    it('ASC のとき likeCount の gt 条件と同数タイの createdAt 条件を OR で返す', () => {
+    it('ASC のとき1段目だけ gt になり、2段目以降は lt のままになる', () => {
       const result = buildCursorCondition(
         cursorData,
         SpotSortBy.LIKE_COUNT,
@@ -145,8 +186,29 @@ describe('buildCursorCondition', () => {
         OR: [
           { likeCount: { gt: 5 } },
           { likeCount: 5, createdAt: { lt: new Date(BASE_DATE_ISO) } },
+          {
+            likeCount: 5,
+            createdAt: new Date(BASE_DATE_ISO),
+            id: { lt: 'spot-1' },
+          },
         ],
       });
+    });
+  });
+
+  describe('タイブレーカの一貫性', () => {
+    it.each([
+      [SpotSortBy.CREATED_AT, SortOrder.DESC],
+      [SpotSortBy.CREATED_AT, SortOrder.ASC],
+      [SpotSortBy.TITLE, SortOrder.DESC],
+      [SpotSortBy.TITLE, SortOrder.ASC],
+      [SpotSortBy.LIKE_COUNT, SortOrder.DESC],
+      [SpotSortBy.LIKE_COUNT, SortOrder.ASC],
+    ])('%s / %s の最終段が id の比較になっている', (sortBy, order) => {
+      const result = buildCursorCondition(cursorData, sortBy, order);
+      const lastBranch = result.OR?.[result.OR.length - 1];
+
+      expect(lastBranch).toHaveProperty('id');
     });
   });
 });
