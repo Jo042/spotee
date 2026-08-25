@@ -81,134 +81,132 @@ describe('buildCursorCondition', () => {
   };
 
   describe('CREATED_AT ソート', () => {
-    it('DESC のとき createdAt の lt 条件と同値タイの id 条件を OR で返す', () => {
+    it('DESC のとき createdAt の lte 範囲条件と同値タイの除外条件を返す', () => {
       const result = buildCursorCondition(
         cursorData,
         SpotSortBy.CREATED_AT,
         SortOrder.DESC,
       );
       expect(result).toEqual({
+        createdAt: { lte: new Date(BASE_DATE_ISO) },
         OR: [
+          { createdAt: { not: new Date(BASE_DATE_ISO) } },
+          { id: { lt: 'spot-1' } },
+        ],
+      });
+    });
+
+    it('ASC のとき createdAt の gte 範囲条件と同値タイの除外条件を返す', () => {
+      const result = buildCursorCondition(
+        cursorData,
+        SpotSortBy.CREATED_AT,
+        SortOrder.ASC,
+      );
+      expect(result).toEqual({
+        createdAt: { gte: new Date(BASE_DATE_ISO) },
+        OR: [
+          { createdAt: { not: new Date(BASE_DATE_ISO) } },
+          { id: { gt: 'spot-1' } },
+        ],
+      });
+    });
+  });
+
+  describe('TITLE ソート', () => {
+    it('DESC のとき title の lte 範囲条件と同値タイの除外条件を返す', () => {
+      const result = buildCursorCondition(
+        cursorData,
+        SpotSortBy.TITLE,
+        SortOrder.DESC,
+      );
+      expect(result).toEqual({
+        title: { lte: '渋谷カフェ' },
+        OR: [{ title: { not: '渋谷カフェ' } }, { id: { lt: 'spot-1' } }],
+      });
+    });
+
+    it('ASC のとき title の gte 範囲条件と同値タイの除外条件を返す', () => {
+      const result = buildCursorCondition(
+        cursorData,
+        SpotSortBy.TITLE,
+        SortOrder.ASC,
+      );
+      expect(result).toEqual({
+        title: { gte: '渋谷カフェ' },
+        OR: [{ title: { not: '渋谷カフェ' } }, { id: { gt: 'spot-1' } }],
+      });
+    });
+  });
+
+  describe('LIKE_COUNT ソート', () => {
+    it('DESC のとき likeCount の lte 範囲条件と3段の除外条件を返す', () => {
+      const result = buildCursorCondition(
+        cursorData,
+        SpotSortBy.LIKE_COUNT,
+        SortOrder.DESC,
+      );
+      expect(result).toEqual({
+        likeCount: { lte: 5 },
+        OR: [
+          { likeCount: { not: 5 } },
           { createdAt: { lt: new Date(BASE_DATE_ISO) } },
           { createdAt: new Date(BASE_DATE_ISO), id: { lt: 'spot-1' } },
         ],
       });
     });
 
-    it('ASC のとき createdAt の gt 条件と同値タイの id 条件を OR で返す', () => {
-      const result = buildCursorCondition(
-        cursorData,
-        SpotSortBy.CREATED_AT,
-        SortOrder.ASC,
-      );
-      expect(result).toEqual({
-        OR: [
-          { createdAt: { gt: new Date(BASE_DATE_ISO) } },
-          { createdAt: new Date(BASE_DATE_ISO), id: { gt: 'spot-1' } },
-        ],
-      });
-    });
-
-    it('id のタイブレーク条件の向きが createdAt の向きと一致する', () => {
-      const desc = buildCursorCondition(
-        cursorData,
-        SpotSortBy.CREATED_AT,
-        SortOrder.DESC,
-      );
-      const asc = buildCursorCondition(
-        cursorData,
-        SpotSortBy.CREATED_AT,
-        SortOrder.ASC,
-      );
-
-      expect(desc.OR?.[1]).toHaveProperty('id.lt');
-      expect(asc.OR?.[1]).toHaveProperty('id.gt');
-    });
-  });
-
-  describe('TITLE ソート', () => {
-    it('DESC のとき title の lt 条件と同値タイの id 条件を OR で返す', () => {
-      const result = buildCursorCondition(
-        cursorData,
-        SpotSortBy.TITLE,
-        SortOrder.DESC,
-      );
-      expect(result).toEqual({
-        OR: [
-          { title: { lt: '渋谷カフェ' } },
-          { title: '渋谷カフェ', id: { lt: 'spot-1' } },
-        ],
-      });
-    });
-
-    it('ASC のとき title の gt 条件と同値タイの id 条件を OR で返す', () => {
-      const result = buildCursorCondition(
-        cursorData,
-        SpotSortBy.TITLE,
-        SortOrder.ASC,
-      );
-      expect(result).toEqual({
-        OR: [
-          { title: { gt: '渋谷カフェ' } },
-          { title: '渋谷カフェ', id: { gt: 'spot-1' } },
-        ],
-      });
-    });
-  });
-
-  describe('LIKE_COUNT ソート', () => {
-    it('DESC のとき likeCount・createdAt・id の3段の OR を返す', () => {
-      const result = buildCursorCondition(
-        cursorData,
-        SpotSortBy.LIKE_COUNT,
-        SortOrder.DESC,
-      );
-      expect(result).toEqual({
-        OR: [
-          { likeCount: { lt: 5 } },
-          { likeCount: 5, createdAt: { lt: new Date(BASE_DATE_ISO) } },
-          {
-            likeCount: 5,
-            createdAt: new Date(BASE_DATE_ISO),
-            id: { lt: 'spot-1' },
-          },
-        ],
-      });
-    });
-
-    it('ASC のとき1段目だけ gt になり、2段目以降は lt のままになる', () => {
+    it('ASC のとき範囲条件だけ gte になり、同数タイの条件は lt のままになる', () => {
       const result = buildCursorCondition(
         cursorData,
         SpotSortBy.LIKE_COUNT,
         SortOrder.ASC,
       );
       expect(result).toEqual({
+        likeCount: { gte: 5 },
         OR: [
-          { likeCount: { gt: 5 } },
-          { likeCount: 5, createdAt: { lt: new Date(BASE_DATE_ISO) } },
-          {
-            likeCount: 5,
-            createdAt: new Date(BASE_DATE_ISO),
-            id: { lt: 'spot-1' },
-          },
+          { likeCount: { not: 5 } },
+          { createdAt: { lt: new Date(BASE_DATE_ISO) } },
+          { createdAt: new Date(BASE_DATE_ISO), id: { lt: 'spot-1' } },
         ],
       });
     });
   });
 
-  describe('タイブレーカの一貫性', () => {
-    it.each([
-      [SpotSortBy.CREATED_AT, SortOrder.DESC],
-      [SpotSortBy.CREATED_AT, SortOrder.ASC],
-      [SpotSortBy.TITLE, SortOrder.DESC],
-      [SpotSortBy.TITLE, SortOrder.ASC],
-      [SpotSortBy.LIKE_COUNT, SortOrder.DESC],
-      [SpotSortBy.LIKE_COUNT, SortOrder.ASC],
-    ])('%s / %s の最終段が id の比較になっている', (sortBy, order) => {
+  describe('実行計画を保つための構造', () => {
+    const cases = [
+      [SpotSortBy.CREATED_AT, SortOrder.DESC, 'createdAt', 'lte'],
+      [SpotSortBy.CREATED_AT, SortOrder.ASC, 'createdAt', 'gte'],
+      [SpotSortBy.TITLE, SortOrder.DESC, 'title', 'lte'],
+      [SpotSortBy.TITLE, SortOrder.ASC, 'title', 'gte'],
+      [SpotSortBy.LIKE_COUNT, SortOrder.DESC, 'likeCount', 'lte'],
+      [SpotSortBy.LIKE_COUNT, SortOrder.ASC, 'likeCount', 'gte'],
+    ] as const;
+
+    it.each(cases)(
+      '%s / %s は第1キー %s に %s の範囲条件を持つ',
+      (sortBy, order, key, rangeOperator) => {
+        const result = buildCursorCondition(cursorData, sortBy, order);
+
+        // 第1キーの範囲条件がトップレベルに独立していないと
+        // PostgreSQL が Index Cond を導出できず、深いページで劣化する
+        expect(result).toHaveProperty(`${key}.${rangeOperator}`);
+      },
+    );
+
+    it.each(cases)('%s / %s は同値タイの除外条件を OR で持つ', (sortBy, order) => {
       const result = buildCursorCondition(cursorData, sortBy, order);
-      const lastBranch = result.OR?.[result.OR.length - 1];
 
-      expect(lastBranch).toHaveProperty('id');
+      expect(Array.isArray(result.OR)).toBe(true);
+      expect((result.OR as unknown[]).length).toBeGreaterThanOrEqual(2);
+    });
+
+    it('最終段が id の比較になっている', () => {
+      for (const [sortBy, order] of cases) {
+        const result = buildCursorCondition(cursorData, sortBy, order);
+        const branches = result.OR as Record<string, unknown>[];
+
+        expect(branches[branches.length - 1]).toHaveProperty('id');
+      }
     });
   });
 });
