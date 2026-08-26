@@ -1,5 +1,6 @@
 import { ObjectType, Field, Int } from '@nestjs/graphql';
 import { Spot } from './spot.object';
+import type { SpotNode } from './spot.object';
 
 @ObjectType()
 export class PageInfo {
@@ -18,8 +19,10 @@ export class PageInfo {
 
 @ObjectType()
 export class SpotEdge {
+  // GraphQL 上は Spot だが、TS 上はスカラーのみ。
+  // リレーションは ResolveField が解決するのでサービス層では持たない
   @Field(() => Spot)
-  node: Spot;
+  node: SpotNode;
 
   @Field()
   cursor: string;
