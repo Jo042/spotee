@@ -80,3 +80,10 @@ export class Spot {
   @Field(() => Boolean, { nullable: true })
   isLiked?: boolean | null;
 }
+
+/**
+ * 一覧取得がサービス層から返す形。
+ * user / category / images / isLiked は ResolveField の DataLoader が解決するため、
+ * サービス層では取得しない（取得すると二重取得になる）
+ */
+export type SpotNode = Omit<Spot, 'user' | 'category' | 'images' | 'isLiked'>;

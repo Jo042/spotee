@@ -187,15 +187,13 @@ export class SpotService {
 
     const take = first + 1;
 
+    // リレーションは ResolveField の DataLoader が解決する。
+    // ここで include すると同じデータを二重に取得するうえ、
+    // GraphQL で要求されていないフィールドまで常に取得してしまう
     const spots = await this.prisma.spot.findMany({
       where,
       take,
       orderBy,
-      include: {
-        images: { orderBy: { order: 'asc' } },
-        user: true,
-        category: true,
-      },
     });
 
     const hasNextPage = spots.length > first;
