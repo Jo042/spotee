@@ -74,3 +74,39 @@ export const GET_SPOTS = gql(`
     }
   }
 `);
+
+export const GET_SPOTS_PAGE = gql(`
+  query GetSpotsPage($first: Int, $after: String, $sort: SpotSortInput, $filter: SpotFilterInput) {
+    spots(first: $first, after: $after, sort: $sort, filter: $filter) {
+      edges {
+        node {
+          id
+          title
+          address
+          likeCount
+          isLiked
+          createdAt
+          images {
+            id
+            url
+            order
+          }
+          category {
+            id
+            name
+          }
+          user {
+            id
+            name
+            avatarUrl
+          }
+        }
+        cursor
+      }
+      pageInfo {
+        hasNextPage
+        endCursor
+      }
+    }
+  }
+`);
