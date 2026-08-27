@@ -3,7 +3,7 @@
 import { useQuery } from "@apollo/client/react";
 import { useCallback, useState } from "react";
 import { SlidersHorizontal } from "lucide-react";
-import { GET_SPOTS } from "@/graphql/queries/spot";
+import { GET_SPOTS, GET_SPOTS_PAGE } from "@/graphql/queries/spot";
 import { SpotList } from "@/components/spot/SpotList";
 import Link from "next/link";
 import { useAuth } from "@/hooks/useAuth";
@@ -56,6 +56,7 @@ export default function SpotsPageContent() {
 
     try {
       await fetchMore({
+        query: GET_SPOTS_PAGE,
         variables: {
           first: 20,
           after: data.spots.pageInfo.endCursor,
@@ -67,6 +68,7 @@ export default function SpotsPageContent() {
           return {
             spots: {
               ...fetchMoreResult.spots,
+              totalCount: prevResult.spots.totalCount,
               edges: [
                 ...prevResult.spots.edges,
                 ...fetchMoreResult.spots.edges,

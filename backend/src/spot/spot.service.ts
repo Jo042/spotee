@@ -15,11 +15,8 @@ import {
   decodeCursor,
   buildCursorCondition,
 } from './spot-cursor.util';
-import {
-  SpotConnection,
-  SpotEdge,
-  PageInfo,
-} from './dto/spot-connection.object';
+import { SpotEdge, PageInfo } from './dto/spot-connection.object';
+import type { SpotConnectionSource } from './dto/spot-connection.object';
 
 @Injectable()
 export class SpotService {
@@ -171,7 +168,7 @@ export class SpotService {
     after?: string,
     sort?: SpotSortInput,
     filter?: SpotFilterInput,
-  ): Promise<SpotConnection> {
+  ): Promise<SpotConnectionSource> {
     const sortBy = sort?.sortBy ?? SpotSortBy.CREATED_AT;
     const order = sort?.order ?? SortOrder.DESC;
 
@@ -187,9 +184,6 @@ export class SpotService {
 
     const take = first + 1;
 
-    // リレーションは ResolveField の DataLoader が解決する。
-    // ここで include すると同じデータを二重に取得するうえ、
-    // GraphQL で要求されていないフィールドまで常に取得してしまう
     const spots = await this.prisma.spot.findMany({
       where,
       take,
@@ -205,8 +199,6 @@ export class SpotService {
       cursor: encodeCursor(spot, sortBy),
     }));
 
-    const totalCount = await this.prisma.spot.count({ where: filterWhere });
-
     const pageInfo: PageInfo = {
       hasNextPage,
       hasPreviousPage: !!after,
@@ -217,7 +209,7 @@ export class SpotService {
     return {
       edges,
       pageInfo,
-      totalCount,
+      countTotal: () => this.prisma.spot.count({ where: filterWhere }),
     };
   }
 
@@ -225,8 +217,6 @@ export class SpotService {
    * ソート条件に応じた orderBy を構築
    */
   private buildOrderBy(sortBy: SpotSortBy, order: SortOrder) {
-    // 末尾の id は一意なタイブレーカ。無いと同値レコードの順序が不定になり、
-    // カーソル条件が「続き」を正しく指せなくなる
     switch (sortBy) {
       case SpotSortBy.LIKE_COUNT:
         // いいね順の場合、同数なら新着順

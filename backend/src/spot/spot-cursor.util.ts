@@ -44,9 +44,6 @@ export function buildCursorCondition(
   sortBy: SpotSortBy,
   order: SortOrder,
 ): Prisma.SpotWhereInput {
-  // 第1キーは等号を含む範囲条件（lte/gte）として独立させ、同値の除外は OR 側に寄せる。
-  // OR だけで表現すると PostgreSQL が Index Cond を導出できず、
-  // インデックスの先頭からカーソル位置まで読み捨てる（＝OFFSET と同じ劣化になる）
   const rangeOperator = order === SortOrder.DESC ? 'lte' : 'gte';
   const strictOperator = order === SortOrder.DESC ? 'lt' : 'gt';
   const cursorCreatedAt = new Date(cursorData.createdAt);

@@ -3,6 +3,7 @@ import { UseGuards } from '@nestjs/common';
 import { UserService } from './user.service';
 import { User } from './dto/user.object';
 import { SpotConnection } from '../spot/dto/spot-connection.object';
+import type { SpotConnectionSource } from '../spot/dto/spot-connection.object';
 import { GqlAuthGuard } from '../auth/auth.guard';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import type { AuthUser } from '../auth/types/auth-user.type';
@@ -30,7 +31,7 @@ export class UserResolver {
     @Args('first', { type: () => Int, nullable: true, defaultValue: 20 })
     first: number,
     @Args('after', { type: () => String, nullable: true }) after?: string,
-  ): Promise<SpotConnection> {
+  ): Promise<SpotConnectionSource> {
     const user = await this.userService.getOrCreateUser(authUser);
     return this.userService.mySpots(user.id, first, after);
   }
@@ -42,7 +43,7 @@ export class UserResolver {
     @Args('first', { type: () => Int, nullable: true, defaultValue: 20 })
     first: number,
     @Args('after', { type: () => String, nullable: true }) after?: string,
-  ): Promise<SpotConnection> {
+  ): Promise<SpotConnectionSource> {
     const user = await this.userService.getOrCreateUser(authUser);
     return this.userService.myLikedSpots(user.id, first, after);
   }

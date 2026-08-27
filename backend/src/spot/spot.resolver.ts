@@ -25,6 +25,7 @@ import type { AuthUser } from '../auth/types/auth-user.type';
 import { SpotLoader } from './spot.loader';
 import { LikeLoader } from '../like/like.loader';
 import { SpotConnection } from './dto/spot-connection.object';
+import type { SpotConnectionSource } from './dto/spot-connection.object';
 import { SpotSortInput } from './dto/spot-sort.input';
 import { SpotFilterInput } from './dto/spot-filter.input';
 
@@ -65,7 +66,7 @@ export class SpotResolver {
     sort?: SpotSortInput,
     @Args('filter', { type: () => SpotFilterInput, nullable: true })
     filter?: SpotFilterInput,
-  ): Promise<SpotConnection> {
+  ): Promise<SpotConnectionSource> {
     return this.spotService.findMany(first, after, sort, filter);
   }
 
