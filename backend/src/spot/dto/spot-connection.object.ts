@@ -19,8 +19,6 @@ export class PageInfo {
 
 @ObjectType()
 export class SpotEdge {
-  // GraphQL 上は Spot だが、TS 上はスカラーのみ。
-  // リレーションは ResolveField が解決するのでサービス層では持たない
   @Field(() => Spot)
   node: SpotNode;
 
@@ -39,3 +37,7 @@ export class SpotConnection {
   @Field(() => Int)
   totalCount: number;
 }
+
+export type SpotConnectionSource = Omit<SpotConnection, 'totalCount'> & {
+  countTotal: () => Promise<number>;
+};

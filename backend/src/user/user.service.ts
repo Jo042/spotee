@@ -2,11 +2,8 @@ import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { Prisma } from '@prisma/client';
 import type { AuthUser } from '../auth/types/auth-user.type';
-import {
-  SpotConnection,
-  SpotEdge,
-  PageInfo,
-} from '../spot/dto/spot-connection.object';
+import { SpotEdge, PageInfo } from '../spot/dto/spot-connection.object';
+import type { SpotConnectionSource } from '../spot/dto/spot-connection.object';
 
 @Injectable()
 export class UserService {
@@ -56,7 +53,7 @@ export class UserService {
     userId: string,
     first: number = 20,
     after?: string,
-  ): Promise<SpotConnection> {
+  ): Promise<SpotConnectionSource> {
     const take = first + 1;
     const where: Prisma.SpotWhereInput = { userId };
 
@@ -78,7 +75,6 @@ export class UserService {
 
     const hasNextPage = spots.length > first;
     const result = hasNextPage ? spots.slice(0, first) : spots;
-    const totalCount = await this.prisma.spot.count({ where: { userId } });
 
     const edges: SpotEdge[] = result.map((spot) => ({
       node: spot,
@@ -92,14 +88,18 @@ export class UserService {
       endCursor: edges[edges.length - 1]?.cursor ?? null,
     };
 
-    return { edges, pageInfo, totalCount };
+    return {
+      edges,
+      pageInfo,
+      countTotal: () => this.prisma.spot.count({ where: { userId } }),
+    };
   }
 
   async myLikedSpots(
     userId: string,
     first: number = 20,
     after?: string,
-  ): Promise<SpotConnection> {
+  ): Promise<SpotConnectionSource> {
     const take = first + 1;
     const where: Prisma.LikeWhereInput = { userId };
 
@@ -125,7 +125,6 @@ export class UserService {
 
     const hasNextPage = likes.length > first;
     const result = hasNextPage ? likes.slice(0, first) : likes;
-    const totalCount = await this.prisma.like.count({ where: { userId } });
 
     const edges: SpotEdge[] = result.map((like) => ({
       node: like.spot,
@@ -139,7 +138,11 @@ export class UserService {
       endCursor: edges[edges.length - 1]?.cursor ?? null,
     };
 
-    return { edges, pageInfo, totalCount };
+    return {
+      edges,
+      pageInfo,
+      countTotal: () => this.prisma.like.count({ where: { userId } }),
+    };
   }
 
   private encodeCursor(createdAt: Date): string {
