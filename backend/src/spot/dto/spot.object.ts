@@ -1,6 +1,7 @@
 import { ObjectType, Field, ID, Int, Float } from '@nestjs/graphql';
 import { User } from '../../user/dto/user.object';
 import { Category } from '../../category/dto/category.object';
+import { AttributeTag, MoodTag } from '../../category/dto/tag.object';
 import { registerEnumType } from '@nestjs/graphql';
 
 @ObjectType()
@@ -77,8 +78,17 @@ export class Spot {
   @Field(() => [SpotImage])
   images: SpotImage[];
 
+  @Field(() => [AttributeTag])
+  attributeTags: AttributeTag[];
+
+  @Field(() => [MoodTag])
+  moodTags: MoodTag[];
+
   @Field(() => Boolean, { nullable: true })
   isLiked?: boolean | null;
 }
 
-export type SpotNode = Omit<Spot, 'user' | 'category' | 'images' | 'isLiked'>;
+export type SpotNode = Omit<
+  Spot,
+  'user' | 'category' | 'images' | 'attributeTags' | 'moodTags' | 'isLiked'
+>;

@@ -1,6 +1,8 @@
 import { Injectable, Scope } from '@nestjs/common';
 import DataLoader from 'dataloader';
+import type { AttributeTag, MoodTag, SpotImage } from '@prisma/client';
 import { PrismaService } from '../../prisma/prisma.service';
+import { groupRowsByKey } from './spot-loader.util';
 
 @Injectable({ scope: Scope.REQUEST })
 export class SpotLoader {
@@ -24,19 +26,53 @@ export class SpotLoader {
     return categoryIds.map((id) => categoryMap.get(id) || null);
   });
 
-  readonly imagesLoader = new DataLoader<string, any[]>(async (spotIds) => {
-    const images = await this.prisma.spotImage.findMany({
-      where: { spotId: { in: [...spotIds] } },
-      orderBy: { order: 'asc' },
-    });
+  readonly imagesLoader = new DataLoader<string, SpotImage[]>(
+    async (spotIds) => {
+      const images = await this.prisma.spotImage.findMany({
+        where: { spotId: { in: [...spotIds] } },
+        orderBy: { order: 'asc' },
+      });
 
-    const imageMap = new Map<string, any[]>();
-    images.forEach((image) => {
-      const existing = imageMap.get(image.spotId) || [];
-      existing.push(image);
-      imageMap.set(image.spotId, existing);
-    });
+      return groupRowsByKey(
+        spotIds,
+        images,
+        (image) => image.spotId,
+        (image) => image,
+      );
+    },
+  );
 
-    return spotIds.map((id) => imageMap.get(id) || []);
-  });
+  readonly attributeTagsLoader = new DataLoader<string, AttributeTag[]>(
+    async (spotIds) => {
+      const rows = await this.prisma.spotAttributeTag.findMany({
+        where: { spotId: { in: [...spotIds] } },
+        include: { tag: true },
+        orderBy: { tag: { displayOrder: 'asc' } },
+      });
+
+      return groupRowsByKey(
+        spotIds,
+        rows,
+        (row) => row.spotId,
+        (row) => row.tag,
+      );
+    },
+  );
+
+  readonly moodTagsLoader = new DataLoader<string, MoodTag[]>(
+    async (spotIds) => {
+      const rows = await this.prisma.spotMoodTag.findMany({
+        where: { spotId: { in: [...spotIds] } },
+        include: { tag: true },
+        orderBy: { tag: { displayOrder: 'asc' } },
+      });
+
+      return groupRowsByKey(
+        spotIds,
+        rows,
+        (row) => row.spotId,
+        (row) => row.tag,
+      );
+    },
+  );
 }

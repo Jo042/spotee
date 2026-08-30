@@ -180,7 +180,7 @@ export enum SortOrder {
 export type Spot = {
   __typename?: 'Spot';
   address: Scalars['String']['output'];
-  attributeTags?: Maybe<Array<AttributeTag>>;
+  attributeTags: Array<AttributeTag>;
   businessHours?: Maybe<Scalars['String']['output']>;
   category: Category;
   createdAt: Scalars['DateTime']['output'];
@@ -191,7 +191,7 @@ export type Spot = {
   latitude?: Maybe<Scalars['Float']['output']>;
   likeCount: Scalars['Int']['output'];
   longitude?: Maybe<Scalars['Float']['output']>;
-  moodTags?: Maybe<Array<MoodTag>>;
+  moodTags: Array<MoodTag>;
   priceRange?: Maybe<PriceRange>;
   title: Scalars['String']['output'];
   updatedAt: Scalars['DateTime']['output'];
@@ -314,7 +314,7 @@ export type GetSpotQueryVariables = Exact<{
 }>;
 
 
-export type GetSpotQuery = { __typename?: 'Query', spot?: { __typename?: 'Spot', id: string, title: string, description?: string | null, address: string, priceRange?: PriceRange | null, businessHours?: string | null, likeCount: number, isLiked?: boolean | null, createdAt: any, images: Array<{ __typename?: 'SpotImage', id: string, url: string, order: number }>, category: { __typename?: 'Category', id: string, name: string }, user: { __typename?: 'User', id: string, name: string, avatarUrl?: string | null }, attributeTags?: Array<{ __typename?: 'AttributeTag', id: string, name: string }> | null, moodTags?: Array<{ __typename?: 'MoodTag', id: string, name: string }> | null } | null };
+export type GetSpotQuery = { __typename?: 'Query', spot?: { __typename?: 'Spot', id: string, title: string, description?: string | null, address: string, priceRange?: PriceRange | null, businessHours?: string | null, likeCount: number, isLiked?: boolean | null, createdAt: any, images: Array<{ __typename?: 'SpotImage', id: string, url: string, order: number }>, category: { __typename?: 'Category', id: string, name: string }, user: { __typename?: 'User', id: string, name: string, avatarUrl?: string | null }, attributeTags: Array<{ __typename?: 'AttributeTag', id: string, name: string }>, moodTags: Array<{ __typename?: 'MoodTag', id: string, name: string }> } | null };
 
 export type GetSpotsQueryVariables = Exact<{
   first?: InputMaybe<Scalars['Int']['input']>;
