@@ -134,9 +134,14 @@ export function ImageUploader({
 
   const handleFileSelect = useCallback(
     (event: React.ChangeEvent<HTMLInputElement>) => {
-      const files = event.target.files;
+      // input.files は input と連動するライブな FileList で、value をリセットすると
+      // 中身が空になる。同じファイルを選び直せるようにするリセットは、必ず配列へ
+      // コピーし終えてから行う
+      const fileList = event.target.files;
+      if (!fileList || fileList.length === 0) return;
+
+      const selectedFiles = Array.from(fileList);
       event.target.value = "";
-      if (!files || files.length === 0) return;
 
       const remainingSlots = maxImages - images.length;
       if (remainingSlots <= 0) {
@@ -144,7 +149,7 @@ export function ImageUploader({
         return;
       }
 
-      const items: QueueItem[] = Array.from(files)
+      const items: QueueItem[] = selectedFiles
         .slice(0, remainingSlots)
         .map((file) => ({
           file,
