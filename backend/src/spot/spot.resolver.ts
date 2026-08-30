@@ -12,7 +12,7 @@ import {
 import { UseGuards } from '@nestjs/common';
 import { SpotService } from './spot.service';
 import { UserService } from '../user/user.service';
-import { Spot } from './dto/spot.object';
+import { Spot, type SpotNode } from './dto/spot.object';
 import { User } from '../user/dto/user.object';
 import { Category } from '../category/dto/category.object';
 import { AttributeTag, MoodTag } from '../category/dto/tag.object';
@@ -43,7 +43,7 @@ export class SpotResolver {
   async createSpot(
     @CurrentUser() authUser: AuthUser,
     @Args('input') input: CreateSpotInput,
-  ): Promise<Spot> {
+  ): Promise<SpotNode> {
     const user = await this.userService.getOrCreateUser(authUser);
     return this.spotService.create(user.id, input);
   }
@@ -52,7 +52,7 @@ export class SpotResolver {
   @Query(() => Spot, { name: 'spot', nullable: true })
   async getSpot(
     @Args('id', { type: () => ID }) id: string,
-  ): Promise<Spot | null> {
+  ): Promise<SpotNode | null> {
     return this.spotService.findById(id);
   }
 
@@ -76,7 +76,7 @@ export class SpotResolver {
     @CurrentUser() authUser: AuthUser,
     @Args('id', { type: () => ID }) id: string,
     @Args('input') input: UpdateSpotInput,
-  ): Promise<Spot> {
+  ): Promise<SpotNode> {
     const user = await this.userService.getOrCreateUser(authUser);
     return this.spotService.update(user.id, id, input);
   }
@@ -106,16 +106,14 @@ export class SpotResolver {
     return this.spotLoader.imagesLoader.load(spot.id);
   }
 
-  @ResolveField(() => [AttributeTag], { nullable: true })
-  attributeTags(
-    @Parent() spot: { attributeTags?: { tag: AttributeTag }[] },
-  ): AttributeTag[] {
-    return (spot.attributeTags ?? []).map((sat) => sat.tag);
+  @ResolveField(() => [AttributeTag])
+  async attributeTags(@Parent() spot: { id: string }): Promise<AttributeTag[]> {
+    return this.spotLoader.attributeTagsLoader.load(spot.id);
   }
 
-  @ResolveField(() => [MoodTag], { nullable: true })
-  moodTags(@Parent() spot: { moodTags?: { tag: MoodTag }[] }): MoodTag[] {
-    return (spot.moodTags ?? []).map((smt) => smt.tag);
+  @ResolveField(() => [MoodTag])
+  async moodTags(@Parent() spot: { id: string }): Promise<MoodTag[]> {
+    return this.spotLoader.moodTagsLoader.load(spot.id);
   }
 
   @ResolveField(() => Boolean, { nullable: true })

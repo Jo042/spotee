@@ -54,8 +54,6 @@ export class SpotService {
         images: true,
         user: true,
         category: true,
-        attributeTags: { include: { tag: true } },
-        moodTags: { include: { tag: true } },
       },
     });
   }
@@ -67,8 +65,6 @@ export class SpotService {
         images: { orderBy: { order: 'asc' } },
         user: true,
         category: true,
-        attributeTags: { include: { tag: true } },
-        moodTags: { include: { tag: true } },
       },
     });
 
@@ -133,8 +129,6 @@ export class SpotService {
           images: { orderBy: { order: 'asc' } },
           user: true,
           category: true,
-          attributeTags: { include: { tag: true } },
-          moodTags: { include: { tag: true } },
         },
       });
     });
