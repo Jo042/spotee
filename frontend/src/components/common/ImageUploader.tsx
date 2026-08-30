@@ -1,15 +1,29 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect, useRef } from "react";
 import Image from "next/image";
 import { uploadImage } from "@/lib/storage";
 import imageCompression from "browser-image-compression";
+import dynamic from "next/dynamic";
+import { cropImageToFile, isCroppable, type CropArea } from "@/lib/image-crop";
 
 interface ImageUploaderProps {
   images: string[];
   onChange: (images: string[]) => void;
   maxImages?: number;
 }
+
+/** 切り抜き待ちのファイル。previewUrl は切り抜き対象のファイルにだけ付く */
+interface QueueItem {
+  file: File;
+  previewUrl: string | null;
+}
+
+// 切り抜きUIはファイル選択後にしか使わないため、初期バンドルから外す
+const ImageCropModal = dynamic(
+  () => import("./ImageCropModal").then((m) => m.ImageCropModal),
+  { ssr: false },
+);
 
 const MAX_FILE_SIZE_MB = 4.5;
 
@@ -32,6 +46,12 @@ const compressImage = async (file: File): Promise<File> => {
   return compressed;
 };
 
+const revokeAll = (items: QueueItem[]) => {
+  items.forEach((item) => {
+    if (item.previewUrl) URL.revokeObjectURL(item.previewUrl);
+  });
+};
+
 export function ImageUploader({
   images,
   onChange,
@@ -39,10 +59,83 @@ export function ImageUploader({
 }: ImageUploaderProps) {
   const [isUploading, setIsUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [queue, setQueue] = useState<QueueItem[]>([]);
+  const [queueIndex, setQueueIndex] = useState(0);
+
+  const uploadedUrls = useRef<string[]>([]);
+  const queueRef = useRef<QueueItem[]>([]);
+
+  // アップロード途中で画面を離れた場合にオブジェクトURLを解放する
+  useEffect(() => {
+    return () => {
+      revokeAll(queueRef.current);
+      queueRef.current = [];
+    };
+  }, []);
+
+  const applyQueue = useCallback((items: QueueItem[]) => {
+    queueRef.current = items;
+    setQueue(items);
+  }, []);
+
+  const finishQueue = useCallback(
+    (items: QueueItem[]) => {
+      revokeAll(items);
+      if (uploadedUrls.current.length > 0) {
+        onChange([...images, ...uploadedUrls.current]);
+      }
+      uploadedUrls.current = [];
+      applyQueue([]);
+      setQueueIndex(0);
+      setIsUploading(false);
+    },
+    [images, onChange, applyQueue],
+  );
+
+  const uploadFile = useCallback(async (file: File) => {
+    const compressed = await compressImage(file);
+    const url = await uploadImage(compressed);
+    uploadedUrls.current = [...uploadedUrls.current, url];
+  }, []);
+
+  /**
+   * startIndex から順に、切り抜きの要らないファイルを続けてアップロードする。
+   * 切り抜きが必要なファイルに当たったらそこで停止し、モーダルの表示に切り替える。
+   */
+  const advanceFrom = useCallback(
+    async (startIndex: number, items: QueueItem[], skipCropping: boolean) => {
+      let index = startIndex;
+
+      try {
+        while (index < items.length) {
+          const item = items[index];
+          if (!skipCropping && item.previewUrl) break;
+
+          await uploadFile(item.file);
+          index += 1;
+        }
+      } catch (err) {
+        setError(
+          err instanceof Error ? err.message : "アップロードに失敗しました",
+        );
+        finishQueue(items);
+        return;
+      }
+
+      if (index >= items.length) {
+        finishQueue(items);
+        return;
+      }
+
+      setQueueIndex(index);
+    },
+    [uploadFile, finishQueue],
+  );
 
   const handleFileSelect = useCallback(
-    async (event: React.ChangeEvent<HTMLInputElement>) => {
+    (event: React.ChangeEvent<HTMLInputElement>) => {
       const files = event.target.files;
+      event.target.value = "";
       if (!files || files.length === 0) return;
 
       const remainingSlots = maxImages - images.length;
@@ -51,30 +144,69 @@ export function ImageUploader({
         return;
       }
 
-      const filesToUpload = Array.from(files).slice(0, remainingSlots);
+      const items: QueueItem[] = Array.from(files)
+        .slice(0, remainingSlots)
+        .map((file) => ({
+          file,
+          previewUrl: isCroppable(file.type) ? URL.createObjectURL(file) : null,
+        }));
 
-      setIsUploading(true);
       setError(null);
+      setIsUploading(true);
+      uploadedUrls.current = [];
+      applyQueue(items);
+      setQueueIndex(0);
+
+      void advanceFrom(0, items, false);
+    },
+    [images, maxImages, advanceFrom, applyQueue],
+  );
+
+  const handleConfirmCrop = useCallback(
+    async (area: CropArea) => {
+      const item = queue[queueIndex];
+      if (!item) return;
 
       try {
-        const uploadPromises = filesToUpload.map(async (file) => {
-          const compressed = await compressImage(file);
-          return uploadImage(compressed);
-        });
-        const newUrls = await Promise.all(uploadPromises);
-
-        onChange([...images, ...newUrls]);
+        const cropped = await cropImageToFile(item.file, area, item.file.name);
+        await uploadFile(cropped);
       } catch (err) {
         setError(
           err instanceof Error ? err.message : "アップロードに失敗しました",
         );
-      } finally {
-        setIsUploading(false);
-        event.target.value = "";
+        finishQueue(queue);
+        return;
       }
+
+      void advanceFrom(queueIndex + 1, queue, false);
     },
-    [images, maxImages, onChange],
+    [queue, queueIndex, uploadFile, advanceFrom, finishQueue],
   );
+
+  const handleSkipCrop = useCallback(async () => {
+    const item = queue[queueIndex];
+    if (!item) return;
+
+    try {
+      await uploadFile(item.file);
+    } catch (err) {
+      setError(
+        err instanceof Error ? err.message : "アップロードに失敗しました",
+      );
+      finishQueue(queue);
+      return;
+    }
+
+    void advanceFrom(queueIndex + 1, queue, false);
+  }, [queue, queueIndex, uploadFile, advanceFrom, finishQueue]);
+
+  const handleSkipAll = useCallback(() => {
+    void advanceFrom(queueIndex, queue, true);
+  }, [queueIndex, queue, advanceFrom]);
+
+  const handleCancelCurrent = useCallback(() => {
+    void advanceFrom(queueIndex + 1, queue, false);
+  }, [queueIndex, queue, advanceFrom]);
 
   const handleRemove = useCallback(
     (index: number) => {
@@ -103,6 +235,8 @@ export function ImageUploader({
   const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault();
   };
+
+  const croppingItem = queue[queueIndex] ?? null;
 
   return (
     <div className="space-y-4">
@@ -178,6 +312,18 @@ export function ImageUploader({
       <p className="text-sm text-gray-500">
         JPEG, PNG, WebP, GIF 形式、最大5MB、{maxImages}枚まで
       </p>
+
+      {croppingItem?.previewUrl && (
+        <ImageCropModal
+          imageSrc={croppingItem.previewUrl}
+          progressLabel={`${queue.length}枚中 ${queueIndex + 1}枚目`}
+          showSkipAll={queueIndex < queue.length - 1}
+          onConfirm={handleConfirmCrop}
+          onSkip={handleSkipCrop}
+          onSkipAll={handleSkipAll}
+          onCancel={handleCancelCurrent}
+        />
+      )}
     </div>
   );
 }
