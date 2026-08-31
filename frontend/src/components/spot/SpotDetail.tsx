@@ -217,7 +217,10 @@ export function SpotDetail({ spot, isOwner = false }: SpotDetailProps) {
             <dl className="mt-4 space-y-4 text-sm">
               {spot.priceRange && (
                 <div className="flex items-start gap-3">
-                  <Banknote size={16} className="mt-0.5 shrink-0 text-gray-400" />
+                  <Banknote
+                    size={16}
+                    className="mt-0.5 shrink-0 text-gray-400"
+                  />
                   <div>
                     <dt className="text-xs text-gray-500">価格帯</dt>
                     <dd className="mt-0.5 text-gray-900">
@@ -247,7 +250,10 @@ export function SpotDetail({ spot, isOwner = false }: SpotDetailProps) {
             </dl>
           </div>
 
-          <div className="rounded-xl border border-gray-200 p-5">
+          <Link
+            href={`/users/${spot.user.id}`}
+            className="block rounded-xl border border-gray-200 p-5 transition-colors hover:border-gray-300 hover:bg-gray-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-300"
+          >
             <div className="flex items-center gap-3">
               <div className="h-10 w-10 shrink-0 overflow-hidden rounded-full bg-gray-200">
                 {spot.user.avatarUrl ? (
@@ -273,7 +279,7 @@ export function SpotDetail({ spot, isOwner = false }: SpotDetailProps) {
                 </p>
               </div>
             </div>
-          </div>
+          </Link>
         </aside>
 
         <div className="space-y-8 lg:col-span-2 lg:order-1">

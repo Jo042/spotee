@@ -12,7 +12,7 @@ interface SpotListProps {
     likeCount: number;
     images: { url: string }[];
     category: { name: string };
-    user: { name: string; avatarUrl?: string | null };
+    user: { id: string; name: string; avatarUrl?: string | null };
   }>;
   loading?: boolean;
   hasNextPage?: boolean;

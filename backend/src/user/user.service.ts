@@ -49,7 +49,11 @@ export class UserService {
     });
   }
 
-  async mySpots(
+  /**
+   * 指定ユーザーの投稿一覧。中身は userId で絞るだけなので、
+   * 自分・他人のどちらにも使える（呼び出し側のガードで公開範囲を決める）
+   */
+  async spotsByUser(
     userId: string,
     first: number = 20,
     after?: string,
@@ -93,6 +97,14 @@ export class UserService {
       pageInfo,
       countTotal: () => this.prisma.spot.count({ where: { userId } }),
     };
+  }
+
+  mySpots(
+    userId: string,
+    first: number = 20,
+    after?: string,
+  ): Promise<SpotConnectionSource> {
+    return this.spotsByUser(userId, first, after);
   }
 
   async myLikedSpots(
