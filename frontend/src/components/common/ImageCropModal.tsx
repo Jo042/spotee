@@ -135,6 +135,9 @@ export function ImageCropModal({
             maxZoom={maxZoom}
             aspect={SPOT_IMAGE_ASPECT}
             showGrid
+            // 画像全体が見えるように収める。クロップ領域の高さから表示サイズが
+            // 決まる前提なので、cover に変えるとレイアウトの根拠が崩れる
+            objectFit="contain"
             // 既定ではクロップ領域上のホイール／2本指スクロールでズームしてしまう。
             // ズームはスライダーと実機のピンチ（別系統のタッチ処理）に任せる
             zoomWithScroll={false}
