@@ -135,6 +135,9 @@ export function ImageCropModal({
             maxZoom={maxZoom}
             aspect={SPOT_IMAGE_ASPECT}
             showGrid
+            // 既定ではクロップ領域上のホイール／2本指スクロールでズームしてしまう。
+            // ズームはスライダーと実機のピンチ（別系統のタッチ処理）に任せる
+            zoomWithScroll={false}
             onCropChange={setCrop}
             onZoomChange={setZoom}
             onMediaLoaded={handleMediaLoaded}
