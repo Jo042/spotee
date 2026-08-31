@@ -11,11 +11,9 @@ import {
 interface ImageCropModalProps {
   imageSrc: string;
   progressLabel: string;
-  showSkipAll: boolean;
   onConfirm: (area: CropArea) => void;
   onSkip: () => void;
-  onSkipAll: () => void;
-  onCancel: () => void;
+  onDiscard: () => void;
 }
 
 const FOCUSABLE_SELECTOR =
@@ -24,11 +22,9 @@ const FOCUSABLE_SELECTOR =
 export function ImageCropModal({
   imageSrc,
   progressLabel,
-  showSkipAll,
   onConfirm,
   onSkip,
-  onSkipAll,
-  onCancel,
+  onDiscard,
 }: ImageCropModalProps) {
   const dialogRef = useRef<HTMLDivElement>(null);
   const [crop, setCrop] = useState({ x: 0, y: 0 });
@@ -54,11 +50,13 @@ export function ImageCropModal({
       ).filter((el) => !el.hasAttribute("disabled"));
     };
 
-    getFocusable()[0]?.focus();
+    // 先頭の要素（＝破棄ボタン）に当てると、開いた直後の Enter で写真を捨てて
+    // しまうため、ダイアログ自体にフォーカスを移す
+    dialogRef.current?.focus();
 
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
-        onCancel();
+        onDiscard();
         return;
       }
       if (e.key !== "Tab") return;
@@ -82,7 +80,7 @@ export function ImageCropModal({
       document.removeEventListener("keydown", handleKeyDown);
       previouslyFocused?.focus();
     };
-  }, [onCancel]);
+  }, [onDiscard]);
 
   // width/height は表示上のサイズ。切り抜き座標は元画像のピクセル基準で返るため
   // ズーム上限も naturalWidth/naturalHeight から求める
@@ -105,23 +103,31 @@ export function ImageCropModal({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 sm:p-6"
       role="dialog"
       aria-modal="true"
       aria-label="画像の切り抜き"
     >
       <div
         ref={dialogRef}
-        className="flex w-full max-w-2xl flex-col overflow-hidden rounded-2xl bg-white shadow-xl"
+        tabIndex={-1}
+        className="flex h-dvh w-full flex-col outline-none overflow-hidden bg-white sm:h-auto sm:max-w-5xl sm:rounded-2xl sm:shadow-xl"
       >
-        <div className="flex items-center justify-between border-b border-gray-100 px-5 py-4">
-          <h2 className="text-base font-semibold text-gray-900">
+        <header className="flex shrink-0 items-center justify-between gap-3 border-b border-gray-100 px-2 py-2 sm:px-5 sm:py-3">
+          <button
+            type="button"
+            onClick={onDiscard}
+            className="flex min-h-11 items-center rounded-lg px-3 text-sm font-bold text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-700"
+          >
+            この写真を使わない
+          </button>
+          <h2 className="hidden text-lg font-bold text-gray-900 sm:block">
             画像の切り抜き
           </h2>
-          <span className="text-sm text-gray-500">{progressLabel}</span>
-        </div>
+          <span className="px-2 text-sm text-gray-500">{progressLabel}</span>
+        </header>
 
-        <div className="relative aspect-video w-full bg-gray-900">
+        <div className="relative min-h-0 flex-1 bg-gray-900 sm:h-[65vh] sm:flex-none">
           <Cropper
             image={imageSrc}
             crop={crop}
@@ -136,13 +142,13 @@ export function ImageCropModal({
           />
         </div>
 
-        <div className="space-y-4 px-5 py-4">
+        <div className="shrink-0 space-y-3 px-4 py-4 sm:px-5">
           <p className="text-sm text-gray-500">
-            カード表示に合わせて 16:9 で切り抜かれます。ドラッグで位置を、スライダーで大きさを調整できます。
+            カード表示に合わせて 16:9 で切り抜かれます
           </p>
 
-          <label className="flex items-center gap-3">
-            <span className="text-sm text-gray-600">ズーム</span>
+          <label className="flex min-h-11 items-center gap-3">
+            <span className="shrink-0 text-sm text-gray-600">ズーム</span>
             <input
               type="range"
               min={1}
@@ -152,39 +158,23 @@ export function ImageCropModal({
               onChange={(e) => setZoom(Number(e.target.value))}
               disabled={maxZoom <= 1}
               aria-label="ズーム"
-              className="flex-1 accent-primary-600 disabled:opacity-40"
+              className="h-2 flex-1 cursor-pointer appearance-none rounded-full bg-gray-200 accent-primary-600 disabled:cursor-not-allowed disabled:opacity-40 [&::-webkit-slider-thumb]:h-6 [&::-webkit-slider-thumb]:w-6 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-primary-600 [&::-webkit-slider-thumb]:shadow-sm"
             />
           </label>
 
-          <div className="flex flex-wrap items-center justify-end gap-2">
-            <button
-              type="button"
-              onClick={onCancel}
-              className="rounded-lg px-4 py-2 text-sm font-medium text-gray-600 transition-colors hover:bg-gray-100"
-            >
-              この画像をやめる
-            </button>
-            {showSkipAll && (
-              <button
-                type="button"
-                onClick={onSkipAll}
-                className="rounded-lg px-4 py-2 text-sm font-medium text-gray-600 transition-colors hover:bg-gray-100"
-              >
-                残りすべてスキップ
-              </button>
-            )}
+          <div className="grid grid-cols-2 gap-3 sm:flex sm:justify-end">
             <button
               type="button"
               onClick={onSkip}
-              className="rounded-lg border border-gray-200 px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50"
+              className="min-h-11 rounded-lg border border-gray-200 px-5 text-sm font-bold text-gray-700 transition-colors hover:bg-gray-50 sm:min-w-40"
             >
-              切り抜かない
+              切り抜かずに使う
             </button>
             <button
               type="button"
               onClick={handleConfirm}
               disabled={!croppedArea}
-              className="rounded-lg bg-primary-600 px-5 py-2 text-sm font-semibold text-white transition-colors hover:bg-primary-700 disabled:opacity-40"
+              className="min-h-11 rounded-lg bg-primary-600 px-5 text-sm font-bold text-white transition-colors hover:bg-primary-700 active:scale-[0.98] disabled:opacity-40 sm:min-w-40"
             >
               決定
             </button>

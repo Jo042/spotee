@@ -103,13 +103,13 @@ export function ImageUploader({
    * 切り抜きが必要なファイルに当たったらそこで停止し、モーダルの表示に切り替える。
    */
   const advanceFrom = useCallback(
-    async (startIndex: number, items: QueueItem[], skipCropping: boolean) => {
+    async (startIndex: number, items: QueueItem[]) => {
       let index = startIndex;
 
       try {
         while (index < items.length) {
           const item = items[index];
-          if (!skipCropping && item.previewUrl) break;
+          if (item.previewUrl) break;
 
           await uploadFile(item.file);
           index += 1;
@@ -162,7 +162,7 @@ export function ImageUploader({
       applyQueue(items);
       setQueueIndex(0);
 
-      void advanceFrom(0, items, false);
+      void advanceFrom(0, items);
     },
     [images, maxImages, advanceFrom, applyQueue],
   );
@@ -183,7 +183,7 @@ export function ImageUploader({
         return;
       }
 
-      void advanceFrom(queueIndex + 1, queue, false);
+      void advanceFrom(queueIndex + 1, queue);
     },
     [queue, queueIndex, uploadFile, advanceFrom, finishQueue],
   );
@@ -202,15 +202,11 @@ export function ImageUploader({
       return;
     }
 
-    void advanceFrom(queueIndex + 1, queue, false);
+    void advanceFrom(queueIndex + 1, queue);
   }, [queue, queueIndex, uploadFile, advanceFrom, finishQueue]);
 
-  const handleSkipAll = useCallback(() => {
-    void advanceFrom(queueIndex, queue, true);
-  }, [queueIndex, queue, advanceFrom]);
-
-  const handleCancelCurrent = useCallback(() => {
-    void advanceFrom(queueIndex + 1, queue, false);
+  const handleDiscardCurrent = useCallback(() => {
+    void advanceFrom(queueIndex + 1, queue);
   }, [queueIndex, queue, advanceFrom]);
 
   const handleRemove = useCallback(
@@ -322,11 +318,9 @@ export function ImageUploader({
         <ImageCropModal
           imageSrc={croppingItem.previewUrl}
           progressLabel={`${queue.length}枚中 ${queueIndex + 1}枚目`}
-          showSkipAll={queueIndex < queue.length - 1}
           onConfirm={handleConfirmCrop}
           onSkip={handleSkipCrop}
-          onSkipAll={handleSkipAll}
-          onCancel={handleCancelCurrent}
+          onDiscard={handleDiscardCurrent}
         />
       )}
     </div>
