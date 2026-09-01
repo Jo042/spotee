@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { MapPin, UserCircle } from "lucide-react";
 import { LikeButton } from "@/components/spot/LikeButton";
 
@@ -14,12 +15,21 @@ interface SpotCardProps {
     isLiked?: boolean | null;
     images: { url: string }[];
     category: { name: string };
-    user: { name: string; avatarUrl?: string | null };
+    user: { id: string; name: string; avatarUrl?: string | null };
   };
 }
 
 export function SpotCard({ spot }: SpotCardProps) {
+  const router = useRouter();
   const firstImage = spot.images[0]?.url;
+
+  // カード全体が Link なので、投稿者リンクを <a> にすると入れ子になり
+  // hydration エラーになる。button + router.push で回避する
+  const handleAuthorClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    router.push(`/users/${spot.user.id}`);
+  };
 
   return (
     <Link
@@ -57,7 +67,12 @@ export function SpotCard({ spot }: SpotCardProps) {
           </p>
 
           <div className="mt-3 pt-3 border-t border-gray-100 flex items-center justify-between gap-2">
-            <div className="flex items-center gap-2 min-w-0">
+            <button
+              type="button"
+              onClick={handleAuthorClick}
+              aria-label={`${spot.user.name} のプロフィールを見る`}
+              className="flex items-center gap-2 min-w-0 rounded-lg transition-colors hover:text-primary-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-300"
+            >
               <div className="w-6 h-6 bg-gray-200 rounded-full overflow-hidden shrink-0">
                 {spot.user.avatarUrl ? (
                   <Image
@@ -76,7 +91,7 @@ export function SpotCard({ spot }: SpotCardProps) {
               <span className="text-sm text-gray-600 truncate">
                 {spot.user.name}
               </span>
-            </div>
+            </button>
             <LikeButton
               spotId={spot.id}
               likeCount={spot.likeCount}

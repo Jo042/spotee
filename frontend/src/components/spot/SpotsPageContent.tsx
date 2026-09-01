@@ -102,7 +102,7 @@ export default function SpotsPageContent() {
       isLiked?: boolean | null;
       images: { url: string }[];
       category: { name: string };
-      user: { name: string; avatarUrl?: string | null };
+      user: { id: string; name: string; avatarUrl?: string | null };
     }>;
   const hasNextPage = data?.spots?.pageInfo?.hasNextPage ?? false;
   const totalCount = data?.spots?.totalCount;

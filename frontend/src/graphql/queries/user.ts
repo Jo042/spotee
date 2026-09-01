@@ -83,3 +83,50 @@ export const GET_MY_LIKED_SPOTS = gql(`
     }
   }
 `);
+
+export const GET_USER_PROFILE = gql(`
+  query GetUserProfile($id: ID!) {
+    user(id: $id) {
+      id
+      name
+      avatarUrl
+      bio
+      spotsCount
+    }
+  }
+`);
+
+export const GET_USER_SPOTS = gql(`
+  query GetUserSpots($userId: ID!, $first: Int, $after: String) {
+    userSpots(userId: $userId, first: $first, after: $after) {
+      edges {
+        node {
+          id
+          title
+          address
+          likeCount
+          isLiked
+          images {
+            id
+            url
+            order
+          }
+          category {
+            id
+            name
+          }
+          user {
+            id
+            name
+            avatarUrl
+          }
+        }
+        cursor
+      }
+      pageInfo {
+        hasNextPage
+        endCursor
+      }
+    }
+  }
+`);
