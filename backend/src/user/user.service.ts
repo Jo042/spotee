@@ -2,8 +2,15 @@ import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { Prisma } from '@prisma/client';
 import type { AuthUser } from '../auth/types/auth-user.type';
-import { SpotEdge, PageInfo } from '../spot/dto/spot-connection.object';
 import type { SpotConnectionSource } from '../spot/dto/spot-connection.object';
+import { buildConnection } from '../spot/spot-connection.util';
+import {
+  encodeCursor,
+  decodeCursor,
+  buildCursorCondition,
+  buildCreatedAtCursorCondition,
+} from '../spot/spot-cursor.util';
+import { SpotSortBy, SortOrder } from '../spot/dto/spot-sort.input';
 
 @Injectable()
 export class UserService {
@@ -58,45 +65,31 @@ export class UserService {
     first: number = 20,
     after?: string,
   ): Promise<SpotConnectionSource> {
-    const take = first + 1;
-    const where: Prisma.SpotWhereInput = { userId };
-
-    if (after) {
-      const cursor = this.decodeCursor(after);
-      where.createdAt = { lt: new Date(cursor.createdAt) };
-    }
+    const filterWhere: Prisma.SpotWhereInput = { userId };
+    const cursorCondition = after
+      ? buildCursorCondition(
+          decodeCursor(after),
+          SpotSortBy.CREATED_AT,
+          SortOrder.DESC,
+        )
+      : null;
 
     const spots = await this.prisma.spot.findMany({
-      where,
-      take,
-      orderBy: { createdAt: 'desc' },
-      include: {
-        images: { orderBy: { order: 'asc' } },
-        user: true,
-        category: true,
-      },
+      where: cursorCondition
+        ? { AND: [filterWhere, cursorCondition] }
+        : filterWhere,
+      take: first + 1,
+      orderBy: [{ createdAt: 'desc' }, { id: 'desc' }],
     });
 
-    const hasNextPage = spots.length > first;
-    const result = hasNextPage ? spots.slice(0, first) : spots;
-
-    const edges: SpotEdge[] = result.map((spot) => ({
-      node: spot,
-      cursor: this.encodeCursor(spot.createdAt),
-    }));
-
-    const pageInfo: PageInfo = {
-      hasNextPage,
+    return buildConnection({
+      rows: spots,
+      first,
       hasPreviousPage: !!after,
-      startCursor: edges[0]?.cursor ?? null,
-      endCursor: edges[edges.length - 1]?.cursor ?? null,
-    };
-
-    return {
-      edges,
-      pageInfo,
-      countTotal: () => this.prisma.spot.count({ where: { userId } }),
-    };
+      toNode: (spot) => spot,
+      toCursor: (spot) => encodeCursor(spot, SpotSortBy.CREATED_AT),
+      countTotal: () => this.prisma.spot.count({ where: filterWhere }),
+    });
   }
 
   mySpots(
@@ -107,67 +100,36 @@ export class UserService {
     return this.spotsByUser(userId, first, after);
   }
 
+  /**
+   * いいねしたスポットの一覧。ページングの基準は Like の作成日時なので、
+   * カーソルもスポットではなく Like に対して組み立てる
+   */
   async myLikedSpots(
     userId: string,
     first: number = 20,
     after?: string,
   ): Promise<SpotConnectionSource> {
-    const take = first + 1;
-    const where: Prisma.LikeWhereInput = { userId };
-
-    if (after) {
-      const cursor = this.decodeCursor(after);
-      where.createdAt = { lt: new Date(cursor.createdAt) };
-    }
+    const filterWhere: Prisma.LikeWhereInput = { userId };
+    const cursorCondition = after
+      ? buildCreatedAtCursorCondition(decodeCursor(after), SortOrder.DESC)
+      : null;
 
     const likes = await this.prisma.like.findMany({
-      where,
-      take,
-      orderBy: { createdAt: 'desc' },
-      include: {
-        spot: {
-          include: {
-            images: { orderBy: { order: 'asc' } },
-            user: true,
-            category: true,
-          },
-        },
-      },
+      where: cursorCondition
+        ? { AND: [filterWhere, cursorCondition] }
+        : filterWhere,
+      take: first + 1,
+      orderBy: [{ createdAt: 'desc' }, { id: 'desc' }],
+      include: { spot: true },
     });
 
-    const hasNextPage = likes.length > first;
-    const result = hasNextPage ? likes.slice(0, first) : likes;
-
-    const edges: SpotEdge[] = result.map((like) => ({
-      node: like.spot,
-      cursor: this.encodeCursor(like.createdAt),
-    }));
-
-    const pageInfo: PageInfo = {
-      hasNextPage,
+    return buildConnection({
+      rows: likes,
+      first,
       hasPreviousPage: !!after,
-      startCursor: edges[0]?.cursor ?? null,
-      endCursor: edges[edges.length - 1]?.cursor ?? null,
-    };
-
-    return {
-      edges,
-      pageInfo,
-      countTotal: () => this.prisma.like.count({ where: { userId } }),
-    };
-  }
-
-  private encodeCursor(createdAt: Date): string {
-    return Buffer.from(
-      JSON.stringify({ createdAt: createdAt.toISOString() }),
-    ).toString('base64');
-  }
-
-  private decodeCursor(cursor: string): { createdAt: string } {
-    try {
-      return JSON.parse(Buffer.from(cursor, 'base64').toString('utf-8'));
-    } catch {
-      throw new Error('Invalid cursor');
-    }
+      toNode: (like) => like.spot,
+      toCursor: (like) => encodeCursor(like, SpotSortBy.CREATED_AT),
+      countTotal: () => this.prisma.like.count({ where: filterWhere }),
+    });
   }
 }
