@@ -2,6 +2,7 @@ import {
   encodeCursor,
   decodeCursor,
   buildCursorCondition,
+  assertCursorMatchesSort,
   CursorData,
 } from './spot-cursor.util';
 import { SpotSortBy, SortOrder } from './dto/spot-sort.input';
@@ -193,12 +194,15 @@ describe('buildCursorCondition', () => {
       },
     );
 
-    it.each(cases)('%s / %s は同値タイの除外条件を OR で持つ', (sortBy, order) => {
-      const result = buildCursorCondition(cursorData, sortBy, order);
+    it.each(cases)(
+      '%s / %s は同値タイの除外条件を OR で持つ',
+      (sortBy, order) => {
+        const result = buildCursorCondition(cursorData, sortBy, order);
 
-      expect(Array.isArray(result.OR)).toBe(true);
-      expect((result.OR as unknown[]).length).toBeGreaterThanOrEqual(2);
-    });
+        expect(Array.isArray(result.OR)).toBe(true);
+        expect((result.OR as unknown[]).length).toBeGreaterThanOrEqual(2);
+      },
+    );
 
     it('最終段が id の比較になっている', () => {
       for (const [sortBy, order] of cases) {
@@ -208,5 +212,67 @@ describe('buildCursorCondition', () => {
         expect(branches[branches.length - 1]).toHaveProperty('id');
       }
     });
+  });
+});
+
+describe('assertCursorMatchesSort', () => {
+  const base: CursorData = { id: 'spot-1', createdAt: BASE_DATE_ISO };
+
+  it('CREATED_AT は id と createdAt があれば通る', () => {
+    expect(() =>
+      assertCursorMatchesSort(base, SpotSortBy.CREATED_AT),
+    ).not.toThrow();
+  });
+
+  describe('ソート種別と食い違うカーソル', () => {
+    it('LIKE_COUNT ソートに likeCount を含まないカーソルを渡すと落ちる', () => {
+      expect(() =>
+        assertCursorMatchesSort(base, SpotSortBy.LIKE_COUNT),
+      ).toThrow('Invalid cursor');
+    });
+
+    it('TITLE ソートに title を含まないカーソルを渡すと落ちる', () => {
+      expect(() => assertCursorMatchesSort(base, SpotSortBy.TITLE)).toThrow(
+        'Invalid cursor',
+      );
+    });
+
+    it('LIKE_COUNT ソートに likeCount を含むカーソルなら通る', () => {
+      expect(() =>
+        assertCursorMatchesSort(
+          { ...base, likeCount: 3 },
+          SpotSortBy.LIKE_COUNT,
+        ),
+      ).not.toThrow();
+    });
+
+    it('TITLE ソートに title を含むカーソルなら通る', () => {
+      expect(() =>
+        assertCursorMatchesSort({ ...base, title: 'カフェ' }, SpotSortBy.TITLE),
+      ).not.toThrow();
+    });
+  });
+
+  describe('壊れたカーソル', () => {
+    it('id が空文字なら落ちる', () => {
+      expect(() =>
+        assertCursorMatchesSort({ ...base, id: '' }, SpotSortBy.CREATED_AT),
+      ).toThrow('Invalid cursor');
+    });
+
+    it('createdAt が日付として解釈できないなら落ちる', () => {
+      expect(() =>
+        assertCursorMatchesSort(
+          { ...base, createdAt: 'not-a-date' },
+          SpotSortBy.CREATED_AT,
+        ),
+      ).toThrow('Invalid cursor');
+    });
+  });
+
+  it('buildCursorCondition からも検証が働く', () => {
+    expect(() =>
+      buildCursorCondition(base, SpotSortBy.LIKE_COUNT, SortOrder.DESC),
+    ).toThrow('Invalid cursor');
   });
 });
