@@ -5,7 +5,6 @@ import Link from "next/link";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import {
-  ArrowLeft,
   Banknote,
   Clock,
   MapPin,
@@ -17,6 +16,7 @@ import { useMutation } from "@apollo/client/react";
 import { DELETE_SPOT } from "@/graphql/mutations/spot";
 import { PriceRange } from "@/graphql/generated/graphql";
 import { LikeButton } from "@/components/spot/LikeButton";
+import { BackLink } from "@/components/common/BackLink";
 
 interface SpotImage {
   id: string;
@@ -87,13 +87,7 @@ export function SpotDetail({ spot, isOwner = false }: SpotDetailProps) {
   return (
     <div className="max-w-4xl mx-auto">
       <div className="flex items-center justify-between gap-4 mb-6">
-        <Link
-          href="/spots"
-          className="inline-flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-900 transition-colors"
-        >
-          <ArrowLeft size={16} />
-          スポット一覧
-        </Link>
+        <BackLink fallbackHref="/spots" fallbackLabel="スポット一覧" />
         {isOwner && (
           <div className="flex items-center gap-2">
             {confirmDelete ? (
