@@ -15,8 +15,8 @@ import {
   decodeCursor,
   buildCursorCondition,
 } from './spot-cursor.util';
-import { SpotEdge, PageInfo } from './dto/spot-connection.object';
 import type { SpotConnectionSource } from './dto/spot-connection.object';
+import { buildConnection } from './spot-connection.util';
 
 @Injectable()
 export class SpotService {
@@ -50,22 +50,12 @@ export class SpotService {
           },
         }),
       },
-      include: {
-        images: true,
-        user: true,
-        category: true,
-      },
     });
   }
 
   async findById(id: string) {
     const spot = await this.prisma.spot.findUnique({
       where: { id },
-      include: {
-        images: { orderBy: { order: 'asc' } },
-        user: true,
-        category: true,
-      },
     });
 
     if (!spot) {
@@ -125,11 +115,6 @@ export class SpotService {
       return tx.spot.update({
         where: { id },
         data: spotData,
-        include: {
-          images: { orderBy: { order: 'asc' } },
-          user: true,
-          category: true,
-        },
       });
     });
   }
@@ -184,27 +169,14 @@ export class SpotService {
       orderBy,
     });
 
-    const hasNextPage = spots.length > first;
-
-    const resultSpots = hasNextPage ? spots.slice(0, first) : spots;
-
-    const edges: SpotEdge[] = resultSpots.map((spot) => ({
-      node: spot,
-      cursor: encodeCursor(spot, sortBy),
-    }));
-
-    const pageInfo: PageInfo = {
-      hasNextPage,
+    return buildConnection({
+      rows: spots,
+      first,
       hasPreviousPage: !!after,
-      startCursor: edges.length > 0 ? edges[0].cursor : null,
-      endCursor: edges.length > 0 ? edges[edges.length - 1].cursor : null,
-    };
-
-    return {
-      edges,
-      pageInfo,
+      toNode: (spot) => spot,
+      toCursor: (spot) => encodeCursor(spot, sortBy),
       countTotal: () => this.prisma.spot.count({ where: filterWhere }),
-    };
+    });
   }
 
   /**
