@@ -1,17 +1,26 @@
-import { SpotEdge, PageInfo } from './dto/spot-connection.object';
-import type { SpotConnectionSource } from './dto/spot-connection.object';
-import type { SpotNode } from './dto/spot.object';
+import { PageInfo } from './dto/page-info.object';
 
-interface BuildConnectionParams<TRow> {
+export interface Edge<TNode> {
+  node: TNode;
+  cursor: string;
+}
+
+export interface ConnectionSource<TNode> {
+  edges: Edge<TNode>[];
+  pageInfo: PageInfo;
+  /** 総件数の数え方。要求されたときだけ実行する */
+  countTotal: () => Promise<number>;
+}
+
+interface BuildConnectionParams<TRow, TNode> {
   /** first + 1 件を取得した結果。次ページの有無をこの1件で判定する */
   rows: TRow[];
   /** 1ページの件数 */
   first: number;
   /** 呼び出し時にカーソルが指定されていたか */
   hasPreviousPage: boolean;
-  toNode: (row: TRow) => SpotNode;
+  toNode: (row: TRow) => TNode;
   toCursor: (row: TRow) => string;
-  /** 総件数の数え方。要求されたときだけ実行する（#210） */
   countTotal: () => Promise<number>;
 }
 
@@ -22,18 +31,18 @@ interface BuildConnectionParams<TRow> {
  * という手順は取得元によらず同じなので、行の取得方法とノード・カーソルの
  * 取り出し方だけを呼び出し側から受け取る。
  */
-export function buildConnection<TRow>({
+export function buildConnection<TRow, TNode>({
   rows,
   first,
   hasPreviousPage,
   toNode,
   toCursor,
   countTotal,
-}: BuildConnectionParams<TRow>): SpotConnectionSource {
+}: BuildConnectionParams<TRow, TNode>): ConnectionSource<TNode> {
   const hasNextPage = rows.length > first;
   const pageRows = hasNextPage ? rows.slice(0, first) : rows;
 
-  const edges: SpotEdge[] = pageRows.map((row) => ({
+  const edges: Edge<TNode>[] = pageRows.map((row) => ({
     node: toNode(row),
     cursor: toCursor(row),
   }));
