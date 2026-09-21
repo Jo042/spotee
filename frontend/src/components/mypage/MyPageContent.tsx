@@ -190,18 +190,33 @@ export function MyPageContent() {
                       </span>{" "}
                       いいね
                     </span>
-                    <span>
-                      <span className="font-bold text-gray-900">
-                        {me ? formatCount(me.followersCount) : "-"}
-                      </span>{" "}
-                      フォロワー
-                    </span>
-                    <span>
-                      <span className="font-bold text-gray-900">
-                        {me ? formatCount(me.followingCount) : "-"}
-                      </span>{" "}
-                      フォロー中
-                    </span>
+                    {me ? (
+                      <>
+                        <Link
+                          href={`/users/${me.id}/followers`}
+                          className="transition-colors hover:text-gray-900"
+                        >
+                          <span className="font-bold text-gray-900">
+                            {formatCount(me.followersCount)}
+                          </span>{" "}
+                          フォロワー
+                        </Link>
+                        <Link
+                          href={`/users/${me.id}/following`}
+                          className="transition-colors hover:text-gray-900"
+                        >
+                          <span className="font-bold text-gray-900">
+                            {formatCount(me.followingCount)}
+                          </span>{" "}
+                          フォロー中
+                        </Link>
+                      </>
+                    ) : (
+                      <>
+                        <span>- フォロワー</span>
+                        <span>- フォロー中</span>
+                      </>
+                    )}
                   </div>
                 </div>
                 <Link

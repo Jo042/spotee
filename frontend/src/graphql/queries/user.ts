@@ -135,3 +135,49 @@ export const GET_USER_SPOTS = gql(`
     }
   }
 `);
+
+export const GET_USER_FOLLOWERS = gql(`
+  query GetUserFollowers($userId: ID!, $first: Int, $after: String) {
+    userFollowers(userId: $userId, first: $first, after: $after) {
+      edges {
+        node {
+          id
+          name
+          avatarUrl
+          bio
+          isFollowing
+          followersCount
+        }
+        cursor
+      }
+      pageInfo {
+        hasNextPage
+        endCursor
+      }
+      totalCount
+    }
+  }
+`);
+
+export const GET_USER_FOLLOWING = gql(`
+  query GetUserFollowing($userId: ID!, $first: Int, $after: String) {
+    userFollowing(userId: $userId, first: $first, after: $after) {
+      edges {
+        node {
+          id
+          name
+          avatarUrl
+          bio
+          isFollowing
+          followersCount
+        }
+        cursor
+      }
+      pageInfo {
+        hasNextPage
+        endCursor
+      }
+      totalCount
+    }
+  }
+`);
