@@ -170,18 +170,24 @@ export function UserProfileContent({ userId }: UserProfileContentProps) {
                   </span>{" "}
                   投稿
                 </span>
-                <span>
+                <Link
+                  href={`/users/${profile.id}/followers`}
+                  className="transition-colors hover:text-gray-900"
+                >
                   <span className="font-bold text-gray-900">
                     {formatCount(profile.followersCount)}
                   </span>{" "}
                   フォロワー
-                </span>
-                <span>
+                </Link>
+                <Link
+                  href={`/users/${profile.id}/following`}
+                  className="transition-colors hover:text-gray-900"
+                >
                   <span className="font-bold text-gray-900">
                     {formatCount(profile.followingCount)}
                   </span>{" "}
                   フォロー中
-                </span>
+                </Link>
               </div>
               {profile.bio && (
                 <div className="mt-2">
