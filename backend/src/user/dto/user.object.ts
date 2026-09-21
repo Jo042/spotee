@@ -25,6 +25,19 @@ export class User {
 
   @Field(() => Int)
   spotsCount: number;
+
+  @Field(() => Int)
+  followersCount: number;
+
+  @Field(() => Int)
+  followingCount: number;
+
+  /** 未ログインのときは判定できないため null */
+  @Field(() => Boolean, { nullable: true })
+  isFollowing?: boolean | null;
 }
 
-export type UserNode = Omit<User, 'spotsCount'>;
+export type UserNode = Omit<
+  User,
+  'spotsCount' | 'followersCount' | 'followingCount' | 'isFollowing'
+>;

@@ -3,7 +3,7 @@ import { PrismaService } from '../../prisma/prisma.service';
 import { Prisma } from '@prisma/client';
 import type { AuthUser } from '../auth/types/auth-user.type';
 import type { SpotConnectionSource } from '../spot/dto/spot-connection.object';
-import { buildConnection } from '../spot/spot-connection.util';
+import { buildConnection } from '../common/connection.util';
 import {
   encodeCursor,
   decodeCursor,

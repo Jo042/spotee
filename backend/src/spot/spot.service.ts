@@ -16,7 +16,7 @@ import {
   buildCursorCondition,
 } from './spot-cursor.util';
 import type { SpotConnectionSource } from './dto/spot-connection.object';
-import { buildConnection } from './spot-connection.util';
+import { buildConnection } from '../common/connection.util';
 
 @Injectable()
 export class SpotService {

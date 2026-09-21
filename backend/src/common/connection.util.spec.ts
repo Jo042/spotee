@@ -1,11 +1,10 @@
-import { buildConnection } from './spot-connection.util';
-import type { SpotNode } from './dto/spot.object';
+import { buildConnection } from './connection.util';
 
 type Row = { id: string; title: string };
 
 const row = (id: string): Row => ({ id, title: `spot-${id}` });
 
-const toNode = (r: Row) => r as unknown as SpotNode;
+const toNode = (r: Row) => r;
 const toCursor = (r: Row) => `cursor-${r.id}`;
 const countTotal = () => Promise.resolve(0);
 
@@ -102,7 +101,7 @@ describe('buildConnection', () => {
         rows: likes,
         first: 2,
         hasPreviousPage: false,
-        toNode: (like) => like.spot as unknown as SpotNode,
+        toNode: (like) => like.spot,
         toCursor: (like) => `cursor-${like.spot.id}`,
         countTotal,
       });

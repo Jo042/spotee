@@ -11,6 +11,7 @@ import { AuthModule } from './auth/auth.module';
 import { UserModule } from './user/user.module';
 import { SpotModule } from './spot/spot.module';
 import { LikeModule } from './like/like.module';
+import { FollowModule } from './follow/follow.module';
 
 @Module({
   imports: [
@@ -32,6 +33,7 @@ import { LikeModule } from './like/like.module';
     UserModule,
     SpotModule,
     LikeModule,
+    FollowModule,
   ],
   controllers: [AppController],
   providers: [AppService],

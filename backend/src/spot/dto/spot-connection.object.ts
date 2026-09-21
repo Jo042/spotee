@@ -1,21 +1,7 @@
 import { ObjectType, Field, Int } from '@nestjs/graphql';
 import { Spot } from './spot.object';
 import type { SpotNode } from './spot.object';
-
-@ObjectType()
-export class PageInfo {
-  @Field()
-  hasNextPage: boolean;
-
-  @Field()
-  hasPreviousPage: boolean;
-
-  @Field(() => String, { nullable: true })
-  startCursor: string | null;
-
-  @Field(() => String, { nullable: true })
-  endCursor: string | null;
-}
+import { PageInfo } from '../../common/dto/page-info.object';
 
 @ObjectType()
 export class SpotEdge {
