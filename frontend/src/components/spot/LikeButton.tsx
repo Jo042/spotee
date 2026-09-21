@@ -5,6 +5,7 @@ import { Heart } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/hooks/useAuth";
 import { TOGGLE_LIKE } from "@/graphql/mutations/like";
+import { formatCount } from "@/lib/format";
 
 interface LikeButtonProps {
   spotId: string;
@@ -66,7 +67,7 @@ export function LikeButton({
         }`}
       >
         <Heart size={16} className={isLiked ? "fill-rose-500" : ""} />
-        <span>{likeCount}</span>
+        <span>{formatCount(likeCount)}</span>
       </button>
     );
   }
@@ -77,16 +78,11 @@ export function LikeButton({
       disabled={loading}
       aria-pressed={isLiked ?? false}
       className={`flex items-center gap-1 p-2 -m-2 text-sm transition-colors disabled:opacity-50 ${
-        isLiked
-          ? "text-rose-500"
-          : "text-gray-400 hover:text-rose-400"
+        isLiked ? "text-rose-500" : "text-gray-400 hover:text-rose-400"
       }`}
     >
-      <Heart
-        size={14}
-        className={isLiked ? "fill-rose-500" : ""}
-      />
-      <span>{likeCount}</span>
+      <Heart size={14} className={isLiked ? "fill-rose-500" : ""} />
+      <span>{formatCount(likeCount)}</span>
     </button>
   );
 }

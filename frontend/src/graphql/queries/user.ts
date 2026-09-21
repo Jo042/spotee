@@ -8,6 +8,8 @@ export const GET_ME = gql(`
       email
       avatarUrl
       bio
+      followersCount
+      followingCount
     }
   }
 `);
@@ -92,6 +94,9 @@ export const GET_USER_PROFILE = gql(`
       avatarUrl
       bio
       spotsCount
+      followersCount
+      followingCount
+      isFollowing
     }
   }
 `);
