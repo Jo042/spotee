@@ -25,6 +25,8 @@ export const GET_SPOT = gql(`
         id
         name
         avatarUrl
+        isFollowing
+        followersCount
       }
       attributeTags {
         id

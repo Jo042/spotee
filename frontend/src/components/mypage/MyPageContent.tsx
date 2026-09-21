@@ -10,7 +10,12 @@ import { useAuth } from "@/hooks/useAuth";
 import { useIntersectionObserver } from "@/hooks/useIntersectionObserver";
 import { SpotCard } from "@/components/spot/SpotCard";
 import { SpotCardSkeleton } from "@/components/spot/SpotList";
-import { GET_ME, GET_MY_SPOTS, GET_MY_LIKED_SPOTS } from "@/graphql/queries/user";
+import {
+  GET_ME,
+  GET_MY_SPOTS,
+  GET_MY_LIKED_SPOTS,
+} from "@/graphql/queries/user";
+import { formatCount } from "@/lib/format";
 
 type Tab = "spots" | "liked";
 
@@ -22,7 +27,9 @@ export function MyPageContent() {
   const [activeTab, setActiveTab] = useState<Tab>("spots");
   const [loadingMore, setLoadingMore] = useState(false);
 
-  const { data: meData, loading: meLoading } = useQuery(GET_ME, { skip: !user });
+  const { data: meData, loading: meLoading } = useQuery(GET_ME, {
+    skip: !user,
+  });
   const {
     data: spotsData,
     loading: spotsLoading,
@@ -59,7 +66,10 @@ export function MyPageContent() {
             return {
               mySpots: {
                 ...fetchMoreResult.mySpots,
-                edges: [...prevResult.mySpots.edges, ...fetchMoreResult.mySpots.edges],
+                edges: [
+                  ...prevResult.mySpots.edges,
+                  ...fetchMoreResult.mySpots.edges,
+                ],
               },
             };
           },
@@ -72,7 +82,10 @@ export function MyPageContent() {
             return {
               myLikedSpots: {
                 ...fetchMoreResult.myLikedSpots,
-                edges: [...prevResult.myLikedSpots.edges, ...fetchMoreResult.myLikedSpots.edges],
+                edges: [
+                  ...prevResult.myLikedSpots.edges,
+                  ...fetchMoreResult.myLikedSpots.edges,
+                ],
               },
             };
           },
@@ -85,9 +98,11 @@ export function MyPageContent() {
     }
   }, [activeTab, activePageInfo, loadingMore, fetchMoreSpots, fetchMoreLiked]);
 
-  const { targetRef, isIntersecting } = useIntersectionObserver<HTMLDivElement>({
-    enabled: hasNextPage && !loadingMore,
-  });
+  const { targetRef, isIntersecting } = useIntersectionObserver<HTMLDivElement>(
+    {
+      enabled: hasNextPage && !loadingMore,
+    },
+  );
 
   useEffect(() => {
     if (isIntersecting && hasNextPage && !loadingMore) {
@@ -96,7 +111,11 @@ export function MyPageContent() {
   }, [isIntersecting, hasNextPage, loadingMore, handleLoadMore]);
 
   if (authLoading) {
-    return <div className="min-h-screen flex items-center justify-center">読み込み中...</div>;
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        読み込み中...
+      </div>
+    );
   }
 
   if (!user) {
@@ -154,12 +173,34 @@ export function MyPageContent() {
                       {me?.name ?? user.email}
                     </h1>
                   )}
-                  <div className="mt-1.5 flex items-center gap-4 text-sm text-gray-600">
+                  <div className="mt-1.5 flex flex-wrap items-center gap-4 text-sm text-gray-600">
                     <span>
-                      <span className="font-bold text-gray-900">{spotsCount ?? "-"}</span> 投稿
+                      <span className="font-bold text-gray-900">
+                        {spotsCount === undefined
+                          ? "-"
+                          : formatCount(spotsCount)}
+                      </span>{" "}
+                      投稿
                     </span>
                     <span>
-                      <span className="font-bold text-gray-900">{likedCount ?? "-"}</span> いいね
+                      <span className="font-bold text-gray-900">
+                        {likedCount === undefined
+                          ? "-"
+                          : formatCount(likedCount)}
+                      </span>{" "}
+                      いいね
+                    </span>
+                    <span>
+                      <span className="font-bold text-gray-900">
+                        {me ? formatCount(me.followersCount) : "-"}
+                      </span>{" "}
+                      フォロワー
+                    </span>
+                    <span>
+                      <span className="font-bold text-gray-900">
+                        {me ? formatCount(me.followingCount) : "-"}
+                      </span>{" "}
+                      フォロー中
                     </span>
                   </div>
                 </div>
@@ -173,7 +214,9 @@ export function MyPageContent() {
                 </Link>
               </div>
               {me?.bio && (
-                <p className="mt-2 text-sm leading-relaxed text-gray-600">{me.bio}</p>
+                <p className="mt-2 text-sm leading-relaxed text-gray-600">
+                  {me.bio}
+                </p>
               )}
             </div>
           </div>
@@ -223,7 +266,11 @@ export function MyPageContent() {
         ) : activeSpots.length === 0 ? (
           <div className="flex flex-col items-center py-16 sm:py-20 text-center">
             <div className="flex h-12 w-12 items-center justify-center rounded-full bg-gray-100 text-gray-400">
-              {activeTab === "spots" ? <Camera size={22} /> : <Heart size={22} />}
+              {activeTab === "spots" ? (
+                <Camera size={22} />
+              ) : (
+                <Heart size={22} />
+              )}
             </div>
             <p className="mt-4 text-sm text-gray-500">
               {activeTab === "spots"
@@ -255,7 +302,11 @@ export function MyPageContent() {
             </div>
             {loadingMore && (
               <div className="flex items-center justify-center gap-2 py-8 text-sm text-gray-500">
-                <Loader2 size={18} className="animate-spin" aria-hidden="true" />
+                <Loader2
+                  size={18}
+                  className="animate-spin"
+                  aria-hidden="true"
+                />
                 読み込み中...
               </div>
             )}

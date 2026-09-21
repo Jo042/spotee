@@ -16,6 +16,7 @@ import { useMutation } from "@apollo/client/react";
 import { DELETE_SPOT } from "@/graphql/mutations/spot";
 import { PriceRange } from "@/graphql/generated/graphql";
 import { LikeButton } from "@/components/spot/LikeButton";
+import { FollowButton } from "@/components/user/FollowButton";
 import { BackLink } from "@/components/common/BackLink";
 
 interface SpotImage {
@@ -52,6 +53,8 @@ interface SpotDetailProps {
       id: string;
       name: string;
       avatarUrl?: string | null;
+      isFollowing?: boolean | null;
+      followersCount?: number;
     };
   };
 }
@@ -272,6 +275,16 @@ export function SpotDetail({ spot, isOwner = false }: SpotDetailProps) {
                   {new Date(spot.createdAt).toLocaleDateString("ja-JP")} に投稿
                 </p>
               </div>
+              {!isOwner && (
+                <div className="ml-auto shrink-0">
+                  <FollowButton
+                    userId={spot.user.id}
+                    isFollowing={spot.user.isFollowing ?? null}
+                    followersCount={spot.user.followersCount ?? 0}
+                    size="sm"
+                  />
+                </div>
+              )}
             </div>
           </Link>
         </aside>

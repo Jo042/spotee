@@ -10,6 +10,8 @@ import { useAuth } from "@/hooks/useAuth";
 import { useIntersectionObserver } from "@/hooks/useIntersectionObserver";
 import { SpotCard } from "@/components/spot/SpotCard";
 import { SpotCardSkeleton } from "@/components/spot/SpotList";
+import { FollowButton } from "@/components/user/FollowButton";
+import { formatCount } from "@/lib/format";
 import {
   GET_ME,
   GET_USER_PROFILE,
@@ -151,15 +153,36 @@ export function UserProfileContent({ userId }: UserProfileContentProps) {
             </div>
 
             <div className="min-w-0 flex-1">
-              <h1 className="truncate text-xl font-bold leading-snug text-gray-900 sm:text-[22px]">
-                {profile.name}
-              </h1>
-              <p className="mt-1.5 text-sm text-gray-600">
-                <span className="font-bold text-gray-900">
-                  {profile.spotsCount}
-                </span>{" "}
-                投稿
-              </p>
+              <div className="flex items-start justify-between gap-3">
+                <h1 className="truncate text-xl font-bold leading-snug text-gray-900 sm:text-[22px]">
+                  {profile.name}
+                </h1>
+                <FollowButton
+                  userId={profile.id}
+                  isFollowing={profile.isFollowing ?? null}
+                  followersCount={profile.followersCount}
+                />
+              </div>
+              <div className="mt-1.5 flex flex-wrap items-center gap-4 text-sm text-gray-600">
+                <span>
+                  <span className="font-bold text-gray-900">
+                    {formatCount(profile.spotsCount)}
+                  </span>{" "}
+                  投稿
+                </span>
+                <span>
+                  <span className="font-bold text-gray-900">
+                    {formatCount(profile.followersCount)}
+                  </span>{" "}
+                  フォロワー
+                </span>
+                <span>
+                  <span className="font-bold text-gray-900">
+                    {formatCount(profile.followingCount)}
+                  </span>{" "}
+                  フォロー中
+                </span>
+              </div>
               {profile.bio && (
                 <div className="mt-2">
                   <p
