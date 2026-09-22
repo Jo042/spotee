@@ -4,33 +4,30 @@ import { useSyncExternalStore } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
+import {
+  subscribeInAppNavigation,
+  getInAppNavigationSnapshot,
+  getInAppNavigationServerSnapshot,
+} from "@/lib/in-app-navigation";
 
 interface BackLinkProps {
-  /** 履歴が無いとき（直接アクセス）の遷移先 */
+  /** アプリ内の移動が無いとき（直接アクセス）の遷移先 */
   fallbackHref: string;
-  /** 履歴が無いときの表示文言 */
+  /** 直接アクセス時の表示文言 */
   fallbackLabel: string;
 }
 
-/** 履歴の深さは購読できる値ではないため、変更通知は行わない */
-const subscribe = () => () => {};
-
-const getSnapshot = () => window.history.length > 1;
-
-/** サーバー描画時はブラウザの履歴を読めないので、フォールバック側で描く */
-const getServerSnapshot = () => false;
-
 /**
  * 来た経路に応じて戻り先を決めるリンク。
- * アプリ内から遷移してきていればブラウザの戻ると同じ挙動にし、
- * 直接アクセス（履歴なし）のときだけ fallbackHref へ送る。
+ * アプリ内を一度でも移動していればブラウザの戻ると同じ挙動にし、
+ * 直接アクセスのときだけ fallbackHref へ送る。
  */
 export function BackLink({ fallbackHref, fallbackLabel }: BackLinkProps) {
   const router = useRouter();
   const canGoBack = useSyncExternalStore(
-    subscribe,
-    getSnapshot,
-    getServerSnapshot,
+    subscribeInAppNavigation,
+    getInAppNavigationSnapshot,
+    getInAppNavigationServerSnapshot,
   );
 
   const className =
@@ -38,7 +35,7 @@ export function BackLink({ fallbackHref, fallbackLabel }: BackLinkProps) {
 
   if (!canGoBack) {
     return (
-      <Link href={fallbackHref} className={className}>
+      <Link href={fallbackHref} aria-label="戻る" className={className}>
         <ArrowLeft size={16} />
         {fallbackLabel}
       </Link>
@@ -46,7 +43,12 @@ export function BackLink({ fallbackHref, fallbackLabel }: BackLinkProps) {
   }
 
   return (
-    <button type="button" onClick={() => router.back()} className={className}>
+    <button
+      type="button"
+      onClick={() => router.back()}
+      aria-label="戻る"
+      className={className}
+    >
       <ArrowLeft size={16} />
       戻る
     </button>

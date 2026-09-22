@@ -3,6 +3,7 @@ import { Noto_Sans_JP } from "next/font/google";
 import "./globals.css";
 import { Providers } from "./provider";
 import { Header } from "@/components/layout/Header";
+import { InAppNavigationTracker } from "@/components/common/InAppNavigationTracker";
 
 const notoSansJP = Noto_Sans_JP({
   variable: "--font-noto-sans-jp",
@@ -28,6 +29,7 @@ export default function RootLayout({
     <html lang="ja">
       <body className={`${notoSansJP.variable} font-sans antialiased`}>
         <Providers>
+          <InAppNavigationTracker />
           <Header />
           {children}
         </Providers>
