@@ -16,6 +16,7 @@ import { useMutation } from "@apollo/client/react";
 import { DELETE_SPOT } from "@/graphql/mutations/spot";
 import { PriceRange } from "@/graphql/generated/graphql";
 import { LikeButton } from "@/components/spot/LikeButton";
+import { SaveButton } from "@/components/bookmark/SaveButton";
 import { FollowButton } from "@/components/user/FollowButton";
 import { BackLink } from "@/components/common/BackLink";
 import { useToast } from "@/components/common/toast/ToastProvider";
@@ -43,6 +44,7 @@ interface SpotDetailProps {
     businessHours?: string | null;
     likeCount: number;
     isLiked?: boolean | null;
+    isBookmarked?: boolean | null;
     createdAt: string;
     images: SpotImage[];
     category: {
@@ -152,12 +154,19 @@ export function SpotDetail({ spot, isOwner = false }: SpotDetailProps) {
               {spot.address}
             </p>
           </div>
-          <LikeButton
-            spotId={spot.id}
-            likeCount={spot.likeCount}
-            isLiked={spot.isLiked ?? null}
-            variant="pill"
-          />
+          <div className="flex shrink-0 items-center gap-2">
+            <SaveButton
+              spotId={spot.id}
+              isBookmarked={spot.isBookmarked ?? null}
+              variant="pill"
+            />
+            <LikeButton
+              spotId={spot.id}
+              likeCount={spot.likeCount}
+              isLiked={spot.isLiked ?? null}
+              variant="pill"
+            />
+          </div>
         </div>
       </header>
 

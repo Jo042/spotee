@@ -24,6 +24,7 @@ export const GET_MY_SPOTS = gql(`
           address
           likeCount
           isLiked
+          isBookmarked
           images {
             id
             url
@@ -60,6 +61,7 @@ export const GET_MY_LIKED_SPOTS = gql(`
           address
           likeCount
           isLiked
+          isBookmarked
           images {
             id
             url
@@ -111,6 +113,7 @@ export const GET_USER_SPOTS = gql(`
           address
           likeCount
           isLiked
+          isBookmarked
           images {
             id
             url
