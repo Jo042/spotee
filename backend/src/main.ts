@@ -1,9 +1,14 @@
 import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
+import { NestExpressApplication } from '@nestjs/platform-express';
 import { AppModule } from './app.module';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create<NestExpressApplication>(AppModule);
+
+  // Railway のプロキシを1段挟むため、req.ip を X-Forwarded-For の
+  // 最後の値（プロキシが付けた接続元）から取る。回数制限の識別に使う
+  app.set('trust proxy', 1);
 
   // whitelist: 検証デコレーターの無いプロパティを落とす
   // transform: 受け取った素のオブジェクトをクラスのインスタンスにする
