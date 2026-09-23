@@ -7,6 +7,8 @@ import { useMutation, useQuery } from "@apollo/client/react";
 import { CREATE_SPOT, UPDATE_SPOT } from "@/graphql/mutations/spot";
 import { GET_ALL_TAGS } from "@/graphql/queries/tag";
 import { ImageUploader } from "@/components/common/ImageUploader";
+import { useToast } from "@/components/common/toast/ToastProvider";
+import { getUserFacingErrorMessage } from "@/lib/graphql-error";
 import { PriceRange } from "@/graphql/generated/graphql";
 
 interface SpotFormData {
@@ -50,6 +52,7 @@ const priceRangeEnumMap: Record<number, PriceRange> = {
 
 export function SpotForm({ spotId, initialValues }: SpotFormProps) {
   const router = useRouter();
+  const toast = useToast();
   const isEditMode = !!spotId;
 
   const [imageUrls, setImageUrls] = useState<string[]>(
@@ -91,7 +94,10 @@ export function SpotForm({ spotId, initialValues }: SpotFormProps) {
     currentValue: string[],
   ) => {
     if (currentValue.includes(tagId)) {
-      setValue(field, currentValue.filter((id) => id !== tagId));
+      setValue(
+        field,
+        currentValue.filter((id) => id !== tagId),
+      );
     } else {
       setValue(field, [...currentValue, tagId]);
     }
@@ -99,7 +105,7 @@ export function SpotForm({ spotId, initialValues }: SpotFormProps) {
 
   const onSubmit = async (data: SpotFormData) => {
     if (imageUrls.length === 0) {
-      alert("画像を最低1枚アップロードしてください");
+      toast.error("画像を1枚以上選択してください");
       return;
     }
 
@@ -118,13 +124,22 @@ export function SpotForm({ spotId, initialValues }: SpotFormProps) {
     try {
       if (isEditMode) {
         await updateSpot({ variables: { id: spotId, input } });
+        toast.success("スポットを更新しました");
         router.push(`/spots/${spotId}`);
       } else {
         const result = await createSpot({ variables: { input } });
+        toast.success("スポットを投稿しました");
         router.push(`/spots/${result.data?.createSpot.id}`);
       }
-    } catch {
-      alert(isEditMode ? "スポットの更新に失敗しました" : "スポットの投稿に失敗しました");
+    } catch (err) {
+      toast.error(
+        getUserFacingErrorMessage(
+          err,
+          isEditMode
+            ? "スポットの更新に失敗しました"
+            : "スポットの投稿に失敗しました",
+        ),
+      );
     }
   };
 
@@ -319,8 +334,12 @@ export function SpotForm({ spotId, initialValues }: SpotFormProps) {
           className="w-full py-3 px-4 bg-primary-600 text-white font-medium rounded-lg hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
         >
           {loading
-            ? isEditMode ? "更新中..." : "投稿中..."
-            : isEditMode ? "スポットを更新する" : "スポットを投稿する"}
+            ? isEditMode
+              ? "更新中..."
+              : "投稿中..."
+            : isEditMode
+              ? "スポットを更新する"
+              : "スポットを投稿する"}
         </button>
       </div>
     </form>
