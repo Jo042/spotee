@@ -20,3 +20,44 @@ export const GET_SPOT_BOOKMARK_STATE = gql(`
     }
   }
 `);
+
+export const GET_FOLDER = gql(`
+  query GetFolder($id: ID!, $first: Int, $after: String) {
+    folder(id: $id) {
+      id
+      name
+      spotCount
+      spots(first: $first, after: $after) {
+        edges {
+          node {
+            id
+            title
+            address
+            likeCount
+            isLiked
+            isBookmarked
+            images {
+              id
+              url
+              order
+            }
+            category {
+              id
+              name
+            }
+            user {
+              id
+              name
+              avatarUrl
+            }
+          }
+          cursor
+        }
+        pageInfo {
+          hasNextPage
+          endCursor
+        }
+      }
+    }
+  }
+`);

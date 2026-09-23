@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { useQuery } from "@apollo/client/react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
 import { Camera, Heart, Loader2, Pencil, UserCircle } from "lucide-react";
@@ -10,6 +10,8 @@ import { useAuth } from "@/hooks/useAuth";
 import { useIntersectionObserver } from "@/hooks/useIntersectionObserver";
 import { SpotCard } from "@/components/spot/SpotCard";
 import { SpotCardSkeleton } from "@/components/spot/SpotList";
+import { FolderGrid } from "@/components/bookmark/FolderGrid";
+import { GET_MY_FOLDERS } from "@/graphql/queries/bookmark";
 import {
   GET_ME,
   GET_MY_SPOTS,
@@ -17,15 +19,27 @@ import {
 } from "@/graphql/queries/user";
 import { formatCount } from "@/lib/format";
 
-type Tab = "spots" | "liked";
+const TABS = ["spots", "liked", "folders"] as const;
+type Tab = (typeof TABS)[number];
+
+const isTab = (value: string | null): value is Tab =>
+  TABS.some((tab) => tab === value);
 
 const PAGE_SIZE = 20;
 
 export function MyPageContent() {
   const { user, loading: authLoading } = useAuth();
   const router = useRouter();
-  const [activeTab, setActiveTab] = useState<Tab>("spots");
+  // タブは URL に持つ。フォルダの詳細から戻ったときに同じタブを開くため
+  const tabParam = useSearchParams().get("tab");
+  const activeTab: Tab = isTab(tabParam) ? tabParam : "spots";
   const [loadingMore, setLoadingMore] = useState(false);
+
+  const selectTab = (tab: Tab) => {
+    router.replace(tab === "spots" ? "/mypage" : `/mypage?tab=${tab}`, {
+      scroll: false,
+    });
+  };
 
   const { data: meData, loading: meLoading } = useQuery(GET_ME, {
     skip: !user,
@@ -47,9 +61,19 @@ export function MyPageContent() {
     skip: !user,
   });
 
+  const { data: foldersData, loading: foldersLoading } = useQuery(
+    GET_MY_FOLDERS,
+    { skip: !user },
+  );
+
   const spotsPageInfo = spotsData?.mySpots?.pageInfo;
   const likedPageInfo = likedData?.myLikedSpots?.pageInfo;
-  const activePageInfo = activeTab === "spots" ? spotsPageInfo : likedPageInfo;
+  const activePageInfo =
+    activeTab === "spots"
+      ? spotsPageInfo
+      : activeTab === "liked"
+        ? likedPageInfo
+        : undefined;
   const hasNextPage = activePageInfo?.hasNextPage ?? false;
 
   const handleLoadMore = useCallback(async () => {
@@ -134,12 +158,20 @@ export function MyPageContent() {
   const spotsCount = spotsData?.mySpots?.totalCount;
   const likedCount = likedData?.myLikedSpots?.totalCount;
 
+  const folders = foldersData?.myFolders;
+
   const activeSpots = activeTab === "spots" ? mySpots : myLikedSpots;
-  const activeLoading = activeTab === "spots" ? spotsLoading : likedLoading;
+  const activeLoading =
+    activeTab === "spots"
+      ? spotsLoading
+      : activeTab === "liked"
+        ? likedLoading
+        : foldersLoading && !folders;
 
   const tabs: { key: Tab; label: string; count: number | undefined }[] = [
     { key: "spots", label: "投稿", count: spotsCount },
     { key: "liked", label: "いいね", count: likedCount },
+    { key: "folders", label: "保存", count: folders?.length },
   ];
 
   return (
@@ -242,7 +274,8 @@ export function MyPageContent() {
               return (
                 <button
                   key={tab.key}
-                  onClick={() => setActiveTab(tab.key)}
+                  onClick={() => selectTab(tab.key)}
+                  aria-current={isActive ? "page" : undefined}
                   className={`relative flex items-center gap-1.5 py-3 text-sm transition-colors ${
                     isActive
                       ? "font-bold text-gray-900"
@@ -278,6 +311,8 @@ export function MyPageContent() {
               <SpotCardSkeleton key={i} />
             ))}
           </div>
+        ) : activeTab === "folders" ? (
+          <FolderGrid folders={folders ?? []} />
         ) : activeSpots.length === 0 ? (
           <div className="flex flex-col items-center py-16 sm:py-20 text-center">
             <div className="flex h-12 w-12 items-center justify-center rounded-full bg-gray-100 text-gray-400">
