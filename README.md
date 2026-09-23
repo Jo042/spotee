@@ -92,7 +92,8 @@ spotee/
 ### 前提条件
 
 - Node.js 20+
-- PostgreSQL（またはSupabaseプロジェクト）
+- Docker（開発用の PostgreSQL を立てる）
+- Supabase プロジェクト（認証・画像の保存に使う。DB は使わない）
 
 ### インストール
 
@@ -115,18 +116,29 @@ NEXT_PUBLIC_GRAPHQL_URL=http://localhost:4000/graphql
 **backend/.env**
 
 ```env
-DATABASE_URL=postgresql://user:password@host:5432/dbname?pgbouncer=true
-DIRECT_URL=postgresql://user:password@host:5432/dbname
-SUPABASE_JWT_SECRET=your_supabase_jwt_secret
+DATABASE_URL=postgresql://postgres:dev@localhost:5434/postgres
+DIRECT_URL=postgresql://postgres:dev@localhost:5434/postgres
+SUPABASE_URL=your_supabase_url
 ```
+
+開発中の DB はローカルの Docker に向ける。**本番（Supabase）の DB に向けて `prisma migrate dev` を実行しない。** `migrate dev` は差分があると DB のリセット（全データ削除）を提案する。
 
 ### データベースのセットアップ
 
 ```bash
+docker compose -f infra/dev/docker-compose.yml up -d   # localhost:5434 に PostgreSQL 17
+
 cd backend
-npx prisma migrate dev
-npx prisma db seed
+npx prisma migrate dev                              # スキーマ適用
+npx prisma db seed                                  # マスタ（カテゴリ・属性タグ・ムードタグ）
+USER_COUNT=5 SPOT_COUNT=60 npm run seed:loadtest    # 画面確認用のサンプルデータ（任意）
 ```
+
+### 本番へのマイグレーションの適用
+
+Railway のデプロイ時に `npx prisma migrate deploy` が自動で実行される（`backend/railway.json` の `preDeployCommand`）。未適用のマイグレーションだけを順に適用し、失敗した場合は新しい版に切り替わらない。Railway の環境変数に `DATABASE_URL` と `DIRECT_URL`（プーラーを経由しない直接接続）が必要。
+
+CI では `schema.prisma` とマイグレーションのファイルが一致しているかを検査している。`schema.prisma` を変えたら `npx prisma migrate dev --name <name>` でマイグレーションを作ってからコミットする。
 
 ### 開発サーバーの起動
 
