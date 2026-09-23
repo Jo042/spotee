@@ -18,6 +18,8 @@ import { PriceRange } from "@/graphql/generated/graphql";
 import { LikeButton } from "@/components/spot/LikeButton";
 import { FollowButton } from "@/components/user/FollowButton";
 import { BackLink } from "@/components/common/BackLink";
+import { useToast } from "@/components/common/toast/ToastProvider";
+import { getUserFacingErrorMessage } from "@/lib/graphql-error";
 
 interface SpotImage {
   id: string;
@@ -68,6 +70,7 @@ const priceRangeLabels: Record<PriceRange, string> = {
 
 export function SpotDetail({ spot, isOwner = false }: SpotDetailProps) {
   const router = useRouter();
+  const toast = useToast();
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [deleteSpot, { loading: deleting }] = useMutation(DELETE_SPOT);
@@ -75,9 +78,10 @@ export function SpotDetail({ spot, isOwner = false }: SpotDetailProps) {
   const handleDelete = async () => {
     try {
       await deleteSpot({ variables: { id: spot.id } });
+      toast.success("スポットを削除しました");
       router.push("/spots");
-    } catch {
-      alert("削除に失敗しました");
+    } catch (err) {
+      toast.error(getUserFacingErrorMessage(err, "削除に失敗しました"));
     }
   };
 
