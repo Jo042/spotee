@@ -1,12 +1,13 @@
-import { isSpotImageUrl } from './spot-image-url.util';
+import { isStorageImageUrl } from './storage-image-url.util';
 
 const SUPABASE_URL = 'https://zvgymgxcmxupxhscnlfo.supabase.co';
 const HOST = 'zvgymgxcmxupxhscnlfo.supabase.co';
 const VALID = `https://${HOST}/storage/v1/object/public/spots/1234-abcd.jpg`;
 
-const check = (value: unknown) => isSpotImageUrl(value, SUPABASE_URL);
+const check = (value: unknown) =>
+  isStorageImageUrl(value, SUPABASE_URL, 'spots');
 
-describe('isSpotImageUrl', () => {
+describe('isStorageImageUrl', () => {
   describe('正規のURL', () => {
     it('自分の Storage の公開URLを許可する', () => {
       expect(check(VALID)).toBe(true);
@@ -101,11 +102,37 @@ describe('isSpotImageUrl', () => {
     });
 
     it('SUPABASE_URL が未設定なら、正規のURLでも弾く', () => {
-      expect(isSpotImageUrl(VALID, undefined)).toBe(false);
+      expect(isStorageImageUrl(VALID, undefined, 'spots')).toBe(false);
     });
 
     it('SUPABASE_URL が壊れていれば弾く', () => {
-      expect(isSpotImageUrl(VALID, 'not a url')).toBe(false);
+      expect(isStorageImageUrl(VALID, 'not a url', 'spots')).toBe(false);
+    });
+  });
+
+  describe('バケットの指定', () => {
+    const AVATAR = `https://${HOST}/storage/v1/object/public/avatars/me.jpg`;
+
+    it('avatars を指定すればアバター用バケットのURLを許可する', () => {
+      expect(isStorageImageUrl(AVATAR, SUPABASE_URL, 'avatars')).toBe(true);
+    });
+
+    it('spots を指定したときアバター用のURLは弾く', () => {
+      expect(isStorageImageUrl(AVATAR, SUPABASE_URL, 'spots')).toBe(false);
+    });
+
+    it('avatars を指定したときスポット用のURLは弾く', () => {
+      expect(isStorageImageUrl(VALID, SUPABASE_URL, 'avatars')).toBe(false);
+    });
+
+    it('バケット名の前方一致で別バケットを通さない（avatars-evil など）', () => {
+      expect(
+        isStorageImageUrl(
+          `https://${HOST}/storage/v1/object/public/avatars-evil/x.jpg`,
+          SUPABASE_URL,
+          'avatars',
+        ),
+      ).toBe(false);
     });
   });
 });

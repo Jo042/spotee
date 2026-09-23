@@ -1,17 +1,17 @@
-/** Supabase Storage の公開URLのうち、スポット画像として許可するパス */
-const STORAGE_PUBLIC_PREFIX = '/storage/v1/object/public/spots/';
+export type StorageBucket = 'spots' | 'avatars';
 
 /**
- * 自分の Supabase Storage にアップロードされた画像URLかを判定する。
+ * 自分の Supabase Storage の、指定したバケットにアップロードされた画像URLかを判定する。
  *
  * 文字列の前方一致や includes では判定できない。
  * `https://自分のホスト.co.evil.com/` や `https://自分のホスト.co@evil.com/` は
  * 前方一致を通過するし、クエリやフラグメントに自分のホスト名を埋め込めば
  * includes も通過する。実際の接続先は URL をパースしないと分からない。
  */
-export function isSpotImageUrl(
+export function isStorageImageUrl(
   value: unknown,
   supabaseUrl: string | undefined,
+  bucket: StorageBucket,
 ): boolean {
   if (typeof value !== 'string' || !supabaseUrl) return false;
 
@@ -35,7 +35,7 @@ export function isSpotImageUrl(
   if (parsed.username !== '' || parsed.password !== '') return false;
 
   // pathname は new URL の時点で `..` が解決されている
-  return parsed.pathname.startsWith(STORAGE_PUBLIC_PREFIX);
+  return parsed.pathname.startsWith(`/storage/v1/object/public/${bucket}/`);
 }
 
 function parseHostname(url: string): string | null {
