@@ -18,6 +18,7 @@ import { GqlAuthGuard, OptionalGqlAuthGuard } from '../auth/auth.guard';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import type { AuthUser } from '../auth/types/auth-user.type';
 import { UserLoader } from './user.loader';
+import { UpdateProfileInput } from './dto/update-profile.input';
 import { FollowLoader } from '../follow/follow.loader';
 import { FollowService } from '../follow/follow.service';
 import { UserConnection } from './dto/user-connection.object';
@@ -90,16 +91,14 @@ export class UserResolver {
   @UseGuards(GqlAuthGuard)
   async updateProfile(
     @CurrentUser() authUser: AuthUser,
-    @Args('name', { nullable: true }) name?: string,
-    @Args('bio', { nullable: true }) bio?: string,
-    @Args('avatarUrl', { nullable: true }) avatarUrl?: string,
+    @Args('input') input: UpdateProfileInput,
   ): Promise<UserNode> {
     const user = await this.userService.getOrCreateUser(authUser);
 
     const updateData: { name?: string; bio?: string; avatarUrl?: string } = {};
-    if (name !== undefined) updateData.name = name;
-    if (bio !== undefined) updateData.bio = bio;
-    if (avatarUrl !== undefined) updateData.avatarUrl = avatarUrl;
+    if (input.name !== undefined) updateData.name = input.name;
+    if (input.bio !== undefined) updateData.bio = input.bio;
+    if (input.avatarUrl !== undefined) updateData.avatarUrl = input.avatarUrl;
 
     return this.userService.updateUser(user.id, updateData);
   }

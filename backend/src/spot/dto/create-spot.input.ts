@@ -12,7 +12,7 @@ import {
   MaxLength,
 } from 'class-validator';
 import { PriceRange } from './spot.object';
-import { IsSpotImageUrl } from '../../common/validation/is-spot-image-url.decorator';
+import { IsStorageImageUrl } from '../../common/validation/is-storage-image-url.decorator';
 import {
   TITLE_MAX_LENGTH,
   DESCRIPTION_MAX_LENGTH,
@@ -81,7 +81,7 @@ export class CreateSpotInput {
   @ArrayMaxSize(IMAGES_MAX, {
     message: `画像は${IMAGES_MAX}枚までです`,
   })
-  @IsSpotImageUrl({ each: true })
+  @IsStorageImageUrl('spots', { each: true })
   imageUrls: string[];
 
   @Field(() => [ID], { nullable: true })
