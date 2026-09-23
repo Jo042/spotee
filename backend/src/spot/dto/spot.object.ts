@@ -86,9 +86,22 @@ export class Spot {
 
   @Field(() => Boolean, { nullable: true })
   isLiked?: boolean | null;
+
+  @Field(() => Boolean, { nullable: true })
+  isBookmarked?: boolean | null;
+
+  @Field(() => [ID], { nullable: true })
+  bookmarkFolderIds?: string[] | null;
 }
 
 export type SpotNode = Omit<
   Spot,
-  'user' | 'category' | 'images' | 'attributeTags' | 'moodTags' | 'isLiked'
+  | 'user'
+  | 'category'
+  | 'images'
+  | 'attributeTags'
+  | 'moodTags'
+  | 'isLiked'
+  | 'isBookmarked'
+  | 'bookmarkFolderIds'
 >;

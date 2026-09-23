@@ -15,6 +15,7 @@ import { UserModule } from './user/user.module';
 import { SpotModule } from './spot/spot.module';
 import { LikeModule } from './like/like.module';
 import { FollowModule } from './follow/follow.module';
+import { BookmarkModule } from './bookmark/bookmark.module';
 import { maskInternalError } from './common/graphql/mask-internal-error';
 import { GqlThrottlerGuard } from './common/graphql/gql-throttler.guard';
 
@@ -64,6 +65,7 @@ const MUTATION_LIMIT_PER_MINUTE = 30;
     SpotModule,
     LikeModule,
     FollowModule,
+    BookmarkModule,
   ],
   controllers: [AppController],
   providers: [AppService, { provide: APP_GUARD, useClass: GqlThrottlerGuard }],
