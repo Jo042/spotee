@@ -7,6 +7,7 @@ import { Camera, UserCircle } from "lucide-react";
 import { useMutation } from "@apollo/client/react";
 import { UPDATE_PROFILE } from "@/graphql/mutations/user";
 import { uploadImage } from "@/lib/storage";
+import { getUserFacingErrorMessage } from "@/lib/graphql-error";
 import imageCompression from "browser-image-compression";
 
 interface ProfileEditFormProps {
@@ -63,15 +64,17 @@ export function ProfileEditForm({
     try {
       await updateProfile({
         variables: {
-          name: name.trim(),
-          bio: bio.trim() || undefined,
-          avatarUrl: avatarUrl || undefined,
+          input: {
+            name: name.trim(),
+            bio: bio.trim() || undefined,
+            avatarUrl: avatarUrl || undefined,
+          },
         },
       });
       router.push("/mypage");
       router.refresh();
-    } catch {
-      setError("保存に失敗しました");
+    } catch (err) {
+      setError(getUserFacingErrorMessage(err, "保存に失敗しました"));
     }
   };
 
@@ -140,7 +143,10 @@ export function ProfileEditForm({
 
       <div>
         <div className="flex items-baseline justify-between mb-1.5">
-          <label htmlFor="profile-name" className="text-sm font-medium text-gray-700">
+          <label
+            htmlFor="profile-name"
+            className="text-sm font-medium text-gray-700"
+          >
             名前
           </label>
           <span className="text-xs text-gray-400">{name.length}/50</span>
@@ -157,7 +163,10 @@ export function ProfileEditForm({
 
       <div>
         <div className="flex items-baseline justify-between mb-1.5">
-          <label htmlFor="profile-bio" className="text-sm font-medium text-gray-700">
+          <label
+            htmlFor="profile-bio"
+            className="text-sm font-medium text-gray-700"
+          >
             自己紹介
           </label>
           <span className="text-xs text-gray-400">{bio.length}/200</span>
