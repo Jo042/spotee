@@ -31,13 +31,25 @@ export class UserService {
 
     const defaultName = authUser.email.split('@')[0];
 
-    return this.prisma.user.create({
-      data: {
-        supabaseId: authUser.supabaseId,
-        email: authUser.email,
-        name: defaultName,
-      },
-    });
+    try {
+      return await this.prisma.user.create({
+        data: {
+          supabaseId: authUser.supabaseId,
+          email: authUser.email,
+          name: defaultName,
+        },
+      });
+    } catch (error) {
+      // 同じリクエスト内の別のリゾルバーなどが、先に作った場合
+      const isDuplicate =
+        error instanceof Prisma.PrismaClientKnownRequestError &&
+        error.code === 'P2002';
+      if (!isDuplicate) throw error;
+
+      const createdByOther = await this.findBySupabaseId(authUser.supabaseId);
+      if (!createdByOther) throw error;
+      return createdByOther;
+    }
   }
 
   findById(id: string) {
