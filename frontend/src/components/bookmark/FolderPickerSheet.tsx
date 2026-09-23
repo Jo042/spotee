@@ -1,9 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import Image from "next/image";
-import type { ApolloCache } from "@apollo/client";
-import { useMutation, useQuery } from "@apollo/client/react";
+import type { ApolloCache, Reference } from "@apollo/client";
+import { useApolloClient, useMutation, useQuery } from "@apollo/client/react";
 import { Bookmark, Check } from "lucide-react";
 import { BottomSheet } from "@/components/common/BottomSheet";
 import { useToast } from "@/components/common/toast/ToastProvider";
@@ -35,6 +35,10 @@ interface FolderPickerSheetProps {
   onRequestManage: () => void;
 }
 
+interface CachedSpotConnection {
+  edges: readonly { node: Reference }[];
+}
+
 interface FolderRow {
   id: string;
   name: string;
@@ -51,6 +55,9 @@ export function FolderPickerSheet({
   const toast = useToast();
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [createError, setCreateError] = useState<string | null>(null);
+  const client = useApolloClient();
+  // シートを開いている間に外したフォルダ。閉じるときにフォルダ内一覧から消す
+  const removedFolderIds = useRef(new Set<string>());
 
   const { data: foldersData, loading: foldersLoading } = useQuery(
     GET_MY_FOLDERS,
@@ -80,16 +87,43 @@ export function FolderPickerSheet({
    * 件数だけをキャッシュ上で直す。一覧を取り直すと「直近使った順」で並び替わり、
    * 付け外しの最中に行が動いてしまうため、並びは次に開いたときに更新する
    */
-  const adjustSpotCount =
-    (folderId: string, delta: 1 | -1) => (cache: ApolloCache) => {
-      cache.modify({
-        id: cache.identify({ __typename: "Folder", id: folderId }),
-        fields: { spotCount: (count: number) => Math.max(0, count + delta) },
-      });
-    };
+  const adjustSpotCount = (
+    cache: ApolloCache,
+    folderId: string,
+    delta: 1 | -1,
+  ) => {
+    cache.modify({
+      id: cache.identify({ __typename: "Folder", id: folderId }),
+      fields: { spotCount: (count: number) => Math.max(0, count + delta) },
+    });
+  };
 
-  const save = (folder: FolderRow) =>
-    addBookmark({
+  /**
+   * 表示中のフォルダ内一覧から、外したスポットを取り除く。
+   * 一覧のフィールドを捨てる（evict）と、フォルダ詳細のクエリが欠けた状態に
+   * なって画面が更新されなくなるため、該当の行だけを消す。
+   * 付け外しの最中に消すと、カードごとこのシートも消えてしまうので、閉じるときに行う
+   */
+  const removeFromFolderSpots = (cache: ApolloCache, folderId: string) => {
+    cache.modify<{ spots: CachedSpotConnection }>({
+      id: cache.identify({ __typename: "Folder", id: folderId }),
+      fields: {
+        spots: (existing, { readField, isReference }) => {
+          if (isReference(existing)) return existing;
+          return {
+            ...existing,
+            edges: existing.edges.filter(
+              (edge) => readField<string>("id", edge.node) !== spotId,
+            ),
+          };
+        },
+      },
+    });
+  };
+
+  const save = (folder: FolderRow) => {
+    removedFolderIds.current.delete(folder.id);
+    return addBookmark({
       variables: { spotId, folderId: folder.id },
       optimisticResponse: {
         addBookmark: {
@@ -99,12 +133,14 @@ export function FolderPickerSheet({
           bookmarkFolderIds: withFolderId(savedIds, folder.id),
         },
       },
-      update: savedIds.includes(folder.id)
-        ? undefined
-        : adjustSpotCount(folder.id, 1),
+      update: (cache) => {
+        if (!savedIds.includes(folder.id)) adjustSpotCount(cache, folder.id, 1);
+      },
     });
+  };
 
   const unsave = (folder: FolderRow) => {
+    removedFolderIds.current.add(folder.id);
     const next = withoutFolderId(savedIds, folder.id);
     return removeBookmark({
       variables: { spotId, folderId: folder.id },
@@ -116,10 +152,21 @@ export function FolderPickerSheet({
           bookmarkFolderIds: next,
         },
       },
-      update: savedIds.includes(folder.id)
-        ? adjustSpotCount(folder.id, -1)
-        : undefined,
+      update: (cache) => {
+        if (!savedIds.includes(folder.id)) return;
+        adjustSpotCount(cache, folder.id, -1);
+      },
+    }).catch((error: unknown) => {
+      removedFolderIds.current.delete(folder.id);
+      throw error;
     });
+  };
+
+  const handleClose = () => {
+    for (const folderId of removedFolderIds.current) {
+      removeFromFolderSpots(client.cache, folderId);
+    }
+    onClose();
   };
 
   const notifyError = (error: unknown, fallback: string) =>
@@ -164,12 +211,15 @@ export function FolderPickerSheet({
     }
   };
 
-  const isFirstLoad = foldersLoading && !foldersData;
+  // 管理モードは保存先が分かるまでチェック状態を出さない。未読込のまま出すと
+  // すべて未チェックに見え、外すつもりで押すと追加になってしまう
+  const isFirstLoad =
+    (foldersLoading && !foldersData) || (mode === "manage" && !stateData);
 
   return (
     <BottomSheet
       open
-      onClose={onClose}
+      onClose={handleClose}
       label={mode === "save" ? "フォルダに保存" : "保存先のフォルダ"}
       title={mode === "save" ? "フォルダに保存" : "保存先のフォルダ"}
       desktop="dialog"
@@ -177,7 +227,7 @@ export function FolderPickerSheet({
         mode === "manage" ? (
           <button
             type="button"
-            onClick={onClose}
+            onClick={handleClose}
             className="w-full rounded-lg bg-primary-600 py-3 text-sm font-bold text-white transition hover:bg-primary-700 active:scale-[0.98]"
           >
             完了

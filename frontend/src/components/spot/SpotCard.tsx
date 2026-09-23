@@ -94,7 +94,7 @@ export function SpotCard({ spot }: SpotCardProps) {
                 {spot.user.name}
               </span>
             </button>
-            <div className="flex shrink-0 items-center gap-4">
+            <div className="flex shrink-0 items-center gap-3">
               <SaveButton
                 spotId={spot.id}
                 isBookmarked={spot.isBookmarked ?? null}
