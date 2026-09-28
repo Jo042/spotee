@@ -18,7 +18,13 @@
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "jest --config ./test/jest-e2e.json",
-    "seed:loadtest": "ts-node prisma/seed-loadtest.ts"
+    "seed:loadtest": "ts-node prisma/seed-loadtest.ts",
+    "db:assert-local": "node --env-file-if-exists=.env scripts/assert-local-db.mjs",
+    "db:migrate": "npm run db:assert-local && prisma migrate dev",
+    "db:seed": "npm run db:assert-local && prisma db seed",
+    "db:seed:sample": "npm run db:assert-local && USER_COUNT=5 SPOT_COUNT=60 ts-node prisma/seed-loadtest.ts",
+    "db:studio": "prisma studio",
+    "db:status": "prisma migrate status"
   },
   "dependencies": {
     "@apollo/server": "^5.4.0",
