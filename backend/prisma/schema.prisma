@@ -22,6 +22,8 @@ model User {
   likes       Like[]
   followers   Follow[]     @relation("following")
   following   Follow[]     @relation("follower")
+  folders     Folder[]
+  bookmarks   Bookmark[]
 
   @@map("users")
 }
@@ -60,6 +62,7 @@ model Spot {
   category      Category @relation(fields: [categoryId], references: [id])
   images        SpotImage[]
   likes         Like[]
+  bookmarks     Bookmark[]
   attributeTags SpotAttributeTag[]
   moodTags      SpotMoodTag[]
 
@@ -168,4 +171,35 @@ model Like {
   @@index([userId])
   @@index([spotId])
   @@map("likes")
+}
+
+model Folder {
+  id        String   @id @default(uuid())
+  userId    String   @map("user_id")
+  name      String
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  bookmarks Bookmark[]
+
+  @@unique([userId, name])
+  @@map("folders")
+}
+
+model Bookmark {
+  id        String   @id @default(uuid())
+  userId    String   @map("user_id")
+  spotId    String   @map("spot_id")
+  folderId  String   @map("folder_id")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  spot   Spot   @relation(fields: [spotId], references: [id], onDelete: Cascade)
+  folder Folder @relation(fields: [folderId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, spotId, folderId])
+  @@index([folderId, createdAt])
+  @@index([spotId])
+  @@map("bookmarks")
 }
