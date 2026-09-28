@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { MapPin, UserCircle } from "lucide-react";
 import { LikeButton } from "@/components/spot/LikeButton";
+import { SaveButton } from "@/components/bookmark/SaveButton";
 
 interface SpotCardProps {
   spot: {
@@ -13,6 +14,7 @@ interface SpotCardProps {
     address: string;
     likeCount: number;
     isLiked?: boolean | null;
+    isBookmarked?: boolean | null;
     images: { url: string }[];
     category: { name: string };
     user: { id: string; name: string; avatarUrl?: string | null };
@@ -92,11 +94,17 @@ export function SpotCard({ spot }: SpotCardProps) {
                 {spot.user.name}
               </span>
             </button>
-            <LikeButton
-              spotId={spot.id}
-              likeCount={spot.likeCount}
-              isLiked={spot.isLiked ?? null}
-            />
+            <div className="flex shrink-0 items-center gap-3">
+              <SaveButton
+                spotId={spot.id}
+                isBookmarked={spot.isBookmarked ?? null}
+              />
+              <LikeButton
+                spotId={spot.id}
+                likeCount={spot.likeCount}
+                isLiked={spot.isLiked ?? null}
+              />
+            </div>
           </div>
         </div>
       </article>

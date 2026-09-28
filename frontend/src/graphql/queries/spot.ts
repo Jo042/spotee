@@ -11,6 +11,7 @@ export const GET_SPOT = gql(`
       businessHours
       likeCount
       isLiked
+      isBookmarked
       createdAt
       images {
         id
@@ -50,6 +51,7 @@ export const GET_SPOTS = gql(`
           address
           likeCount
           isLiked
+          isBookmarked
           createdAt
           images {
             id
@@ -87,6 +89,7 @@ export const GET_SPOTS_PAGE = gql(`
           address
           likeCount
           isLiked
+          isBookmarked
           createdAt
           images {
             id
