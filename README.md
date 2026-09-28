@@ -24,7 +24,7 @@ Instagram等のSNSでは難しい「複合条件での絞り込み」を、AND/O
 
 | レイヤー | 技術 |
 |----------|------|
-| フロントエンド | Next.js 14 (App Router), Apollo Client, Tailwind CSS |
+| フロントエンド | Next.js 16 (App Router), Apollo Client, Tailwind CSS |
 | バックエンド | NestJS, Apollo Server (GraphQL Code First), Prisma |
 | データベース | PostgreSQL (Supabase) |
 | 認証 | Supabase Auth (JWT) |
@@ -65,11 +65,11 @@ Instagram等のSNSでは難しい「複合条件での絞り込み」を、AND/O
 
 ```
 spotee/
-├── frontend/          # Next.js 14 (App Router)
+├── frontend/          # Next.js 16 (App Router)
 │   └── src/
 │       ├── app/       # ページ (App Router)
 │       ├── components/
-│       ├── graphql/   # クエリ・ミューテーション定義
+│       ├── graphql/   # クエリ・ミューテーション定義（generated/ は codegen の出力）
 │       ├── hooks/     # useAuth 等
 │       └── lib/       # Apollo Client, Supabase クライアント
 ├── backend/           # NestJS + GraphQL + Prisma
@@ -77,12 +77,20 @@ spotee/
 │   │   ├── spot/
 │   │   ├── user/
 │   │   ├── like/
-│   │   ├── tag/
+│   │   ├── follow/
+│   │   ├── bookmark/  # 保存フォルダ
+│   │   ├── category/  # カテゴリ・タグ
 │   │   ├── auth/      # JWT Guard
-│   │   └── prisma/    # PrismaService
-│   └── prisma/
-│       └── schema.prisma
-└── package.json       # npm workspaces
+│   │   └── common/    # Connection・入力検証・GraphQL の保護
+│   ├── prisma/
+│   │   ├── schema.prisma
+│   │   ├── migrations/
+│   │   └── seed.ts
+│   └── scripts/       # 開発用コマンドの補助
+├── infra/
+│   ├── dev/           # 開発用 DB（docker compose）
+│   └── bench/         # 性能計測用 DB
+└── package.json       # npm workspaces・開発用コマンド
 ```
 
 ---
@@ -91,16 +99,23 @@ spotee/
 
 ### 前提条件
 
-- Node.js 20+
+- Node.js 22 以上（CI・本番の Docker と同じ）
 - Docker（開発用の PostgreSQL を立てる）
-- Supabase プロジェクト（認証・画像の保存に使う。DB は使わない）
+- Supabase プロジェクト（認証・画像の保存に使う。開発中の DB には使わない）
 
-### インストール
+### 初回だけ
 
 ```bash
 git clone https://github.com/Jo042/spotee.git
 cd spotee
 npm install
+
+# 環境変数を用意する（下の「環境変数」）
+
+npm run db:up             # 開発用 DB（Docker の PostgreSQL 17、localhost:5434）を起動
+npm run db:migrate        # スキーマを適用
+npm run db:seed           # マスタ（カテゴリ・属性タグ・ムードタグ）
+npm run db:seed:sample    # 画面確認用のサンプル（ユーザー5人・スポット60件）。任意
 ```
 
 ### 環境変数
@@ -110,7 +125,7 @@ npm install
 ```env
 NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
-NEXT_PUBLIC_GRAPHQL_URL=http://localhost:4000/graphql
+NEXT_PUBLIC_API_URL=http://localhost:4000/graphql
 ```
 
 **backend/.env**
@@ -121,53 +136,73 @@ DIRECT_URL=postgresql://postgres:dev@localhost:5434/postgres
 SUPABASE_URL=your_supabase_url
 ```
 
-開発中の DB はローカルの Docker に向ける。**本番（Supabase）の DB に向けて `prisma migrate dev` を実行しない。** `migrate dev` は差分があると DB のリセット（全データ削除）を提案する。
-
-### データベースのセットアップ
-
-```bash
-docker compose -f infra/dev/docker-compose.yml up -d   # localhost:5434 に PostgreSQL 17
-
-cd backend
-npx prisma migrate dev                              # スキーマ適用
-npx prisma db seed                                  # マスタ（カテゴリ・属性タグ・ムードタグ）
-USER_COUNT=5 SPOT_COUNT=60 npm run seed:loadtest    # 画面確認用のサンプルデータ（任意）
-```
-
-### 本番へのマイグレーションの適用
-
-Railway のデプロイ時に `npx prisma migrate deploy` が自動で実行される（`backend/railway.json` の `preDeployCommand`）。未適用のマイグレーションだけを順に適用し、失敗した場合は新しい版に切り替わらない。Railway の環境変数に `DATABASE_URL` と `DIRECT_URL`（プーラーを経由しない直接接続）が必要。
-
-CI では `schema.prisma` とマイグレーションのファイルが一致しているかを検査している。`schema.prisma` を変えたら `npx prisma migrate dev --name <name>` でマイグレーションを作ってからコミットする。
-
-### 開発サーバーの起動
-
-```bash
-# フロントエンド (localhost:3000)
-npm run dev:frontend
-
-# バックエンド (localhost:4000)
-npm run dev:backend
-```
+開発中の DB はローカルの Docker に向ける。**本番（Supabase）の DB に向けて `prisma migrate dev` を実行しない**（差分があると DB のリセット＝全データ削除を提案する）。`npm run db:migrate` と `db:seed` / `db:seed:sample` は、接続先が `localhost` 以外だと実行せずに止まる。
 
 ---
 
-## 主要コマンド
+## 普段使うコマンド
 
-```bash
-# ビルド
-npm run build:frontend
-npm run build:backend
+すべてリポジトリのルートで実行する。
 
-# Prisma
-npx prisma migrate dev --name <name>   # マイグレーション作成・適用
-npx prisma db seed                     # シードデータ投入
-npx prisma studio                      # DB GUI
-npx prisma generate                    # クライアント再生成
+### 起動
 
-# GraphQL コード生成 (frontend/)
-npm run codegen
-```
+| コマンド | 内容 |
+|---|---|
+| `npm run dev` | 開発用 DB を起動し、バックエンド（localhost:4000）とフロントエンド（localhost:3000）を同時に起動する。Ctrl+C で両方止まる |
+| `npm run dev:backend` | バックエンドだけ起動 |
+| `npm run dev:frontend` | フロントエンドだけ起動 |
+
+### データベース
+
+| コマンド | 内容 |
+|---|---|
+| `npm run db:up` / `npm run db:stop` | 開発用 DB の起動・停止（停止してもデータは残る） |
+| `npm run db:migrate -- --name <名前>` | `schema.prisma` の変更からマイグレーションを作り、開発用 DB に適用する |
+| `npm run db:status` | マイグレーションの適用状況を見る（読み取りのみ） |
+| `npm run db:seed` | マスタデータを入れる |
+| `npm run db:seed:sample` | 画面確認用のサンプルデータを入れる |
+| `npm run db:studio` | DB の中身をブラウザで見る（Prisma Studio） |
+
+### GraphQL の型
+
+| コマンド | 内容 |
+|---|---|
+| `npm run codegen` | フロントエンドの GraphQL の型を生成する |
+
+`codegen` は `backend/src/schema.gql` を読む。このファイルは**バックエンドの起動時に自動で作り直される**（Code First）。バックエンドのリゾルバーや型を変えたら、バックエンドを起動してから `codegen` を実行する（`npm run dev` 中なら保存するたびに作り直される）。
+
+### 品質チェック
+
+| コマンド | 内容 |
+|---|---|
+| `npm run lint` | フロントエンド・バックエンドの lint |
+| `npm run test` | フロントエンド（Vitest）・バックエンド（Jest）のテスト |
+| `npm run build` | 両方のビルド（`build:frontend` / `build:backend` で片方だけ） |
+
+---
+
+## デプロイ
+
+| 対象 | サービス | 備考 |
+|---|---|---|
+| フロントエンド | Vercel | main へのマージで自動デプロイ |
+| バックエンド | Railway | main へのマージで自動デプロイ（`backend/Dockerfile`） |
+| DB・認証・画像 | Supabase | |
+
+### 本番へのマイグレーションの適用
+
+Railway のデプロイ時に `npx prisma migrate deploy` が自動で実行される（`backend/railway.json` の `preDeployCommand`）。未適用のマイグレーションだけを順に適用し、失敗した場合は新しい版に切り替わらない。
+
+Railway には次の2つの接続先が必要。
+
+| 変数 | 接続先 | 用途 |
+|---|---|---|
+| `DATABASE_URL` | トランザクションプーラー（`…pooler.supabase.com:6543`、末尾に `?pgbouncer=true`） | アプリの通常のクエリ |
+| `DIRECT_URL` | セッションプーラー（`…pooler.supabase.com:5432`） | マイグレーション |
+
+`DIRECT_URL` に Supabase の直接接続（`db.<プロジェクト>.supabase.co:5432`）は使えない。直接接続は IPv6 専用で、Railway からは届かない（`P1001: Can't reach database server`）。セッションプーラーの URL は、`DATABASE_URL` のポートを 5432 にし、`?pgbouncer=true` を外したものになる。
+
+CI では `schema.prisma` とマイグレーションのファイルが一致しているかを検査している。`schema.prisma` を変えたら `npm run db:migrate -- --name <名前>` でマイグレーションを作ってからコミットする。
 
 ---
 
