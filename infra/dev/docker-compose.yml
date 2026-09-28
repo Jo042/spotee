@@ -1,0 +1,17 @@
+# 使い方は README.md の「開発環境のセットアップ」を参照
+
+services:
+  dev-db:
+    # 本番（Supabase）と同じメジャーバージョン
+    image: postgres:17
+    container_name: spotee-dev
+    ports:
+      # 既存のローカル PostgreSQL(5432) と計測用(5433) を避ける
+      - '5434:5432'
+    environment:
+      POSTGRES_PASSWORD: dev
+    volumes:
+      - spotee-dev-data:/var/lib/postgresql/data
+
+volumes:
+  spotee-dev-data:
