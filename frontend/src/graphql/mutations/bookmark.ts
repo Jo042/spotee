@@ -30,3 +30,18 @@ export const REMOVE_BOOKMARK = gql(`
     }
   }
 `);
+
+export const RENAME_FOLDER = gql(`
+  mutation RenameFolder($id: ID!, $input: FolderNameInput!) {
+    renameFolder(id: $id, input: $input) {
+      id
+      name
+    }
+  }
+`);
+
+export const DELETE_FOLDER = gql(`
+  mutation DeleteFolder($id: ID!) {
+    deleteFolder(id: $id)
+  }
+`);
