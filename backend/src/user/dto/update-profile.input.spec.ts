@@ -23,7 +23,11 @@ describe('UpdateProfileInput', () => {
 
   it('全項目を正しく埋めれば通る', async () => {
     expect(
-      await failedProperties({ name: 'たなか', bio: 'よろしく', avatarUrl: AVATAR }),
+      await failedProperties({
+        name: 'たなか',
+        bio: 'よろしく',
+        avatarUrl: AVATAR,
+      }),
     ).toEqual([]);
   });
 
@@ -53,7 +57,9 @@ describe('UpdateProfileInput', () => {
     });
 
     it('201文字なら落ちる', async () => {
-      expect(await failedProperties({ bio: 'あ'.repeat(201) })).toContain('bio');
+      expect(await failedProperties({ bio: 'あ'.repeat(201) })).toContain(
+        'bio',
+      );
     });
   });
 
@@ -74,7 +80,9 @@ describe('UpdateProfileInput', () => {
 
     it('userinfo にホスト名を置いたURLは落ちる', async () => {
       expect(
-        await failedProperties({ avatarUrl: `https://${HOST}@evil.com/me.jpg` }),
+        await failedProperties({
+          avatarUrl: `https://${HOST}@evil.com/me.jpg`,
+        }),
       ).toContain('avatarUrl');
     });
   });

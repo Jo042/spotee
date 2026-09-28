@@ -5,7 +5,9 @@ import type { SpotConnectionSource } from './dto/spot-connection.object';
 @Resolver(() => SpotConnection)
 export class SpotConnectionResolver {
   @ResolveField(() => Int)
-  async totalCount(@Parent() connection: SpotConnectionSource): Promise<number> {
+  async totalCount(
+    @Parent() connection: SpotConnectionSource,
+  ): Promise<number> {
     return connection.countTotal();
   }
 }
