@@ -5,7 +5,6 @@ export const GET_ME = gql(`
     me {
       id
       name
-      email
       avatarUrl
       bio
       followersCount
