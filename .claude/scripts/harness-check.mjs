@@ -15,6 +15,8 @@ const CLAUDE_MD_MAX_LINES = 200;
 const ROADMAP_STALE_DAYS = 14;
 const REVIEW_INTERVAL_DAYS = 30;
 const DOC_STALE_DAYS = 90;
+const VERIFICATION_WAIT_DAYS = 7;
+const SMOKE_TEST_INTERVAL_DAYS = 30;
 
 const findings = [];
 const add = (level, message) => findings.push({ level, message });
@@ -112,6 +114,27 @@ if (existsSync(LOCAL)) {
     add('info', 'ハーネスの定期点検の記録がまだ無い。/review-harness を提案する');
   } else if (daysSince(new Date(`${lastReview}T00:00:00`)) > REVIEW_INTERVAL_DAYS) {
     add('info', `前回のハーネスの定期点検（${lastReview}）から ${REVIEW_INTERVAL_DAYS} 日以上経った。/review-harness を提案する`);
+  }
+
+  // 人の確認待ち（- [ ] YYYY-MM-DD ... の行）
+  const queue = read(join(LOCAL, 'reviews/verification-queue.md')) ?? '';
+  const waiting = [...queue.matchAll(/^- \[ \] (\d{4}-\d{2}-\d{2})/gm)].map((m) => m[1]).sort();
+  if (waiting.length > 0) {
+    const oldest = daysSince(new Date(`${waiting[0]}T00:00:00`));
+    const level = oldest > VERIFICATION_WAIT_DAYS ? 'warn' : 'info';
+    add(level, `人の確認待ちが ${waiting.length} 件ある（一番古いものは ${oldest} 日前。local/reviews/verification-queue.md）`);
+  }
+
+  // スモークテストの実施記録（「## 実施記録」の下の - YYYY-MM-DD の行）
+  const smoke = read(join(LOCAL, 'reviews/smoke-test.md'));
+  if (smoke) {
+    const log = smoke.split(/^## 実施記録/m)[1] ?? '';
+    const lastSmoke = [...log.matchAll(/^- (\d{4}-\d{2}-\d{2})/gm)].map((m) => m[1]).sort().pop();
+    if (!lastSmoke) {
+      add('info', 'スモークテストの実施記録がまだ無い（local/reviews/smoke-test.md）');
+    } else if (daysSince(new Date(`${lastSmoke}T00:00:00`)) > SMOKE_TEST_INTERVAL_DAYS) {
+      add('info', `前回のスモークテスト（${lastSmoke}）から ${SMOKE_TEST_INTERVAL_DAYS} 日以上経った`);
+    }
   }
 
   const proposals = read(join(LOCAL, 'harness/proposals.md')) ?? '';
