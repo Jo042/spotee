@@ -30,6 +30,7 @@ npm run lint && npm run test && npm run build
 
 - **認証**: Supabase Auth に委譲し、NestJS は JWT の検証だけを行う。パスワードに関わる処理をバックエンドに書かない
 - **認可**: 持ち主の確認は取得条件に含める（`findFirst({ where: { id, userId } })`）。他人のリソースは「見つかりません」で返し、存在を明かさない
+- **公開範囲**: 本人以外に見せない情報（メールアドレスなど）は、「本人以外なら null」の判定で隠さず、公開される型に載せない。本人だけが見る情報は、本人しか通らない経路の専用の型に置く
 - **GraphQL**: Code First。リレーションの取得は必ず DataLoader でまとめる（N+1 を作らない）
 - **ページネーション**: カーソル方式のみ。並び順とカーソル条件には必ず `id` のタイブレークを含める。Connection は `common/connection.util.ts` の `buildConnection` で組み立てる
 - **入力検証**: InputType と class-validator。GraphQL の引数をスカラーで直接受けると検証を素通りするので、InputType にまとめる
