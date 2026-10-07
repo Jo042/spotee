@@ -176,8 +176,11 @@ SUPABASE_URL=your_supabase_url
 | コマンド | 内容 |
 |---|---|
 | `npm run lint` | フロントエンド・バックエンドの lint |
-| `npm run test` | フロントエンド（Vitest）・バックエンド（Jest）のテスト |
+| `npm run test` | フロントエンド（Vitest）・バックエンド（Jest）の単体テスト。DB は使わない |
+| `npm run test:integration` | バックエンドの統合テスト。開発用 DB と同じコンテナの `spotee_test` に対して、本物の GraphQL API を呼ぶ（先に `npm run db:up`） |
 | `npm run build` | 両方のビルド（`build:frontend` / `build:backend` で片方だけ） |
+
+統合テストは `backend/test/integration/` にある。テストのたびに `spotee_test` の全テーブルを空にするため、接続先がローカルで DB 名が `_test` で終わるとき以外は始まる前に止まる（接続先は `TEST_DATABASE_URL` で変えられる）。ログインは、テスト用の鍵で署名した JWT で行う。
 
 ---
 
