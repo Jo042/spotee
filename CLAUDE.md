@@ -21,6 +21,7 @@ npm run dev                        # 開発用 DB + backend(:4000) + frontend(:3
 npm run db:migrate -- --name <n>   # マイグレーションの作成と適用（localhost 以外の DB では止まる）
 npm run codegen                    # フロントの GraphQL の型。先にバックエンドを起動して schema.gql を更新しておく
 npm run lint && npm run test && npm run build
+npm run test:integration           # 統合テスト（開発用 DB を起動しておく）
 ```
 
 - 開発用の DB はローカルの Docker（localhost:5434）。**本番の DB に `prisma migrate dev` を実行しない**（差分があるとリセットを提案する）。本番へは Railway の pre-deploy で `migrate deploy` が自動で走る
@@ -74,6 +75,8 @@ AI に実装を任せる前提で、人が承認できる基準を先に決め�
 | 認可・公開範囲に関わる API | 統合テスト（本物の DB で、他人のものを見られない・触れない、見せない情報が出ないこと） |
 | バグ修正 | 修正前に再現し、直ったことを同じ手順で確かめる（テストで書けるものはテストにする） |
 | 画面の変更 | 人の確認手順を用意する（確認はマージ後にまとめて行ってよい。公開前には必ず消化する） |
+
+- 統合テストは `backend/test/integration/` にある既存のテストに倣って書く（自分と他人の2人を用意し、他人のものを自分として操作する）
 
 - 新しい機能は、実装の前にテストケースの一覧（日本語の振る舞い）を人が承認する
 - 変更したら、型・lint・テストに加えて、画面の変更は実際のブラウザで、API の変更は実際のサーバーで確かめる
