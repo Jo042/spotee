@@ -1,0 +1,13 @@
+{
+  "moduleFileExtensions": ["js", "json", "ts"],
+  "rootDir": ".",
+  "testEnvironment": "node",
+  "testRegex": "\\.int-spec\\.ts$",
+  "transform": {
+    "^.+\\.(t|j)s$": ["ts-jest", { "tsconfig": { "allowJs": true } }]
+  },
+  "transformIgnorePatterns": ["/node_modules/(?!jose/)"],
+  "globalSetup": "<rootDir>/integration/support/global-setup.ts",
+  "setupFiles": ["<rootDir>/integration/support/setup-env.ts"],
+  "testTimeout": 30000
+}
