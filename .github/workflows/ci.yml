@@ -49,7 +49,7 @@ jobs:
       run:
         working-directory: backend
 
-    # マイグレーションの検査で使う使い捨てのDB（シャドーDB）
+    # マイグレーションの検査（シャドーDB）と統合テストで使う使い捨てのDB
     services:
       postgres:
         image: postgres:17
@@ -96,3 +96,8 @@ jobs:
 
       - name: Test
         run: npm test
+
+      - name: Integration test
+        run: npm run test:integration
+        env:
+          TEST_DATABASE_URL: postgresql://postgres:ci@localhost:5432/spotee_test
