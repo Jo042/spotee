@@ -19,6 +19,9 @@ type Documents = {
     "\n  mutation RemoveBookmark($spotId: ID!, $folderId: ID!) {\n    removeBookmark(spotId: $spotId, folderId: $folderId) {\n      id\n      isBookmarked\n      bookmarkFolderIds\n    }\n  }\n": typeof types.RemoveBookmarkDocument,
     "\n  mutation RenameFolder($id: ID!, $input: FolderNameInput!) {\n    renameFolder(id: $id, input: $input) {\n      id\n      name\n    }\n  }\n": typeof types.RenameFolderDocument,
     "\n  mutation DeleteFolder($id: ID!) {\n    deleteFolder(id: $id)\n  }\n": typeof types.DeleteFolderDocument,
+    "\n  mutation CreateCollection($input: CollectionInput!) {\n    createCollection(input: $input) {\n      id\n    }\n  }\n": typeof types.CreateCollectionDocument,
+    "\n  mutation UpdateCollection($id: ID!, $input: CollectionInput!) {\n    updateCollection(id: $id, input: $input) {\n      id\n      title\n      description\n      coverImageUrl\n      thumbnailUrl\n      spotCount\n      spots {\n        order\n        comment\n        spot {\n          id\n          title\n          address\n          likeCount\n          isLiked\n          isBookmarked\n          images {\n            id\n            url\n            order\n          }\n          category {\n            id\n            name\n          }\n          user {\n            id\n            name\n            avatarUrl\n          }\n        }\n      }\n    }\n  }\n": typeof types.UpdateCollectionDocument,
+    "\n  mutation DeleteCollection($id: ID!) {\n    deleteCollection(id: $id)\n  }\n": typeof types.DeleteCollectionDocument,
     "\n  mutation FollowUser($userId: ID!) {\n    followUser(userId: $userId) {\n      id\n      isFollowing\n      followersCount\n    }\n  }\n": typeof types.FollowUserDocument,
     "\n  mutation UnfollowUser($userId: ID!) {\n    unfollowUser(userId: $userId) {\n      id\n      isFollowing\n      followersCount\n    }\n  }\n": typeof types.UnfollowUserDocument,
     "\n  mutation ToggleLike($spotId: ID!) {\n    toggleLike(spotId: $spotId) {\n      liked\n      likeCount\n    }\n  }\n": typeof types.ToggleLikeDocument,
@@ -52,6 +55,9 @@ const documents: Documents = {
     "\n  mutation RemoveBookmark($spotId: ID!, $folderId: ID!) {\n    removeBookmark(spotId: $spotId, folderId: $folderId) {\n      id\n      isBookmarked\n      bookmarkFolderIds\n    }\n  }\n": types.RemoveBookmarkDocument,
     "\n  mutation RenameFolder($id: ID!, $input: FolderNameInput!) {\n    renameFolder(id: $id, input: $input) {\n      id\n      name\n    }\n  }\n": types.RenameFolderDocument,
     "\n  mutation DeleteFolder($id: ID!) {\n    deleteFolder(id: $id)\n  }\n": types.DeleteFolderDocument,
+    "\n  mutation CreateCollection($input: CollectionInput!) {\n    createCollection(input: $input) {\n      id\n    }\n  }\n": types.CreateCollectionDocument,
+    "\n  mutation UpdateCollection($id: ID!, $input: CollectionInput!) {\n    updateCollection(id: $id, input: $input) {\n      id\n      title\n      description\n      coverImageUrl\n      thumbnailUrl\n      spotCount\n      spots {\n        order\n        comment\n        spot {\n          id\n          title\n          address\n          likeCount\n          isLiked\n          isBookmarked\n          images {\n            id\n            url\n            order\n          }\n          category {\n            id\n            name\n          }\n          user {\n            id\n            name\n            avatarUrl\n          }\n        }\n      }\n    }\n  }\n": types.UpdateCollectionDocument,
+    "\n  mutation DeleteCollection($id: ID!) {\n    deleteCollection(id: $id)\n  }\n": types.DeleteCollectionDocument,
     "\n  mutation FollowUser($userId: ID!) {\n    followUser(userId: $userId) {\n      id\n      isFollowing\n      followersCount\n    }\n  }\n": types.FollowUserDocument,
     "\n  mutation UnfollowUser($userId: ID!) {\n    unfollowUser(userId: $userId) {\n      id\n      isFollowing\n      followersCount\n    }\n  }\n": types.UnfollowUserDocument,
     "\n  mutation ToggleLike($spotId: ID!) {\n    toggleLike(spotId: $spotId) {\n      liked\n      likeCount\n    }\n  }\n": types.ToggleLikeDocument,
@@ -114,6 +120,18 @@ export function gql(source: "\n  mutation RenameFolder($id: ID!, $input: FolderN
  * The gql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
 export function gql(source: "\n  mutation DeleteFolder($id: ID!) {\n    deleteFolder(id: $id)\n  }\n"): (typeof documents)["\n  mutation DeleteFolder($id: ID!) {\n    deleteFolder(id: $id)\n  }\n"];
+/**
+ * The gql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function gql(source: "\n  mutation CreateCollection($input: CollectionInput!) {\n    createCollection(input: $input) {\n      id\n    }\n  }\n"): (typeof documents)["\n  mutation CreateCollection($input: CollectionInput!) {\n    createCollection(input: $input) {\n      id\n    }\n  }\n"];
+/**
+ * The gql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function gql(source: "\n  mutation UpdateCollection($id: ID!, $input: CollectionInput!) {\n    updateCollection(id: $id, input: $input) {\n      id\n      title\n      description\n      coverImageUrl\n      thumbnailUrl\n      spotCount\n      spots {\n        order\n        comment\n        spot {\n          id\n          title\n          address\n          likeCount\n          isLiked\n          isBookmarked\n          images {\n            id\n            url\n            order\n          }\n          category {\n            id\n            name\n          }\n          user {\n            id\n            name\n            avatarUrl\n          }\n        }\n      }\n    }\n  }\n"): (typeof documents)["\n  mutation UpdateCollection($id: ID!, $input: CollectionInput!) {\n    updateCollection(id: $id, input: $input) {\n      id\n      title\n      description\n      coverImageUrl\n      thumbnailUrl\n      spotCount\n      spots {\n        order\n        comment\n        spot {\n          id\n          title\n          address\n          likeCount\n          isLiked\n          isBookmarked\n          images {\n            id\n            url\n            order\n          }\n          category {\n            id\n            name\n          }\n          user {\n            id\n            name\n            avatarUrl\n          }\n        }\n      }\n    }\n  }\n"];
+/**
+ * The gql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function gql(source: "\n  mutation DeleteCollection($id: ID!) {\n    deleteCollection(id: $id)\n  }\n"): (typeof documents)["\n  mutation DeleteCollection($id: ID!) {\n    deleteCollection(id: $id)\n  }\n"];
 /**
  * The gql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */

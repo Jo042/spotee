@@ -1,25 +1,34 @@
 "use client";
 
+import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useQuery } from "@apollo/client/react";
-import { UserCircle } from "lucide-react";
+import { Pencil, Trash2, UserCircle } from "lucide-react";
+import { useAuth } from "@/hooks/useAuth";
 import { GET_COLLECTION } from "@/graphql/queries/collection";
+import { GET_ME } from "@/graphql/queries/user";
 import { BackLink } from "@/components/common/BackLink";
 import { SpotCard } from "@/components/spot/SpotCard";
 import { SpotCardSkeleton } from "@/components/spot/SpotList";
 import { formatCount, formatRank } from "@/lib/format";
+import { DeleteCollectionDialog } from "./DeleteCollectionDialog";
 
 export function CollectionDetailContent({
   collectionId,
 }: {
   collectionId: string;
 }) {
+  const { user } = useAuth();
+  const [isDeleteOpen, setIsDeleteOpen] = useState(false);
+  const { data: meData } = useQuery(GET_ME, { skip: !user });
   const { data, loading } = useQuery(GET_COLLECTION, {
     variables: { id: collectionId },
   });
 
   const collection = data?.collection;
+  const isOwner =
+    !!collection && !!meData?.me && meData.me.id === collection.user.id;
   const backLink = (
     <BackLink fallbackHref="/collections" fallbackLabel="特集一覧" />
   );
@@ -79,7 +88,28 @@ export function CollectionDetailContent({
             </div>
           )}
 
-          <p className="mt-6 text-sm font-medium text-primary-700">特集</p>
+          <div className="mt-6 flex items-center justify-between gap-3">
+            <p className="text-sm font-medium text-primary-700">特集</p>
+            {isOwner && (
+              <div className="flex shrink-0 items-center gap-2">
+                <Link
+                  href={`/collections/${collection.id}/edit`}
+                  className="flex items-center gap-1.5 rounded-lg border border-gray-200 px-3 py-1.5 text-sm text-gray-700 transition-colors hover:bg-gray-50"
+                >
+                  <Pencil size={14} aria-hidden="true" />
+                  編集
+                </Link>
+                <button
+                  type="button"
+                  onClick={() => setIsDeleteOpen(true)}
+                  className="flex items-center gap-1.5 rounded-lg border border-red-200 px-3 py-1.5 text-sm text-red-500 transition-colors hover:bg-red-50"
+                >
+                  <Trash2 size={14} aria-hidden="true" />
+                  削除
+                </button>
+              </div>
+            )}
+          </div>
           <h1 className="mt-1 text-2xl font-bold leading-[1.4] text-gray-900 sm:text-[28px]">
             {collection.title}
           </h1>
@@ -152,6 +182,13 @@ export function CollectionDetailContent({
           </ol>
         )}
       </div>
+
+      {isDeleteOpen && (
+        <DeleteCollectionDialog
+          collection={collection}
+          onClose={() => setIsDeleteOpen(false)}
+        />
+      )}
     </main>
   );
 }
