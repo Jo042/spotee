@@ -109,6 +109,14 @@ export class CollectionResolver {
     return this.spotLoader.userLoader.load(collection.userId);
   }
 
+  @ResolveField(() => String, { nullable: true })
+  thumbnailUrl(@Parent() collection: CollectionNode): Promise<string | null> {
+    if (collection.coverImageUrl) {
+      return Promise.resolve(collection.coverImageUrl);
+    }
+    return this.collectionLoader.firstSpotImageLoader.load(collection.id);
+  }
+
   @ResolveField(() => Int)
   spotCount(@Parent() collection: CollectionNode): Promise<number> {
     return this.collectionLoader.spotCountLoader.load(collection.id);

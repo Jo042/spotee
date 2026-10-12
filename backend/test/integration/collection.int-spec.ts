@@ -281,6 +281,73 @@ describe('特集', () => {
     });
   });
 
+  describe('一覧のカードの画像（thumbnailUrl）', () => {
+    const THUMBNAIL = `query ($id: ID!) { collection(id: $id) { thumbnailUrl } }`;
+
+    const thumbnailOf = async (id: string) =>
+      (
+        await t.graphql<{ collection: { thumbnailUrl: string | null } }>(
+          THUMBNAIL,
+          { variables: { id } },
+        )
+      ).data?.collection.thumbnailUrl;
+
+    const addImages = (spotId: string, urls: string[]) =>
+      t.prisma.spotImage.createMany({
+        data: urls.map((url, order) => ({ spotId, url, order })),
+      });
+
+    it('カバー画像があれば、カバー画像になる', async () => {
+      const { me, s1 } = await setup();
+      await addImages(s1.id, ['s1-1.jpg']);
+      const mine = await createCollection(t.prisma, me.user.id, {
+        title: '特集',
+        spotIds: [s1.id],
+      });
+      await t.prisma.collection.update({
+        where: { id: mine.id },
+        data: { coverImageUrl: 'cover.jpg' },
+      });
+
+      expect(await thumbnailOf(mine.id)).toBe('cover.jpg');
+    });
+
+    it('カバー画像がなければ先頭のスポットの1枚目になり、並べ替えると新しい先頭の画像になる', async () => {
+      const { me, s1, s2 } = await setup();
+      await addImages(s1.id, ['s1-1.jpg', 's1-2.jpg']);
+      await addImages(s2.id, ['s2-1.jpg']);
+      const mine = await createCollection(t.prisma, me.user.id, {
+        title: '特集',
+        spotIds: [s1.id, s2.id],
+      });
+
+      expect(await thumbnailOf(mine.id)).toBe('s1-1.jpg');
+
+      await t.graphql(UPDATE, {
+        variables: {
+          id: mine.id,
+          input: {
+            title: '特集',
+            spots: [{ spotId: s2.id }, { spotId: s1.id }],
+          },
+        },
+        token: me.token,
+      });
+
+      expect(await thumbnailOf(mine.id)).toBe('s2-1.jpg');
+    });
+
+    it('どのスポットにも画像がなければ null になる', async () => {
+      const { me, s1 } = await setup();
+      const mine = await createCollection(t.prisma, me.user.id, {
+        title: '特集',
+        spotIds: [s1.id],
+      });
+
+      expect(await thumbnailOf(mine.id)).toBeNull();
+    });
+  });
+
   describe('一覧と検索', () => {
     const LIST = `query ($first: Int, $after: String, $filter: CollectionFilterInput) {
       collections(first: $first, after: $after, filter: $filter) {
