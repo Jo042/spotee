@@ -219,6 +219,8 @@ CI では `schema.prisma` とマイグレーションのファイルが一致し
 | `/spots/new` | スポット投稿 |
 | `/spots/[id]` | スポット詳細 |
 | `/spots/[id]/edit` | スポット編集（投稿者のみ） |
+| `/collections` | 特集一覧（タイトル検索・無限スクロール） |
+| `/collections/[id]` | 特集詳細（順番どおりのスポットと添え書き） |
 | `/mypage` | マイページ |
 | `/mypage/edit` | プロフィール編集 |
 | `/auth/login` | ログイン・新規登録 |
