@@ -220,7 +220,9 @@ CI では `schema.prisma` とマイグレーションのファイルが一致し
 | `/spots/[id]` | スポット詳細 |
 | `/spots/[id]/edit` | スポット編集（投稿者のみ） |
 | `/collections` | 特集一覧（タイトル検索・無限スクロール） |
+| `/collections/new` | 特集の作成（自分の投稿から選んで並べる） |
 | `/collections/[id]` | 特集詳細（順番どおりのスポットと添え書き） |
+| `/collections/[id]/edit` | 特集の編集（作成者のみ） |
 | `/users/[id]` | ユーザーのプロフィール |
 | `/users/[id]/followers` ・ `/users/[id]/following` | フォロワー・フォロー中の一覧 |
 | `/mypage` | マイページ（投稿・いいね・保存フォルダ） |
