@@ -11,7 +11,12 @@ import { useIntersectionObserver } from "@/hooks/useIntersectionObserver";
 import { SpotCard } from "@/components/spot/SpotCard";
 import { SpotCardSkeleton } from "@/components/spot/SpotList";
 import { FolderGrid } from "@/components/bookmark/FolderGrid";
+import {
+  MyCollectionsTab,
+  MY_COLLECTIONS_PAGE_SIZE,
+} from "@/components/collection/MyCollectionsTab";
 import { GET_MY_FOLDERS } from "@/graphql/queries/bookmark";
+import { GET_MY_COLLECTIONS } from "@/graphql/queries/collection";
 import {
   GET_ME,
   GET_MY_SPOTS,
@@ -19,7 +24,7 @@ import {
 } from "@/graphql/queries/user";
 import { formatCount } from "@/lib/format";
 
-const TABS = ["spots", "liked", "folders"] as const;
+const TABS = ["spots", "liked", "folders", "collections"] as const;
 type Tab = (typeof TABS)[number];
 
 const isTab = (value: string | null): value is Tab =>
@@ -65,6 +70,10 @@ export function MyPageContent() {
     GET_MY_FOLDERS,
     { skip: !user },
   );
+  const { data: collectionsData } = useQuery(GET_MY_COLLECTIONS, {
+    variables: { first: MY_COLLECTIONS_PAGE_SIZE },
+    skip: !user,
+  });
 
   const spotsPageInfo = spotsData?.mySpots?.pageInfo;
   const likedPageInfo = likedData?.myLikedSpots?.pageInfo;
@@ -172,6 +181,11 @@ export function MyPageContent() {
     { key: "spots", label: "投稿", count: spotsCount },
     { key: "liked", label: "いいね", count: likedCount },
     { key: "folders", label: "保存", count: folders?.length },
+    {
+      key: "collections",
+      label: "特集",
+      count: collectionsData?.myCollections?.totalCount,
+    },
   ];
 
   return (
@@ -268,7 +282,7 @@ export function MyPageContent() {
             </div>
           </div>
 
-          <nav className="mt-6 flex gap-6">
+          <nav className="mt-6 flex gap-4 sm:gap-6">
             {tabs.map((tab) => {
               const isActive = activeTab === tab.key;
               return (
@@ -305,7 +319,9 @@ export function MyPageContent() {
       </div>
 
       <div className="max-w-4xl mx-auto px-4 py-6 sm:py-8">
-        {activeLoading ? (
+        {activeTab === "collections" ? (
+          <MyCollectionsTab />
+        ) : activeLoading ? (
           <div className="grid grid-cols-2 gap-4 sm:gap-6 lg:grid-cols-3">
             {Array.from({ length: 6 }).map((_, i) => (
               <SpotCardSkeleton key={i} />
