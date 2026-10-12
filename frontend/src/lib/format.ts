@@ -18,3 +18,8 @@ export function formatCount(count: number): string {
 
   return `${Math.floor(inMan)}万`;
 }
+
+/** 特集の中の順番を「01」「02」のように2桁で表す。10以上はそのまま */
+export function formatRank(rank: number): string {
+  return String(rank).padStart(2, "0");
+}
