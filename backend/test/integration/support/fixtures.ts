@@ -47,3 +47,24 @@ export function createFolder(
 ) {
   return prisma.folder.create({ data: { userId, name } });
 }
+
+export function createCollection(
+  prisma: PrismaService,
+  userId: string,
+  {
+    title,
+    spotIds = [],
+    createdAt,
+  }: { title: string; spotIds?: string[]; createdAt?: Date },
+) {
+  return prisma.collection.create({
+    data: {
+      userId,
+      title,
+      createdAt,
+      spots: {
+        create: spotIds.map((spotId, order) => ({ spotId, order })),
+      },
+    },
+  });
+}

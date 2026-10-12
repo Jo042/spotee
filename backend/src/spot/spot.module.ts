@@ -9,6 +9,6 @@ import { LikeModule } from '../like/like.module';
 @Module({
   imports: [UserModule, LikeModule],
   providers: [SpotResolver, SpotConnectionResolver, SpotService, SpotLoader],
-  exports: [SpotService],
+  exports: [SpotService, SpotLoader],
 })
 export class SpotModule {}

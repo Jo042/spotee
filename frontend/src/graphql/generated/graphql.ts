@@ -36,6 +36,55 @@ export type Category = {
   updatedAt: Scalars['DateTime']['output'];
 };
 
+export type Collection = {
+  __typename?: 'Collection';
+  coverImageUrl?: Maybe<Scalars['String']['output']>;
+  createdAt: Scalars['DateTime']['output'];
+  description?: Maybe<Scalars['String']['output']>;
+  id: Scalars['ID']['output'];
+  spotCount: Scalars['Int']['output'];
+  spots: Array<CollectionSpotItem>;
+  title: Scalars['String']['output'];
+  updatedAt: Scalars['DateTime']['output'];
+  user: User;
+};
+
+export type CollectionConnection = {
+  __typename?: 'CollectionConnection';
+  edges: Array<CollectionEdge>;
+  pageInfo: PageInfo;
+  totalCount: Scalars['Int']['output'];
+};
+
+export type CollectionEdge = {
+  __typename?: 'CollectionEdge';
+  cursor: Scalars['String']['output'];
+  node: Collection;
+};
+
+export type CollectionFilterInput = {
+  keyword?: InputMaybe<Scalars['String']['input']>;
+};
+
+export type CollectionInput = {
+  coverImageUrl?: InputMaybe<Scalars['String']['input']>;
+  description?: InputMaybe<Scalars['String']['input']>;
+  spots: Array<CollectionSpotInput>;
+  title: Scalars['String']['input'];
+};
+
+export type CollectionSpotInput = {
+  comment?: InputMaybe<Scalars['String']['input']>;
+  spotId: Scalars['ID']['input'];
+};
+
+export type CollectionSpotItem = {
+  __typename?: 'CollectionSpotItem';
+  comment?: Maybe<Scalars['String']['output']>;
+  order: Scalars['Int']['output'];
+  spot: Spot;
+};
+
 export type CreateSpotInput = {
   address: Scalars['String']['input'];
   attributeTagIds?: InputMaybe<Array<Scalars['ID']['input']>>;
@@ -88,8 +137,10 @@ export type MoodTag = {
 export type Mutation = {
   __typename?: 'Mutation';
   addBookmark: Spot;
+  createCollection: Collection;
   createFolder: Folder;
   createSpot: Spot;
+  deleteCollection: Scalars['ID']['output'];
   deleteFolder: Scalars['ID']['output'];
   deleteSpot: Scalars['Boolean']['output'];
   followUser: User;
@@ -97,6 +148,7 @@ export type Mutation = {
   renameFolder: Folder;
   toggleLike: LikeResult;
   unfollowUser: User;
+  updateCollection: Collection;
   updateProfile: User;
   updateSpot: Spot;
 };
@@ -108,6 +160,11 @@ export type MutationAddBookmarkArgs = {
 };
 
 
+export type MutationCreateCollectionArgs = {
+  input: CollectionInput;
+};
+
+
 export type MutationCreateFolderArgs = {
   input: FolderNameInput;
 };
@@ -115,6 +172,11 @@ export type MutationCreateFolderArgs = {
 
 export type MutationCreateSpotArgs = {
   input: CreateSpotInput;
+};
+
+
+export type MutationDeleteCollectionArgs = {
+  id: Scalars['ID']['input'];
 };
 
 
@@ -155,6 +217,12 @@ export type MutationUnfollowUserArgs = {
 };
 
 
+export type MutationUpdateCollectionArgs = {
+  id: Scalars['ID']['input'];
+  input: CollectionInput;
+};
+
+
 export type MutationUpdateProfileArgs = {
   input: UpdateProfileInput;
 };
@@ -190,9 +258,12 @@ export type Query = {
   attributeTags: Array<AttributeTag>;
   categories: Array<Category>;
   category?: Maybe<Category>;
+  collection?: Maybe<Collection>;
+  collections: CollectionConnection;
   folder?: Maybe<Folder>;
   me: User;
   moodTags: Array<MoodTag>;
+  myCollections: CollectionConnection;
   myFolders: Array<Folder>;
   myLikedSpots: SpotConnection;
   mySpots: SpotConnection;
@@ -211,8 +282,26 @@ export type QueryCategoryArgs = {
 };
 
 
+export type QueryCollectionArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type QueryCollectionsArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  filter?: InputMaybe<CollectionFilterInput>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+};
+
+
 export type QueryFolderArgs = {
   id: Scalars['ID']['input'];
+};
+
+
+export type QueryMyCollectionsArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
 };
 
 
