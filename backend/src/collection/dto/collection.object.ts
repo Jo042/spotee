@@ -30,6 +30,10 @@ export class Collection {
   @Field(() => String, { nullable: true })
   coverImageUrl: string | null;
 
+  /** 一覧のカード用。カバー画像が無ければ、先頭のスポットの1枚目の画像 */
+  @Field(() => String, { nullable: true })
+  thumbnailUrl: string | null;
+
   @Field()
   createdAt: Date;
 
@@ -48,7 +52,7 @@ export class Collection {
 
 export type CollectionNode = Omit<
   Collection,
-  'user' | 'spotCount' | 'spots'
+  'user' | 'spotCount' | 'spots' | 'thumbnailUrl'
 > & {
   userId: string;
 };

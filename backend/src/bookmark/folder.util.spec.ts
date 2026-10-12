@@ -1,4 +1,4 @@
-import { pickThumbnailUrls, sortFoldersByLastUsed } from './folder.util';
+import { sortFoldersByLastUsed } from './folder.util';
 
 const at = (iso: string) => new Date(iso);
 
@@ -55,51 +55,5 @@ describe('sortFoldersByLastUsed', () => {
     sortFoldersByLastUsed(folders, new Map());
 
     expect(folders).toEqual(original);
-  });
-});
-
-describe('pickThumbnailUrls', () => {
-  it('各フォルダで最後に保存したスポットの1枚目の画像を返す', () => {
-    const bookmarks = [
-      { folderId: 'f1', spotId: 's-new' },
-      { folderId: 'f1', spotId: 's-old' },
-      { folderId: 'f2', spotId: 's-old' },
-    ];
-    const images = [
-      { spotId: 's-new', url: 'new-1.jpg' },
-      { spotId: 's-new', url: 'new-2.jpg' },
-      { spotId: 's-old', url: 'old-1.jpg' },
-    ];
-
-    expect(pickThumbnailUrls(['f1', 'f2'], bookmarks, images)).toEqual([
-      'new-1.jpg',
-      'old-1.jpg',
-    ]);
-  });
-
-  it('空のフォルダは null', () => {
-    expect(pickThumbnailUrls(['empty'], [], [])).toEqual([null]);
-  });
-
-  it('画像が無いスポットなら null', () => {
-    const bookmarks = [{ folderId: 'f1', spotId: 's1' }];
-
-    expect(pickThumbnailUrls(['f1'], bookmarks, [])).toEqual([null]);
-  });
-
-  it('キーの順序どおりに返す（DataLoader の約束）', () => {
-    const bookmarks = [
-      { folderId: 'f2', spotId: 's2' },
-      { folderId: 'f1', spotId: 's1' },
-    ];
-    const images = [
-      { spotId: 's1', url: 'one.jpg' },
-      { spotId: 's2', url: 'two.jpg' },
-    ];
-
-    expect(pickThumbnailUrls(['f1', 'f2'], bookmarks, images)).toEqual([
-      'one.jpg',
-      'two.jpg',
-    ]);
   });
 });

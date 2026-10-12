@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { formatCount } from "./format";
+import { formatCount, formatRank } from "./format";
 
 describe("formatCount", () => {
   describe("1万未満はそのまま表示する", () => {
@@ -52,5 +52,16 @@ describe("formatCount", () => {
     it("小数は切り捨てる", () => {
       expect(formatCount(12.7)).toBe("12");
     });
+  });
+});
+
+describe("formatRank", () => {
+  it.each([
+    [1, "01"],
+    [9, "09"],
+    [10, "10"],
+    [30, "30"],
+  ])("%i は %s", (rank, expected) => {
+    expect(formatRank(rank)).toBe(expected);
   });
 });

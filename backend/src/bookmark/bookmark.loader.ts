@@ -1,9 +1,8 @@
 import { Injectable, Scope } from '@nestjs/common';
 import DataLoader from 'dataloader';
 import { PrismaService } from '../../prisma/prisma.service';
-import { groupRowsByKey } from '../spot/spot-loader.util';
+import { groupRowsByKey, pickThumbnailUrls } from '../spot/spot-loader.util';
 import { alignCounts } from '../user/user-loader.util';
-import { pickThumbnailUrls } from './folder.util';
 
 @Injectable({ scope: Scope.REQUEST })
 export class BookmarkLoader {
@@ -78,7 +77,11 @@ export class BookmarkLoader {
               select: { spotId: true, url: true },
             });
 
-      return pickThumbnailUrls(folderIds, bookmarks, images);
+      return pickThumbnailUrls(
+        folderIds,
+        bookmarks.map((b) => ({ groupId: b.folderId, spotId: b.spotId })),
+        images,
+      );
     },
   );
 }

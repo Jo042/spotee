@@ -219,6 +219,12 @@ CI では `schema.prisma` とマイグレーションのファイルが一致し
 | `/spots/new` | スポット投稿 |
 | `/spots/[id]` | スポット詳細 |
 | `/spots/[id]/edit` | スポット編集（投稿者のみ） |
-| `/mypage` | マイページ |
+| `/collections` | 特集一覧（タイトル検索・無限スクロール） |
+| `/collections/[id]` | 特集詳細（順番どおりのスポットと添え書き） |
+| `/users/[id]` | ユーザーのプロフィール |
+| `/users/[id]/followers` ・ `/users/[id]/following` | フォロワー・フォロー中の一覧 |
+| `/mypage` | マイページ（投稿・いいね・保存フォルダ） |
 | `/mypage/edit` | プロフィール編集 |
-| `/auth/login` | ログイン・新規登録 |
+| `/mypage/folders/[id]` | 保存フォルダの中身 |
+| `/login` ・ `/register` | ログイン・新規登録 |
+| `/forgot-password` ・ `/reset-password` | パスワードの再設定 |

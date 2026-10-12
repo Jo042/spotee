@@ -26,3 +26,31 @@ export function groupRowsByKey<TRow, TValue>(
 
   return keys.map((key) => grouped.get(key) ?? []);
 }
+
+/**
+ * グループ（保存フォルダ・特集）ごとに、先頭のスポットの1枚目の画像を選ぶ。
+ * rows はグループ内で先頭にしたい順、images は表示順の昇順で渡すこと
+ */
+export function pickThumbnailUrls(
+  groupIds: readonly string[],
+  rows: readonly { groupId: string; spotId: string }[],
+  images: readonly { spotId: string; url: string }[],
+): (string | null)[] {
+  const firstSpotIds = groupRowsByKey(
+    groupIds,
+    rows,
+    (row) => row.groupId,
+    (row) => row.spotId,
+  ).map((spotIds) => spotIds[0]);
+
+  const firstImageUrls = new Map<string, string>();
+  for (const image of images) {
+    if (!firstImageUrls.has(image.spotId)) {
+      firstImageUrls.set(image.spotId, image.url);
+    }
+  }
+
+  return firstSpotIds.map((spotId) =>
+    spotId === undefined ? null : (firstImageUrls.get(spotId) ?? null),
+  );
+}

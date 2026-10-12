@@ -1,4 +1,4 @@
-import { groupRowsByKey } from './spot-loader.util';
+import { groupRowsByKey, pickThumbnailUrls } from './spot-loader.util';
 
 type Row = { spotId: string; value: string };
 
@@ -105,5 +105,51 @@ describe('groupRowsByKey', () => {
     );
 
     expect(result).toEqual([['a'], ['a']]);
+  });
+});
+
+describe('pickThumbnailUrls', () => {
+  it('各グループで先頭のスポットの1枚目の画像を返す', () => {
+    const rows = [
+      { groupId: 'f1', spotId: 's-new' },
+      { groupId: 'f1', spotId: 's-old' },
+      { groupId: 'f2', spotId: 's-old' },
+    ];
+    const images = [
+      { spotId: 's-new', url: 'new-1.jpg' },
+      { spotId: 's-new', url: 'new-2.jpg' },
+      { spotId: 's-old', url: 'old-1.jpg' },
+    ];
+
+    expect(pickThumbnailUrls(['f1', 'f2'], rows, images)).toEqual([
+      'new-1.jpg',
+      'old-1.jpg',
+    ]);
+  });
+
+  it('スポットの無いグループは null', () => {
+    expect(pickThumbnailUrls(['empty'], [], [])).toEqual([null]);
+  });
+
+  it('画像が無いスポットなら null', () => {
+    const rows = [{ groupId: 'f1', spotId: 's1' }];
+
+    expect(pickThumbnailUrls(['f1'], rows, [])).toEqual([null]);
+  });
+
+  it('キーの順序どおりに返す（DataLoader の約束）', () => {
+    const rows = [
+      { groupId: 'f2', spotId: 's2' },
+      { groupId: 'f1', spotId: 's1' },
+    ];
+    const images = [
+      { spotId: 's1', url: 'one.jpg' },
+      { spotId: 's2', url: 'two.jpg' },
+    ];
+
+    expect(pickThumbnailUrls(['f1', 'f2'], rows, images)).toEqual([
+      'one.jpg',
+      'two.jpg',
+    ]);
   });
 });
