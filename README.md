@@ -79,6 +79,7 @@ spotee/
 │   │   ├── like/
 │   │   ├── follow/
 │   │   ├── bookmark/  # 保存フォルダ
+│   │   ├── collection/  # 特集
 │   │   ├── category/  # カテゴリ・タグ
 │   │   ├── auth/      # JWT Guard
 │   │   └── common/    # Connection・入力検証・GraphQL の保護
