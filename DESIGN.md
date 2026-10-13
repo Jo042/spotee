@@ -1,17 +1,13 @@
 ---
-version: alpha
+version: beta
 name: Spotee-design-system
 description: |
-  お気に入りの場所を写真とタグで共有するSNSライクなWebアプリ、Spoteeのデザインシステム。
-  Airbnbの写真主体カード＋フィルターUIを骨格としつつ、単色アクセントは独自の
-  コバルトブルー（Spotee Blue）に置き換え、Spoteeの最大の差別化機能である
-  「3層タグ構造（カテゴリ／属性タグ／ムードタグ）× AND/OR検索」を
-  3系統の色相（ブルー／ティール／パープル）で視覚的に表現する。
-  マーケティングLPではなく実務アプリのデザインシステムのため、
-  巨大なヒーローセクションではなく、カード・フィルター・フォーム・バッジといった
-  プロダクトUIコンポーネントを中心に定義する。
-  書体はNoto Sans JP（既存実装を踏襲）。全年代のターゲット（学生〜子育て世代〜アクティブシニア）に
-  馴染みつつ、SNS世代にも「おしゃれ」と感じてもらえるよう、色数を絞ったシンプルな構成にする。
+  お気に入りの場所を写真とタグで共有する SNS ライクな Web アプリ、Spotee のデザインシステム。
+  Spotee の差別化は「3層のタグ（カテゴリ・特徴・雰囲気）を組み合わせて探す」こと。
+  その組み合わせを、トップの一番上で一文として読ませる「文章で探す」を、唯一の大胆な要素にする。
+  それ以外の画面は静かに保つ。白と墨を基本に、アクセントは Spotee の青1色。
+  強弱は文字の太さ・大きさ・色と下線で付け、枠・丸・ピルで囲んで目立たせない。
+  写真が色を担い、書いた人の顔・名前・ひとことが親しみやすさを担う。
 
 colors:
   primary-50: "#EFF3FF"
@@ -24,79 +20,73 @@ colors:
   primary-700: "#1B34B8"
   primary-800: "#142883"
   primary-900: "#0E1C5C"
-  attribute-bg: "#ECFDF5"
-  attribute-text: "#047857"
-  attribute-border: "#A7F3D0"
-  mood-bg: "#FAF5FF"
-  mood-text: "#7E22CE"
-  mood-border: "#E9D5FF"
-  like: "#F43F5E"
-  like-soft: "#FFE4E6"
-  success: "#16A34A"
-  warning: "#D97706"
-  error: "#DC2626"
+  ink: "#101828"
+  ink-muted: "#6A7282"
+  line: "#E5E7EB"
   canvas: "#FFFFFF"
-  surface: "#F7F7F7"
-  surface-strong: "#F0F0F0"
-  hairline: "#E5E5E5"
-  hairline-soft: "#EFEFEF"
-  ink: "#171717"
-  body: "#404040"
-  muted: "#6B6B6B"
-  placeholder: "#9C9C9C"
-  on-primary: "#FFFFFF"
+  surface: "#F9FAFB"
+  accent: "{colors.primary-700}"
+  accent-fill: "{colors.primary-600}"
+  accent-fill-hover: "{colors.primary-700}"
+  accent-soft: "{colors.primary-50}"
+  accent-line: "{colors.primary-200}"
+  focus-ring: "{colors.primary-300}"
+  like: "#F43F5E"
+  success: "#16A34A"
+  error: "#DC2626"
+  error-soft: "#FEF2F2"
 
 typography:
   display:
-    fontFamily: "var(--font-noto-sans-jp)"
+    fontFamily: "var(--font-display)"
     fontSize: 28px
-    fontWeight: 700
-    lineHeight: 1.4
+    fontWeight: 900
+    lineHeight: 1.35
+  ask-sentence:
+    fontFamily: "var(--font-display)"
+    fontSize: 26px
+    fontWeight: 800
+    lineHeight: 1.75
   heading-lg:
-    fontFamily: "var(--font-noto-sans-jp)"
+    fontFamily: "var(--font-display)"
     fontSize: 22px
     fontWeight: 700
-    lineHeight: 1.4
+    lineHeight: 1.45
   heading-md:
-    fontFamily: "var(--font-noto-sans-jp)"
+    fontFamily: "var(--font-display)"
     fontSize: 18px
     fontWeight: 700
     lineHeight: 1.5
   heading-sm:
-    fontFamily: "var(--font-noto-sans-jp)"
-    fontSize: 16px
+    fontFamily: "var(--font-display)"
+    fontSize: 15px
     fontWeight: 700
-    lineHeight: 1.5
+    lineHeight: 1.55
   body-md:
     fontFamily: "var(--font-noto-sans-jp)"
     fontSize: 15px
     fontWeight: 400
-    lineHeight: 1.7
+    lineHeight: 1.8
   body-sm:
     fontFamily: "var(--font-noto-sans-jp)"
     fontSize: 13px
     fontWeight: 400
-    lineHeight: 1.6
+    lineHeight: 1.65
   caption:
     fontFamily: "var(--font-noto-sans-jp)"
     fontSize: 12px
-    fontWeight: 500
-    lineHeight: 1.4
-  button-md:
+    fontWeight: 400
+    lineHeight: 1.5
+  button:
     fontFamily: "var(--font-noto-sans-jp)"
     fontSize: 14px
-    fontWeight: 700
-    lineHeight: 1
-  button-sm:
-    fontFamily: "var(--font-noto-sans-jp)"
-    fontSize: 13px
     fontWeight: 700
     lineHeight: 1
 
 rounded:
   sm: 8px
   md: 12px
-  lg: 16px
+  lg: 20px
   full: 9999px
 
 spacing:
@@ -109,357 +99,334 @@ spacing:
   section: 48px
 
 components:
+  header:
+    backgroundColor: "{colors.canvas}"
+    border: "1px solid {colors.line}（下辺のみ）"
+    height: 60px
+  footer:
+    backgroundColor: "{colors.surface}"
+    textColor: "{colors.ink-muted}"
+    typography: "{typography.caption}"
   button-primary:
-    backgroundColor: "{colors.primary-600}"
-    textColor: "{colors.on-primary}"
-    typography: "{typography.button-md}"
-    rounded: "{rounded.sm}"
-    padding: "10px 20px"
+    backgroundColor: "{colors.accent-fill}"
+    textColor: "{colors.canvas}"
+    typography: "{typography.button}"
+    rounded: "{rounded.full}"
+    padding: 10px 18px
   button-primary-hover:
-    backgroundColor: "{colors.primary-700}"
-    textColor: "{colors.on-primary}"
+    backgroundColor: "{colors.accent-fill-hover}"
   button-secondary:
     backgroundColor: "{colors.canvas}"
     textColor: "{colors.ink}"
-    typography: "{typography.button-md}"
-    rounded: "{rounded.sm}"
-    padding: "10px 20px"
-    border: "1px solid {colors.hairline}"
-  button-ghost:
-    backgroundColor: transparent
-    textColor: "{colors.muted}"
-    typography: "{typography.button-md}"
-  spot-card:
-    backgroundColor: "{colors.canvas}"
-    rounded: "{rounded.md}"
-    border: "1px solid {colors.hairline-soft}"
-  spot-card-hover:
-    transform: "translateY(-2px)"
-    transition: "300ms"
-  spot-card-image:
-    rounded: "{rounded.md} {rounded.md} 0 0"
-  spot-card-image-hover:
-    transform: "scale(1.05)"
-    transition: "500ms ease-out"
-  category-badge:
-    backgroundColor: "{colors.primary-600}"
-    textColor: "{colors.on-primary}"
-    typography: "{typography.caption}"
+    border: "1px solid {colors.ink}"
+    typography: "{typography.button}"
     rounded: "{rounded.full}"
-    padding: "4px 10px"
-  category-badge-overlay:
-    backgroundColor: "rgba(255, 255, 255, 0.9)"
-    backdropFilter: "blur(8px)"
-    textColor: "{colors.primary-700}"
-    typography: "{typography.caption}"
-    rounded: "{rounded.full}"
-    padding: "4px 10px"
-  attribute-chip:
-    backgroundColor: "{colors.canvas}"
-    textColor: "{colors.muted}"
-    typography: "{typography.caption}"
-    rounded: "{rounded.full}"
-    padding: "6px 12px"
-    border: "1px solid {colors.hairline}"
-  attribute-chip-active:
-    backgroundColor: "{colors.attribute-bg}"
-    textColor: "{colors.attribute-text}"
-    border: "1px solid {colors.attribute-border}"
-  mood-chip:
-    backgroundColor: "{colors.canvas}"
-    textColor: "{colors.muted}"
-    typography: "{typography.caption}"
-    rounded: "{rounded.full}"
-    padding: "6px 12px"
-    border: "1px solid {colors.hairline}"
-  mood-chip-active:
-    backgroundColor: "{colors.mood-bg}"
-    textColor: "{colors.mood-text}"
-    border: "1px solid {colors.mood-border}"
-  category-pill:
-    backgroundColor: "{colors.canvas}"
-    textColor: "{colors.muted}"
-    typography: "{typography.caption}"
-    rounded: "{rounded.full}"
-    padding: "6px 12px"
-    border: "1px solid {colors.hairline}"
-  category-pill-active:
-    backgroundColor: "{colors.primary-600}"
-    textColor: "{colors.on-primary}"
-    border: "1px solid {colors.primary-600}"
-  segmented-toggle:
-    backgroundColor: "{colors.surface-strong}"
-    rounded: "{rounded.full}"
-    padding: 2px
-  segmented-toggle-active:
-    backgroundColor: "{colors.primary-600}"
-    textColor: "{colors.on-primary}"
-    rounded: "{rounded.full}"
-    transition: "transform 200ms ease-out"
-  filter-panel:
-    backgroundColor: "{colors.canvas}"
-    rounded: "{rounded.md}"
-    border: "1px solid {colors.hairline}"
-    padding: "{spacing.md}"
+  button-text:
+    textColor: "{colors.accent}"
+    textDecoration: underline
   text-input:
     backgroundColor: "{colors.canvas}"
-    textColor: "{colors.ink}"
-    typography: "{typography.body-md}"
+    border: "1px solid {colors.line}"
     rounded: "{rounded.sm}"
-    padding: "10px 14px"
-    border: "1px solid {colors.hairline}"
+    padding: 10px 14px
   text-input-focused:
-    border: "2px solid {colors.primary-700}"
-  like-button:
-    textColor: "{colors.muted}"
-    typography: "{typography.body-sm}"
-  like-button-active:
-    textColor: "{colors.like}"
-  top-nav:
-    backgroundColor: "rgba(255, 255, 255, 0.9)"
-    backdropFilter: "blur(12px)"
-    textColor: "{colors.ink}"
-    border: "0 0 1px {colors.hairline} solid"
-    height: 64px
-  top-nav-link:
-    textColor: "{colors.muted}"
-    fontSize: 14px
-    fontWeight: 500
-  top-nav-link-active:
-    textColor: "{colors.ink}"
-    underline: "2px solid {colors.primary-600}"
-  avatar:
-    backgroundColor: "{colors.surface-strong}"
+    border: "1px solid {colors.accent}"
+    ring: "1px {colors.accent}"
+  search-field:
+    backgroundColor: "{colors.surface}"
+    textColor: "{colors.ink-muted}"
+    rounded: "{rounded.sm}"
+    padding: 11px 14px
+  ask-block:
+    backgroundColor: "{colors.accent-soft}"
+    rounded: "{rounded.lg}"
+    padding: 22px 20px
+  ask-word-selected:
+    textColor: "{colors.accent}"
+    underline: "2px solid {colors.accent}"
+  ask-word-empty:
+    textColor: "{colors.ink-muted}"
+    underline: "2px dashed {colors.accent-line}"
+  ask-connector:
+    textColor: "{colors.accent}"
+    fontSize: 0.72em
+  mode-switch:
+    backgroundColor: "{colors.canvas}"
     rounded: "{rounded.full}"
+  mode-switch-active:
+    backgroundColor: "{colors.accent-fill}"
+    textColor: "{colors.canvas}"
+  conditions-sheet:
+    backgroundColor: "{colors.canvas}"
+    rounded: "{rounded.lg}（上の2角のみ）"
+    shadow: "0 -6px 24px rgb(16 24 40 / 0.12)"
+  spot-row:
+    border: "1px solid {colors.line}（下辺のみ）"
+    padding: 14px 0
+  spot-card:
+    imageRounded: "{rounded.md}"
+    imageAspectRatio: 16 / 9
+  collection-card:
+    imageRounded: "{rounded.md}"
+    imageAspectRatio: 16 / 9
+  tag-link:
+    textColor: "{colors.accent}"
+    underline: "1px solid {colors.accent-line}"
+  avatar:
+    rounded: "{rounded.full}"
+    sizes: 20px / 28px / 36px / 80px
+  like-active:
+    iconFill: "{colors.like}"
+    textColor: "{colors.like}"
+  save-active:
+    iconFill: "{colors.ink}"
 ---
 
 ## Overview
 
-Spoteeは、お気に入りの場所を写真とタグで共有するSNS的なWebアプリで、booking.com/ozmallのような詳細フィルター（3層タグ構造 × AND/OR検索）が最大の差別化ポイントになっている。このドキュメントはSpotee専用のプロダクトUIデザインシステムで、参考にした4サービス（Airbnb / Pinterest / Notion / Clay）のうち、写真主体のカードレイアウトとフィルターUIの骨格はAirbnbに最も近い。ただしAirbnbのRausch（コーラル）、Pinterestの赤、Notionの紫、Clayのピンクはいずれも避け、**独自のコバルトブルー（Spotee Blue）** を単色アクセントとして採用する。青は年齢・性別に偏りが少なく、地図／検索文脈との親和性が高いため「全年代に馴染みつつシンプル」という要件に合う。
+Spotee は、お気に入りの場所を写真とタグで共有する SNS ライクな Web アプリです。差別化は、**3層のタグ（カテゴリ・特徴・雰囲気）を組み合わせて探せること**です。このデザインシステムは、その差別化を画面の顔にし、それ以外を静かに保つことを目的にしています。
 
-通常表示は`{colors.primary-600}`（#2748E0）、ホバー・押下時に`{colors.primary-700}`（#1B34B8）へ濃くする2段階構成にしている。当初は通常表示から`primary-700`を使っていたが、白背景に対するコントラスト比を計算したところ9.42:1（AA基準4.5:1の倍以上）と余裕がありすぎ、参考にしたAirbnbのRausch（#FF385C、コントラスト比3.52:1）と比べて相対輝度が4倍以上低い＝体感的に重く沈んで見えることが分かったため、`primary-600`（コントラスト比6.80:1、AA基準を満たしつつ視覚的に軽い）を基準色に格上げした。
+考え方は次の5つです。
 
-Spotee固有の設計判断として、**3層タグ構造をそのまま3つの色相に対応させている**。カテゴリ（1つ必須選択）はブランドブルーの実線バッジ、属性タグ（Wi-Fiあり・駐車場ありなど実用条件、複数選択可）はティール系のソフトチップ、ムードタグ（デート向け・写真映えなど感情・雰囲気、複数選択可）はパープル系のソフトチップで表現する。これにより検索結果画面やスポットカードを見ただけで「これは条件系のタグ」「これは雰囲気系のタグ」がひと目で区別でき、Spoteeの検索体験そのものがビジュアルの個性になる。
-
-書体は英語圏の参考書体（Airbnb Cereal / Pin Sans / Notion Sans / Plain Black）がいずれも日本語非対応のため採用せず、**既存実装のNoto Sans JPを継続**する。個性は書体そのものではなく、ウェイトのコントラスト（見出し700 / 本文400）と色数を絞った構成で出す。
-
-**Key Characteristics:**
-- 単色アクセント: `{colors.primary-600}`（通常表示）と`{colors.primary-700}`（ホバー・押下）の2段階がCTA・カテゴリバッジ・選択状態のすべてを担う。コード上は`bg-primary-600` / `hover:bg-primary-700` / `text-primary-500`という使い分けになる。
-- タグ3層 = 3色相: カテゴリ=ブルー、属性タグ=ティール、ムードタグ=パープル。カテゴリバッジは白背景上では`{colors.primary-600}`実線ピル（`{component.category-badge}`）、写真上では半透明白＋`{colors.primary-700}`文字のオーバーレイピル（`{component.category-badge-overlay}`）を使い、どちらもブルーの対応関係は維持する。属性・ムードはソフトチップ（薄色背景＋濃色文字＋同系色ボーダー）で統一。
-- 「いいね」はブランドカラーと独立させ、既存実装どおり`{colors.like}`（rose）を維持する。SNSの慣習（ブランド色と「いいね」色を分ける）に沿う。
-- 形状は控えめな丸み: カード12px、ボタン・入力欄8px、タグ・バッジ・アバターは完全ピル。角の丸さで層を作らず、色と塗り（実線かソフトかアウトラインか）で階層を作る。
-- キャンバスは純白。写真の発色を最優先し、暖色トーンのクリームは採用しない（Clayとの差別化にもなる）。
-- 影は1段階のみ（カードホバー時の淡いシャドウ）。既存の`shadow-sm` / `hover:shadow-md`をそのまま踏襲。
+1. **大胆さは1か所だけ**: トップの一番上の「文章で探す」（3層のタグを一文にした検索）だけを大きく見せる。ほかの画面と部品は静かにし、写真と文字で情報を並べる。
+2. **強弱は文字で付ける**: 文字の太さ・大きさ・色と下線で強弱を付ける。目立たせたいものを、枠・丸・ピルで囲まない。囲むと、どの画面も同じ「よくあるアプリ」に見える。
+3. **見た目の印は、意味ごとに1つ**: 下線＝押せる言葉、点線＝まだ選んでいない言葉。同じ印を別の意味に使わない。
+4. **情報を切らない**: タイトルや名前は2〜3行まで全部見せる。格子をそろえるために1行で切らない。
+5. **親しみやすさは「人」から出す**: 書いた人の顔・名前・ひとことを必ず添える。記号の飾り（シール、色の濃いバッジ、絵文字）で親しみやすさを足さない。
 
 ## Colors
 
-### ブランド・アクセント
-- **Primary 600**（`{colors.primary-600}` — #2748E0）: 主要CTA、カテゴリバッジ、選択中のフィルター状態の**通常表示**。白背景とのコントラスト比6.80:1。
-- **Primary 700**（`{colors.primary-700}` — #1B34B8）: ホバー・押下状態。コントラスト比9.42:1と余裕がありすぎるため通常表示には使わず、濃くする方向の変化にのみ使う（フォーカスボーダーなど、塗り面積が小さく強い視認性が欲しい箇所にも使用）。
-- **Primary 500**（`{colors.primary-500}` — #3D65FA）: ロゴ・ワードマークや24px以上の大きい装飾要素専用。本文中のリンクや小さいテキストには使わない（白背景での文字コントラストが本文サイズには不十分なため）。
-- **Primary 50〜300**: 選択済みチップの背景の薄色バリエーションや、フォーカスリングなど低強度の用途。
-- **Primary 800〜900**: 現状未使用。将来、非常に高いコントラストが必要な場面のために予約。
+白と墨を基本にし、アクセントは Spotee の青1色です。色は写真に任せ、画面の部品は色を使いすぎません。コードでは、墨と灰に Tailwind の `gray-*` を、青に `primary-*` を使います。
 
-### タグ・条件系
-- **Attribute（属性タグ）**: 背景`{colors.attribute-bg}`（#ECFDF5）、文字`{colors.attribute-text}`（#047857）、枠線`{colors.attribute-border}`。Wi-Fi・駐車場・子連れOKなど「事実・条件」を表すタグ。
-- **Mood（ムードタグ）**: 背景`{colors.mood-bg}`（#FAF5FF）、文字`{colors.mood-text}`（#7E22CE）、枠線`{colors.mood-border}`。デートにおすすめ・写真映えなど「雰囲気・感情」を表すタグ。
+| 役割 | トークン | Tailwind | 使う場所 |
+|---|---|---|---|
+| 文字 | `ink` | `gray-900` | 見出し・本文 |
+| 補足の文字 | `ink-muted` | `gray-500` | 住所・日付・件数の説明・層の名前 |
+| 線 | `line` | `gray-200` | 区切り線・入力欄の枠 |
+| 地 | `canvas` | `white` | 画面の地 |
+| 面 | `surface` | `gray-50` | 検索欄・フッター・少しだけ面を分けたいところ |
+| 押せる文字・下線・選択中 | `accent` | `primary-700` | 選んだ言葉・タグのリンク・文字のボタン・選択中の印 |
+| 主要なボタンの塗り | `accent-fill` | `primary-600`（押したとき `primary-700`） | 「◯件を見る」「投稿する」など、画面に1つの主要な操作 |
+| 文章で探すの面 | `accent-soft` | `primary-50` | 「文章で探す」の背景だけ |
+| 控えめな下線 | `accent-line` | `primary-200` | タグのリンクの下線、まだ選んでいない言葉の点線 |
+| フォーカスの輪 | `focus-ring` | `primary-300` | キーボードで選んでいる要素 |
+| いいね | `like` | `rose-500` | いいねを押した後だけ |
+| 成功・エラー | `success` / `error` | `green-600` / `red-600` | お知らせ・入力の誤りなど、意味を伝えるときだけ |
 
-### セマンティック
-- **Like**（`{colors.like}` — #F43F5E）: いいねボタンのアクティブ状態。ハートアイコンの塗りつぶしにも使用。
-- **Success / Warning / Error**: フォームバリデーションや通知に使用する標準的な意味色。
-
-### サーフェス・テキスト
-- **Canvas**（`{colors.canvas}` — #FFFFFF）: 基本の背景。
-- **Surface**（`{colors.surface}` — #F7F7F7）: セクション区切りや無効状態の背景。
-- **Ink**（`{colors.ink}` — #171717）: 見出し・主要テキスト。
-- **Body**（`{colors.body}` — #404040）: 本文。
-- **Muted**（`{colors.muted}` — #6B6B6B）: メタ情報（住所・投稿日・非選択タブ）。
+- 青の生の値を画面に直接書かない。必ず上の役割の名前（またはその Tailwind のクラス）で使う。
+- `primary-500` 以下は、本文の大きさの文字に使わない（白地とのコントラストが足りない）。
+- 3層のタグを色で分けない（カテゴリ・特徴・雰囲気の違いは、層の名前の文字で示す）。
 
 ## Typography
 
-Noto Sans JP（`var(--font-noto-sans-jp)`、既存の`next/font/google`設定を継続）を全ロールで使用する。CJKの可読性を優先し、本文行間は1.6〜1.7とラテン書体よりやや広めに取る。
+見出しは **Zen Kaku Gothic New**、本文・ボタン・入力欄は **Noto Sans JP** です。どちらも Google Fonts で、会社の書体（特定のサービスを連想させる書体）は使いません。
 
-| トークン | サイズ | ウェイト | 行間 | 用途 |
-|---|---|---|---|---|
-| `{typography.display}` | 28px | 700 | 1.4 | スポット詳細ページのタイトル |
-| `{typography.heading-lg}` | 22px | 700 | 1.4 | セクション見出し（「あなたへのおすすめ」等） |
-| `{typography.heading-md}` | 18px | 700 | 1.5 | モーダルタイトル、フィルターパネルの見出し |
-| `{typography.heading-sm}` | 16px | 700 | 1.5 | SpotCardのタイトル |
-| `{typography.body-md}` | 15px | 400 | 1.7 | 本文、フォーム入力値 |
-| `{typography.body-sm}` | 13px | 400 | 1.6 | 住所・投稿者名などのメタ情報 |
-| `{typography.caption}` | 12px | 500 | 1.4 | バッジ・タグチップのラベル |
-| `{typography.button-md}` | 14px | 700 | 1 | ボタンラベル |
+| トークン | 書体 | 大きさ | 使う場所 |
+|---|---|---|---|
+| `display` | Zen Kaku | 28px（PC 34px）・900 | 画面のタイトル（特集のタイトルなど） |
+| `ask-sentence` | Zen Kaku | 26px（PC 44px）・800 | 文章で探すの一文だけ |
+| `heading-lg` | Zen Kaku | 22px・700 | 画面の見出し（「探す」など） |
+| `heading-md` | Zen Kaku | 18px・700 | セクションの見出し（「いま読まれている特集」など） |
+| `heading-sm` | Zen Kaku | 15px・700 | カードと行のタイトル |
+| `body-md` | Noto Sans JP | 15px・400 | 本文・説明・書いた人のひとこと |
+| `body-sm` | Noto Sans JP | 13px・400 | 説明の書き出し・補足 |
+| `caption` | Noto Sans JP | 12px・400 | 住所・日付・件数・層の名前 |
+| `button` | Noto Sans JP | 14px・700 | ボタン |
 
-**原則**: 見出しは700一択（600のような中間ウェイトは使わない）。太字と通常字のコントラストだけで階層を作り、サイズのバリエーションを増やしすぎない。マーケティングLPのような70px級の巨大な見出しはSpoteeには不要（本アプリはプロダクトUIが主戦場のため）。
+- 強弱は太さ（900 / 800 / 700 / 400）と大きさで付ける。色を変えて強調するのは、押せる言葉（`accent`）だけ。
+- 見出しには `text-wrap: balance` を付け、行の終わりが1〜2文字だけにならないようにする。
+- 文字を純粋な黒（#000）にしない。`ink` を使う。
 
 ## Layout & Spacing
 
-- **基準単位**: 4px（既存のTailwindデフォルトスペーシングをそのまま利用）。
-- **カード内パディング**: `{spacing.md}`（16px）。
-- **セクション間の縦マージン**: `{spacing.section}`（48px）。マーケティングサイトほど広くとらず、一覧性を優先する。
-- **カードグリッドのgap**: `{spacing.md}`（16px）。
-- **コンテナ最大幅**: 1280px（`max-w-7xl`、既存Header.tsxの設定を踏襲）。
-
-### スポット一覧グリッド
-モバイル1列 → sm 2列 → md 3列 → lg 4列。Airbnbの4-up desktopパターンを踏襲。
+- 余白は 4px を基準にした段階（`spacing`）だけを使う。セクションの間は `section`（48px）。
+- 画面の幅:
+  - トップ（PC）: 最大 1160px。左に主な列、右に 300px の脇の列（ランキングなど）
+  - スポット一覧（PC）: 最大 1240px。写真のカードを4列
+  - 読み物（特集の詳細、PC）: 本文の列は最大 720px
+  - スマホ: 左右 16px の余白
+- 一覧の格子: スマホ2列 → PC 4列（スポット一覧）。トップのスポットは格子ではなく行で並べる。
 
 ## Shape & Elevation
 
-| トークン | 値 | 用途 |
-|---|---|---|
-| `{rounded.sm}` | 8px | ボタン、入力欄 |
-| `{rounded.md}` | 12px | カード（SpotCard、フィルターパネル、モーダル） |
-| `{rounded.lg}` | 16px | 大きめのモーダル・画像ギャラリー |
-| `{rounded.full}` | pill | タグチップ、カテゴリバッジ、アバター、絞り込みモード切替 |
-
-影は1段階のみ: `shadow-sm`をカードの初期状態、`hover:shadow-md`をホバー時に使用（既存SpotCard.tsxの実装を継続）。モーダル・ドロップダウンにはより強い1段階の影を追加してよいが、それ以上の多段階シャドウは導入しない。
+- 角丸は4段階だけ: 入力欄・小さな面は `sm`（8px）、写真は `md`（12px）、文章で探すとシートは `lg`（20px）、ボタン・切り替え・アバターは `full`。
+- `full`（ピル）はボタンと切り替えの形にだけ使う。ラベルやタグをピルで囲まない。
+- 影は浮いているものにだけ付ける（下から出るシート、メニュー）。カード・行・ボタンには影を付けない。区切りは線と余白で作る。
 
 ## Components
 
-### ナビゲーション（`{component.top-nav}`）
-半透明の白背景（`bg-white/90` + `backdrop-blur`）・高さ64px・下端1pxのhairline。影は使わない。スクロール時にコンテンツがヘッダー下をうっすら透けて通る演出のため、キャンバス純白原則の唯一の例外としてヘッダーのみ半透明を許可する。
+### ヘッダー（`header`）
 
-- **ロゴ**: 左端に「Spotee」ワードマーク（24px・700・`text-primary-500`）＋末尾に`{colors.primary-600}`のドット。ナビリンク（14px・500）とのサイズ・ウェイト差で階層を作る。
-- **リンク**（`{component.top-nav-link}` / `-active`）: 通常は`{colors.muted}`相当のグレー、ホバーで`{colors.ink}`相当へ。ホバー・アクティブ時はリンク下端に2pxの`{colors.primary-600}`バーを`scale-x`（origin-left、200ms ease-out）で伸ばす。アクティブ状態はURLのパス前方一致で判定し、下線を常時表示する。
-- **CTA**: ログイン時は「スポットを投稿」、未ログイン時は「ログイン」を`button-primary`スタイルで右端に配置。押下時に`scale-95`の縮小を加える。
-- **モバイル（md未満）**: ナビを畳み、右端のハンバーガーボタン（44pxタップ領域、`aria-expanded`付き）でヘッダー直下にスライドダウンパネルを開閉する。パネル内はリンクを縦積みし、アクティブリンクは`{colors.primary-50}`背景＋`{colors.primary-700}`文字、CTAは全幅ボタンにする。ルート遷移時に自動で閉じる。
+- 左にロゴ（「spotee」、Zen Kaku 900）、PC はその右に「ホーム・探す・特集」のナビ。
+- PC は中央寄りに検索欄（`search-field`）、右にアバター。スマホは検索のアイコンとアバター。
+- **ログアウトはナビに並べず、アバターを押して出るメニューにしまう**（普段使わない操作のため）。
+- 選択中のナビは、太さ（700）と下辺の 2px の `accent` の線で示す。
 
-### ホームヒーロー
+### フッター（`footer`）
 
-非対称2カラム構成。マーケティングLP的な彩度の高いグラデーション帯・中央寄せは使わず、ヒーロー自体を「プロダクトの予告編」として設計する。背景は`{colors.primary-50}`→白の縦グラデーション（ヘッダー直下にごく淡い空気感を作る用途）。純白キャンバス原則に対する、ヘッダー半透明に次ぐ2つ目の例外とし、`primary-100`以上の濃さには上げない。
-
-- **左カラム（テキスト・左揃え）**: アイライン（`{typography.caption}`相当・`{colors.primary-600}`）→ 見出し → サブコピー（`{colors.muted}`）→ 検索バー → カテゴリショートカットの順で視線を縦に流す。
-- **見出し**: ink色・700。強調語（「行きたい場所」）のみ`{colors.primary-600}`にし、末尾にワードマークと同じブルーのドットを置く。サイズは36px（md以上）を上限とし、モバイルは`clamp`で可変（「70px級の巨大見出しは不要」原則の範囲内で、アイラインとのスケール対比でコントラストを作る）。改行は`<br>`固定ではなく文節単位の`inline-block`で制御し、「に、」のような助詞だけの孤立行を防ぐ。
-- **検索バー**: `{component.text-input}`準拠（白背景＋hairline＋`{rounded.sm}`、フォーカスは太さで示す方式）に、`button-primary`スタイルの検索ボタンを内包する。影は`shadow-sm`1段階のみ。
-- **カテゴリショートカット**: `{component.category-pill}`のリンクを検索バー直下に3〜4個。ホバーは同系色の薄背景（`{colors.primary-50}`）＋ボーダー強調。
-- **右カラム（写真コラージュ）**: 人気スポットの実写真2〜3枚を2列グリッド＋縦オフセットでずらして配置。器はSpotCardと同一（`{rounded.md}`＋hairline＋`shadow-sm`）で、`{component.category-badge-overlay}`を載せる。直下のカードグリッド（上位8件）との重複を避けるため9〜11位の写真を使い、足りない場合のみ上位で代替する。
-- **モバイル（lg未満）**: 1カラム縦積み・左揃えを維持し、コラージュは検索バー下の2枚横並びに縮退する。
-
-#### ホームページ全体の構成
-
-ヒーロー →「人気のスポット」（いいね順8件）→「特集」（新着順3件）→「新着スポット」（新着順4件）→ 投稿CTAバンド、の順で縦に流す。コンテナは`max-w-5xl`で統一し（一覧ページの`max-w-7xl`より狭くして「ホーム=ダイジェスト」の位置づけを保つ）、セクション間は`{spacing.section}`（48px）のリズムで分節する。
-
-- **セクション見出し**: `{typography.heading-lg}`＋直下にmutedの補足1行（「いいねが多い順のおすすめ」等）で階層を作る。右端の「もっと見る」は矢印アイコン付きで、ホバー時に矢印が右へ動く。リンク先は各セクションの並び順と一致させる（人気→`sortBy=LIKE_COUNT`、新着→デフォルトの`/spots`、特集→`/collections`）。
-- **特集セクション**: 特集カードをモバイル1列 → sm 3列で並べる。読み込み中は`CollectionCardSkeleton`で場所を取り、下の「新着スポット」がずれないようにする。0件と分かったらセクションごと出さない（空の箱を見せない）。
-- **投稿CTAバンド**: ページ末尾の締め。`{colors.surface}`相当の背景＋hairlineの`{rounded.lg}`（16px）カードに、左揃えの見出し・補足と右端の`button-primary`（ログイン時→投稿ページ、未ログイン時→ログイン）を置く。
-
-### 検索・フィルター
-- **カテゴリ選択**（`{component.category-pill}` / `{component.category-pill-active}`）: 1層目。アウトライン→選択時は`{colors.primary-600}`実線塗りのピル。
-- **属性タグ**（`{component.attribute-chip}` / `-active`）: 2層目。未選択時はグレーのアウトライン、選択時のみティールのソフトチップ（薄色塗り）に変わる。
-- **ムードタグ**（`{component.mood-chip}` / `-active`）: 3層目。未選択時はグレーのアウトライン、選択時のみパープルのソフトチップに変わる。
-
-属性・ムードタグはカテゴリと違って複数同時選択が前提のため、選択時も`category-pill-active`のような濃い単色塗りにはしない。同時に複数選択されたときに濃い色のピルが並ぶと視覚的にうるさくなるため、選択状態は「薄色塗り＋同系色ボーダー」程度の弱いコントラストに留める。カテゴリは1つしか選択できないため、濃い単色塗りで強調しても画面がうるさくならない。
-- **AND/OR切り替え**（`{component.segmented-toggle}`）: 「いずれか」「すべて」の2択セグメントコントロール。`{colors.surface-strong}`のグレーのピル型トラックの中を、`{colors.primary-600}`のサムが`translateX`（200ms・ease-out）でスライドする。動かすのはtransformのみで、レイアウトプロパティはアニメーションさせない。
-
-#### フィルターパネル（`{component.filter-panel}`）
-
-- パネルは`{rounded.md}`のカード（白背景＋hairlineボーダー、内側`{spacing.md}`）。カードの器は配置側（デスクトップの左サイドバー／モバイルのボトムシート）が持ち、パネル本体はコンテンツのみを描画する。
-- セクションは`{colors.hairline-soft}`の区切り線で分節する。見出し⇔チップ間は8pxで密に、セクションの上下は20pxで疎にし、均一な等間隔を避ける（SpotCardと同じ分節手法）。
-- パネル先頭に「絞り込み」見出し行を置き、フィルター選択中のみ右端に「クリア」テキストボタンを表示する。
-- セクション見出しには層の色相ドット（カテゴリ=ブルー、属性=ティール、ムード=パープル）と選択数バッジ（同系色のソフト配色・10px）を添え、3層×3色の対応をパネル自体でも視覚化する。
-- チップの演出: ホバーは同系色の薄背景＋ボーダー強調、押下時は`scale(0.95)`。選択時はチェックアイコンが`scale`イン（200ms）で出現し、`shadow-sm`（影1段階ルールの範囲内）で浮かせる。動きはtransform・色・影に限定する。
-- モバイル（lg未満）はボトムシート表示: `rounded-t-2xl`・上端にドラッグハンドル・黒40%の背景オーバーレイ。開閉はslide-up（300ms）＋背景フェード（200ms）。表示中は背景スクロールをロックし、下部固定フッターの「◯件のスポットを表示」全幅`button-primary`で閉じる。`prefers-reduced-motion`時はアニメーションを無効化する。
-
-### スポット一覧の上部エリア（ヘッダー帯＋結果ツールバー）
-
-一覧ページの上部は「ページ情報」と「結果の操作」の2層に分離する。ページ情報（タイトル・件数・投稿CTA）は白帯（`shadow-sm`）に、結果の操作（検索・並び替え・絞り込み・適用中チップ）はコンテンツ列の先頭のツールバーに置き、リストに近い場所に操作を集める。
-
-- **ヘッダー帯**: 左にタイトル（`{typography.heading-lg}`相当）＋件数、右に投稿CTA（`button-primary`・700ウェイト・`active:scale-95`）のみ。件数は「全 n 件」の数値だけ700・ink色で強調する。フィルター適用中は括弧書きテキストではなく、`{colors.primary-50}`地＋`{colors.primary-700}`文字＋ブルードットの小さなピルで示す。
-- **結果ツールバー**: 検索バー（伸縮）と並び替えを同一行に置く。モバイル（sm未満）は検索バー全幅 → 直下に「絞り込み」ボタンと並び替えを均等2列で並べる。絞り込みボタン（lg未満のみ表示）は`button-secondary`準拠の白地＋hairline＋`shadow-sm`で、フィルター適用中は右端にブルードットを添える。
-- **並び替え（SortSelect）**: ネイティブ`<select>`を維持する（モバイルでOSネイティブピッカーが開く利点とアクセシビリティを優先）。`appearance-none`で標準の外装を消し、左に並び替えアイコン・右にシェブロンを重ねた白地＋hairline＋`{rounded.sm}`のコントロールにする。ラベル「並び替え」は`sr-only`。フォーカスは太さで示す方式（`focus:border-primary-700` + `ring-1`）。
-- **検索バー**: `{component.text-input}`準拠＋`shadow-sm`（ホームヒーローの検索バーと同じ質感）。フォーカスは太さで示す方式に統一し、グロー式（`ring-2`の薄色リング）は使わない。
-- **適用中フィルターチップ**: ここでも「3層=3色相」を維持する。カテゴリ=`{colors.primary-600}`実線＋白文字、属性=ティールソフト、ムード=パープルソフトで、フィルターパネルの選択時チップと同一配色にする。キーワードは層に属さないため白地＋グレーのニュートラル＋検索アイコンで区別する。各チップ内の×ボタンで個別解除、末尾の「すべてクリア」テキストボタン（フィルターパネルの「クリア」と同スタイル）で一括解除。
-
-### スポットカード（`{component.spot-card}`）
-
-写真ファーストの構成。視線が「写真 → タイトル → 住所 → 投稿者・いいね」の順に流れるよう、カテゴリバッジは画像上のオーバーレイに、いいねボタンは最下段のソーシャル情報行に配置する。
-
-- 画像: `aspect-video`、`{rounded.md}`の上2角のみ丸め。画像がない場合は`{colors.surface}`背景に「No Image」表示（既存実装を踏襲）。
-- カテゴリバッジ（`{component.category-badge-overlay}`）: **画像左上のオーバーレイ**。半透明白（`bg-white/90` + `backdrop-blur`）のピルに`{colors.primary-700}`の文字。「カテゴリ＝ブルー」の対応は文字色で維持する。グリッドに実線ブルーのピルが並ぶ視覚ノイズを避けるため、またどんな写真の上でも喧嘩しないよう、塗りは白にする。
-- タイトル: `{typography.heading-sm}`、1行省略。コンテンツ部の先頭に置き、ホバー時に`{colors.primary-700}`へ変化してカード全体がリンクであることを示す。
-- 住所: `{typography.body-sm}`、`{colors.muted}`、ピンアイコン付き1行省略。タイトル直下に密に寄せ、スポット情報のグループを作る。
-- ソーシャル情報行: `{colors.hairline-soft}`の区切り線で上と分節し、左に投稿者（24px円形アバター＋名前`{typography.body-sm}`）、右にいいねボタン（`{component.like-button}` / `-active`）を配置。非アクティブは`{colors.muted}`、アクティブは`{colors.like}`塗りつぶしハート。
-- 余白リズム: コンテンツ部は16px（モバイル2カラム時は12px）。タイトル〜住所間は4pxで密に、区切り線の上下は12pxで疎に、均一な等間隔を避ける。
-- ホバー: 画像を`scale(1.05)`（500ms・ease-out）、カードは`shadow-sm → shadow-md` + 2pxのリフト（`{component.spot-card-hover}`）。動きは`transform`と影のみに限定する。
-- フォーカス: `focus-visible`時に`{colors.primary-300}`のリングを表示。
-
-### スポット詳細
-
-純白キャンバスにコンテンツを直置きする（一覧ページのような「グレー背景＋白カード」の器は使わない）。1つのスポットを読ませる画面のため、写真の発色を最優先する純白原則をそのまま適用する。コンテナは`max-w-4xl`。
-
-- **ヘッダー**: カテゴリバッジ（白背景上なので`{component.category-badge}`の`{colors.primary-600}`実線ピル）→ タイトル（`{typography.display}`、モバイルは24pxに縮小）→ 住所メタ行（`{typography.body-sm}`・`{colors.muted}`・ピンアイコン付き）の順で縦に流し、右端にいいねボタンを置く。
-- **いいねボタン（pillバリアント）**: 詳細ページでは操作可能な独立ボタンとして、`{rounded.full}`のアウトラインピルで表示する。非アクティブはグレーのアウトライン＋ホバーでrose系に変化、アクティブは`{colors.like-soft}`背景＋`{colors.like}`文字・塗りつぶしハート。押下時`scale-95`。
-- **画像ギャラリー**: メイン画像（`aspect-video`・`{rounded.lg}`）＋直下のサムネイル行で切り替える方式。複数枚あるときのみメイン画像右下に「n / N」カウンター（黒60%半透明ピル・白文字）とサムネイル行を表示する。サムネイルは64px角・`{rounded.sm}`で、選択中は`{colors.primary-600}`の2pxリング＋オフセット、非選択は透明度60%（ホバーで100%）。
-- **本文2カラム（lg以上、モバイルは縦積み）**: 左2/3に「このスポットについて」（説明文）→「このスポットの特徴」（タグチップ群）、右1/3に基本情報カードと投稿者カード。セクション見出しは`{typography.heading-md}`。
-- **タグ表示**: 属性チップ（ティール）→ムードチップ（パープル）の順に1つのチップ群として並べる。配色はフィルターパネルの選択時チップと同一（薄色背景＋濃色文字＋同系色ボーダーのソフトチップ）。カテゴリはヘッダーのバッジが担うため、ここには混ぜない。
-- **基本情報カード**: hairlineボーダー＋`{rounded.md}`のカードに、価格帯・営業時間・住所をアイコン＋ラベル（`{typography.caption}`・muted）＋値の定義リストで縦に並べる。値が無い項目は行ごと省略する（住所は必須のためカードが空になることはない）。
-- **投稿者カード**: hairlineボーダー＋`{rounded.md}`。40px円形アバター＋名前（700）＋投稿日（`{typography.caption}`・muted）。フォローボタンはPhase 2で追加予定。
-
-### 特集（一覧・詳細）
-
-特集は、投稿者が自分のスポットを束ねてテーマを付けた「◯選」記事。一覧はスポット一覧と同じ骨格、詳細はスポット詳細と同じ純白直置きにする。
-
-- **一覧**: gray-50キャンバス＋白のヘッダー帯（タイトル「特集」＋「全 n 件」）。検索バーはコンテンツ列の先頭に置き、`max-w-xl`に収める。グリッドはモバイル1列 → sm 2列 → lg 3列、gap-6（スポットより1枚が大きい）。
-- **特集カード**: スポットカードと同じ器（`{rounded.md}`・hairline・`shadow-sm`、ホバーで画像`scale(1.05)`と2pxのリフト）。カバー画像`aspect-video`の**下**にタイトル（2行まで）を置き、画像の上に文字を重ねない（可読性のためのグラデーションを足さずに済む）。区切り線の下に作成者（24px円形アバター＋名前）と「n スポット」。画像が無いときはgray-100地にレイヤーアイコン。
-- **詳細**: `max-w-4xl`。カバー画像は投稿者が設定したときだけ出す（代わりの画像を出すと、すぐ下の01のカードと同じ画像が並ぶため）。ラベル「特集」（`{colors.primary-700}`）→ タイトル（スポット詳細と同じサイズ）→ 説明 → 区切り線 → 作成者（40pxアバター＋名前700＋作成日）と「n スポット」。
-- **順番と添え書き**: スポットは`<ol>`で、各カードの上に「01」「02」の番号（`{colors.primary-700}`・700・等幅数字）を置く。カードは`SpotCard`をそのまま使い、いいね・保存がそのまま効く。添え書きはカードの下に、左2pxのgray-200ボーダー＋muted文字の引用スタイルで置き、スポット自身の説明文と区別する。モバイル1列 → sm 2列。
-- **作成・編集フォーム**: gray-50背景に`max-w-2xl`。タイトル（右上に`12/60`のカウンタ、例文「雨の日の横浜デート10選」で具体的なタイトルを促す）→ 説明 → カバー画像（`ImageUploader`を1枚まで）→ スポットを選ぶ → 並び順と添え書き → 送信ボタン（`button-primary`・全幅）の順。
-- **スポットを選ぶ**: 自分の投稿を正方形のサムネイル＋タイトル1行のタイルで並べる（モバイル3列・sm 4列）。押すと選択し、選択中は`{colors.primary-600}`の2pxリング＋右上のチェック。上限（30件）に達したら未選択のタイルは透明度40%で押せなくする。投稿が無いときは「スポットを投稿する」へ案内する。
-- **並び順と添え書き**: 選んだ順に、番号・48pxサムネイル・タイトル・「上へ」「下へ」「外す」の36px角アイコンボタン（hairline）を1行に置き、その下に添え書きの入力欄（右下に`n/200`）を置く。並べ替えはドラッグにせず、キーボードや読み上げでも同じように使えるボタンにする。
-- **作成者の操作**: 詳細の「特集」ラベルの右に、作成者にだけ「編集」（hairline）と「削除」（赤のhairline）を置く。削除は`BottomSheet`の確認を挟む。
-
-### マイページ
-
-一覧ページと同じ「gray-50キャンバス＋白のヘッダー帯」の骨格を使う（コレクションを俯瞰するグリッド画面のため、詳細ページの純白直置きとは意図的に使い分ける）。コンテナは`max-w-4xl`。
-
-- **プロフィールヘッダー**: 白帯（`shadow-sm`）内に、アバター（80px、sm以上96px）と右カラム（名前`{typography.heading-lg}` → 統計行 → bio）を横並び。編集導線は`{component.button-secondary}`準拠の「プロフィールを編集」ボタン（モバイルは「編集」に短縮）。鉛筆アイコン単体のような気づきにくい導線にはしない。
-- **統計行**: 「n 投稿 ・ n いいね」。数値は700・ink、単位は`{typography.body-sm}`・muted。件数はConnectionの`totalCount`を使い、両タブのクエリを常時実行して取得する。
-- **タブ**: ヘッダー帯の下端に左寄せで配置。アクティブは700ウェイト＋下端2pxの`{colors.primary-600}`バー（top-nav-linkと同じ文法）、非アクティブはmuted。ラベル右に件数バッジ（アクティブ=`{colors.primary-50}`地に`{colors.primary-700}`文字、非アクティブ=グレーのソフトピル）。全幅均等分割（`flex-1`）にはしない。タブは「投稿・いいね・保存・特集」の4つで、モバイルは間隔を`gap-4`に詰める。
-- **グリッド**: モバイル2列 → lg 3列、gap-4（sm以上gap-6）。一覧ページのモバイル1列と異なり、自分のコレクションの一覧性を優先して2列にする（SpotCardのモバイル2列時パディング12pxが効く前提）。
-- **スケルトン**: SpotListの`SpotCardSkeleton`を共有し、独自の簡易プレースホルダーは作らない。
-- **空状態**: グレー円形地のアイコン＋メッセージ＋次アクションのCTA（投稿タブ=`button-primary`「スポットを投稿する」、いいねタブ=`button-secondary`「スポットを探す」、特集タブ=`button-primary`「特集を作る」）。
-- **特集タブ**: 右上に`button-primary`の「特集を作る」、その下に特集カードをモバイル1列 → sm 2列。続きは無限スクロールにせず「もっと見る」ボタンで読む（1人あたりの特集は少ないため）。テキスト1行だけの空状態にはしない。
-
-### プロフィール編集
-
-gray-50背景に`max-w-lg`の白カード（`{rounded.lg}`相当のrounded-2xl＋hairline＋`shadow-sm`）を中央配置し、上部に`← マイページ`の戻りリンク（詳細ページと同パターン）を置く。
-
-- **アバターアップローダー**: 96px円形。ホバー・フォーカスで黒40%オーバーレイ＋カメラアイコン＋「変更」ラベルを表示し、アップロード中はスピナーに置き換える。ホバーのないモバイル向けに「タップして画像を変更」キャプションを併記する。
-- **入力欄**: `{component.text-input}`準拠。フォーカスは太さで示す方式（`focus:border-primary-700 focus:ring-1`）で、ログイン画面と同一スタイル。文字数上限のある項目はラベル行の右端に`12/50`形式のカウンタ（`{typography.caption}`・placeholder色）を置く。
-- **エラー**: 裸の赤テキストではなく、`error`系ソフト配色（薄赤地＋同系ボーダー）のアラートカードで表示する。
-- **ボタン**: キャンセル=`button-secondary`、保存=`button-primary`（700ウェイト・`active:scale-[0.98]`）。
-
-### フォーム・入力（`{component.text-input}` / `-focused`）
-白背景、1pxのhairlineボーダー、`{rounded.sm}`。フォーカス時はボーダーが`{colors.primary-700}`2pxに変化（グロー効果は使わない、Airbnb同様の「太さで示す」フォーカス表現）。塗り面積が小さい線要素なので、通常表示より濃い`primary-700`を使っても重く見えない。
+すべての画面の一番下に置く。`surface` の面に、ロゴと「Spotee について・利用規約・プライバシーポリシー・お問い合わせ」のリンクを `caption` で並べる。
 
 ### ボタン
-- **Primary**（`{component.button-primary}`）: `{colors.primary-600}`実線、白文字。ホバーで`{colors.primary-700}`に変化。
-- **Secondary**（`{component.button-secondary}`）: 白背景＋hairlineボーダー、通常のフォーム送信以外の操作（キャンセル等）。
-- **Ghost**（`{component.button-ghost}`）: 背景なし、テキストのみ。ログアウトなど低強度の操作。
+
+- **主要なボタン**（`button-primary`）: 画面に1つ。`accent-fill` の塗りに白の文字、`full` の角丸。
+- **二番目のボタン**（`button-secondary`）: 白地に墨の 1px の枠（「フォロー」「キャンセル」など）。
+- **文字のボタン**（`button-text`）: `accent` の文字に下線（「キーワードで探す」「選んだ条件をすべて見る」など）。
+- アイコンだけのボタンには、何をするか分かる `aria-label` を付ける。
+- 押したときは `active:scale-[0.98]` 程度の小さな動きだけ。
+
+### 入力欄
+
+- `text-input`: 白地に `line` の枠、`sm` の角丸。フォーカスは枠を `accent` にし、太さで示す（ぼかした光の輪は使わない）。
+- 文字数に上限がある欄は、ラベルの右端に `12/60` のように残りを `caption` で出す。
+- エラーは入力欄の下に、`error` の文字で理由と直し方を書く。
+
+### 文章で探す（`ask-block`）
+
+トップの一番上に置く、Spotee の顔になる部品です。3層のタグを、そのまま一文として読ませます。
+
+```
+[雰囲気] 、 [特徴] [カテゴリ] を探す
+雨の日でも過ごせる、Wi-Fiのある カフェを探す
+```
+
+- 面は `accent-soft`、角丸は `lg`。一文は `ask-sentence`。
+- **選んだ言葉**（`ask-word-selected`）: `accent` の文字と 2px の下線。押すと、その層の選択肢が出て選び直せる。外すのもそこから。
+- **まだ選んでいない言葉**（`ask-word-empty`）: 「どんな雰囲気の」「どんな特徴の」「場所」を、`ink-muted` の文字と点線の下線で出す。選ばなくても探せる（何も選ばなければ「すべてのスポット」）。
+- 言葉の上に、層の名前（「雰囲気」「特徴」「カテゴリ」）を `caption` で小さく添える。
+- 一文の下に、今の条件に合う写真を4枚（PC は6枚）と、主要なボタン「◯件を見る →」、文字のボタン「キーワードで探す」。
+
+**複数選んだとき**
+
+- 同じ層で2つ選んだら、言葉の間をつなぎの言葉（`ask-connector`）でつなぐ。「か」＝どれか（OR）、「かつ」＝すべて（AND）。つなぎの言葉はただの文字で、押せない。
+- 3つ以上選んだ層は「雨の日でも過ごせる など4つ」のように、最初の言葉と「など◯つ」を同じ下線の中に入れて1語にまとめる。
+- カテゴリのつなぎはいつも「か」（1つのスポットのカテゴリは1つだけなので）。
+- 一文の下に「すべて当てはまる／どれか当てはまる」の切り替え（`mode-switch`）と、結果を言葉と件数で出す（「選んだ条件がすべて当てはまる場所だけ 4件」）。切り替えは、この1か所だけ。
+- 何か選んでいるときは、文字のボタン「選んだ条件をすべて見る（10）」を出す。
+
+**検索の仕組みとの対応**（`backend/src/spot/spot-filter.util.ts`）
+
+- 層と層の間（カテゴリ・特徴・雰囲気・キーワード）はいつも AND。一文の「、」と言葉の並びがこれにあたる。
+- カテゴリの中はいつも OR。
+- 特徴の中と雰囲気の中は `tagSearchMode`（AND / OR）。スイッチは1つで、両方にまとめて効く。
+
+**0件のとき**: 「すべて」で0件になったら、「条件が多くて、すべてが当てはまる場所はまだありません。『どれか当てはまる』にすると 27件 あります。」と、切り替えたときの件数と、ワンタップで切り替えるボタンを出す。
+
+### 条件の一覧のシート（`conditions-sheet`）
+
+「選んだ条件をすべて見る」で、下から出る（PC は中央のダイアログ）。
+
+- 見出し「選んだ条件 10」と、文字のボタン「すべて外す」。
+- 雰囲気・特徴・カテゴリの層ごとに、選んだ言葉を並べ、それぞれ × で外せる。この × は、外す操作のボタンとして `accent-soft` の面に置いてよい（一文の中には × を出さない）。
+- 「すべて当てはまる／どれか当てはまる」の切り替えと、主要なボタン「◯件を見る」。
+
+### スポットの行（`spot-row`、トップ）
+
+文字が主役の一覧です。左に文字、右に写真（16:9、幅 116px／PC 200px）。
+
+- タイトル（`heading-sm`、切らない）→ 説明の書き出し（`body-sm`、2行まで）→ 場所とカテゴリ（ピンのアイコン＋`caption`）→ 書いた人（アバター 20px＋名前）といいねの数。
+- 行の間は `line` の下線だけ。枠や影は付けない。
+
+### 写真のカード（`spot-card`、スポット一覧）
+
+写真が主役のカードです。
+
+- 写真は 16:9、角丸 `md`。右上に保存のアイコンを重ねる（白、うっすら影）。
+- 写真の下に、タイトル（`heading-sm`、2行まで）→ 場所とカテゴリ（`caption`）→ 書いた人と保存の数。
+- 枠と影は付けない。カテゴリを写真の上のバッジにしない。
+
+### 特集のカード（`collection-card`）
+
+- 写真（カバー画像、無ければ先頭のスポットの1枚目）は 16:9、角丸 `md`。
+- 写真の下に、タイトル（`heading-sm`、3行まで）→ 書いた人と「◯か所」。
+- 「特集」のラベルを写真の上に貼らない。必要なら写真の下に `caption` の文字で「特集 ・ 5か所」と書く。
+
+### タグ（`tag-link`）
+
+スポットの詳細などでタグを見せるときは、層の名前ごとに文字で並べる。
+
+```
+カテゴリ　カフェ
+雰囲気　　雨の日でも過ごせる ・ 一人でゆっくりできる
+特徴　　　Wi-Fiあり ・ 電源あり ・ 禁煙
+```
+
+- 層の名前は `caption` の `ink-muted`、言葉は `accent` の文字に `accent-line` の下線。
+- 言葉を押すと、その言葉を選んだ「文章で探す」の検索に移る。
+- チップやピルで囲まない。層を色で分けない。
+
+### いいね・保存
+
+- 詳細ページ: アイコン（20px）と文字。「保存」「いいね 128」。押した後は、いいねは `like` で塗りつぶして文字も `like`、保存は `ink` で塗りつぶして「保存済み」。
+- カード・行の中: アイコン（16px）と数字だけ、`caption` の大きさ。
+- どちらも枠・背景を付けない。押したときは、アイコンを少しだけ弾ませる（`prefers-reduced-motion` のときは動かさない）。
+
+### 書いた人とアバター（`avatar`）
+
+- アバターは円。大きさは 20px（行・カード）、28px（ヘッダー）、36px（特集の書いた人）、80px（プロフィール）。
+- 画像が無い人は、名前の最初の1文字を `accent-soft` の円に `accent` の文字で出す（灰色の人型アイコンにしない）。
+- 書いた人のひとこと（特集の添え書きなど）は、アバター 22px と本文（`body-md`）を並べて出す。吹き出しや引用の枠で囲まない。
+
+### 空のとき・読み込み中・エラーのとき
+
+- **空**: 何が無いのかと、次にできることを1つ出す（例:「まだ特集がありません」＋主要なボタン「特集を作る」）。アイコンを丸い面に入れて飾らない。
+- **読み込み中**: 実際の形と同じ大きさの灰色の枠（`surface`）を出し、読み込み後に中身がずれないようにする。
+- **エラー**: 何が起きたかと、どうすればよいかを日本語で書く。システムからの英語のメッセージをそのまま出さない。
+
+## Screens
+
+画面ごとの細かい形は、それぞれの画面を直すときに決め、この章に足していく。
+
+- **トップ**: 文章で探す → いま読まれている特集（カードの横の列、PC は3列）→ よく保存されている場所（スポットの行）。PC は右の脇の列に「今週よく読まれた特集」（本当の順位なので番号を付ける）。
+- **スポット一覧**: 上に今の条件の一文（「雨の日でも過ごせる、Wi-Fiのある カフェ」と「言葉を変える」）、その下に件数と並び順と「絞り込み」のボタン、写真のカードの格子。カテゴリのアイコンの列は置かない。
+- **スポット詳細**: 写真 → タイトル・場所 → 保存・いいね → 説明 → タグ（文字で並べる）→ 基本情報 → 書いた人。スマホでは説明を基本情報より先に出す。
+- **特集の詳細**: 読み物として、最大 720px の列。タイトル → 書いた人 → カバー画像 → 説明 → スポットを順番どおりに（「1か所目」と見出し、写真、書いた人のひとこと）。
+- **投稿・特集の作成と編集**: 全項目を同じ重さで並べず、写真とタイトルを先頭に。タグの欄の名前は「特徴」「雰囲気」。
+- **マイページ・プロフィール**: 統計（投稿・いいね・フォロワー・フォロー中）はスマホでも1行で読めるように並べる。
+
+## 言葉
+
+- タグの3つの層は、画面ではいつも「**カテゴリ・特徴・雰囲気**」と呼ぶ。「属性」「ムード」のようなシステムの言葉を画面に出さない。
+- ボタンは、押すと何が起きるかを書く（「18件を見る」「保存」「特集を作る」）。押した後は、何が起きたかを伝える（「保存しました」）。
+- エラーは、何が起きたかと、どうすれば直るかを書く。謝罪の言葉で埋めない。
+- 見出しの補足に、見出しの言い換えを書かない。書くなら、そのセクションの中身が分かる具体的な一文にする。
+- 「クリック」「タップ」のような端末によって違う言葉を避け、「押す」「選ぶ」を使う。
 
 ## Do's and Don'ts
 
 ### Do
-- ブランドブルー（`{colors.primary-600}`／ホバー時`{colors.primary-700}`）はCTA・カテゴリバッジ・選択状態にのみ使う。装飾目的では使わない。
-- タグ3層は必ず色相で区別する：カテゴリ=ブルー、属性=ティール、ムード=パープル。この対応関係を崩さない。
-- 「いいね」は`{colors.like}`（rose）を維持し、ブランドブルーと混同しない。
-- 見出しは700ウェイト一択、本文は400ウェイト一択でコントラストを作る。
-- カード・ボタン・チップの角丸は定義した3段階（8 / 12 / pill）以外を増やさない。
+
+- 大胆さは「文章で探す」の1か所に集め、ほかの画面は静かにする。
+- 強弱は文字の太さ・大きさ・色と下線で付ける。
+- 下線＝押せる言葉、点線＝まだ選んでいない言葉、という印の意味を守る。
+- タイトルと名前を切らずに見せる。
+- 書いた人の顔・名前・ひとことを添える。
+- 色は役割の名前（トークン）で使う。
 
 ### Don't
-- 属性タグ・ムードタグにブランドブルーを使わない（カテゴリバッジと衝突するため）。
-- 影を多段階にしない。カードのシャドウは1種類のみ。
-- `{colors.primary-500}`を本文サイズのテキストやリンクに使わない（コントラスト不足）。
-- クリーム系の背景色を導入しない（写真の発色を優先し、キャンバスは純白で統一する）。
 
-## 現状コードとの差分（移行メモ）
+- 目立たせたいものを、枠・丸・ピルで囲まない（「特集」のラベル、カテゴリのバッジ、色の濃いバッジなど）。
+- 小さな文字をラベルのように浮かせない。言葉として文の中に組み込む。
+- 3層のタグを色で分けない。
+- 意味の無い番号（01・02・03）を付けない。番号は本当に順番があるもの（特集の中の順番・ランキング）にだけ使う。
+- 線のアイコンを薄い色の四角や丸に入れて並べない。
+- 絵文字やシールのような記号で、親しみやすさを足さない。
+- カードに影を付けない。影は浮いているもの（シート・メニュー）にだけ。
 
-- `frontend/tailwind.config.ts`の`colors.primary`を、Tailwindデフォルトの`sky`系配列から本ドキュメントの`primary-50`〜`900`の値に差し替える。クラス名（`bg-primary-700`等）は変更不要。
-- `frontend/src/app/globals.css`の`body { font-family: Arial, Helvetica, sans-serif; }`は、`next/font`で読み込んでいる Noto Sans JP を実際には適用できていない状態になっている。`font-sans`（Tailwind側で`var(--font-noto-sans-jp)`を指す設定）を使うよう修正が必要。
-- `FilterPanel.tsx`の属性タグ配色（現状`blue-100`/`blue-700`）を、本ドキュメントのティール（`attribute-bg` / `attribute-text` / `attribute-border`）に差し替える。ムードタグの`purple-100`/`purple-700`は本ドキュメントの`mood-*`トークンとほぼ一致するため変更は軽微。
+## コードとの差分（移行メモ）
+
+このデザインシステムに合わせるため、土台の実装で次を直す。
+
+- 書体: `frontend/src/app/layout.tsx` で Zen Kaku Gothic New を `next/font/google` で読み込み、`--font-display` として `frontend/src/app/globals.css` の `@theme` に足す。
+- 色: `primary-*` は今の値のまま使う。役割ごとの使い分け（押せる文字は `primary-700`、主要なボタンは `primary-600`）にそろえる。
+- タグ: 特徴（ティール）・雰囲気（紫）の色分けをやめる（`FilterPanel.tsx`・`SpotForm.tsx`・`SpotDetail.tsx` など）。画面の呼び名を「特徴」「雰囲気」にそろえる。
+- ヘッダー: ログアウトをアバターのメニューへ移す。
+- フッター: すべての画面に足す。
+- アバター: 画像が無い人の表示を、灰色の人型アイコンから名前の最初の1文字に変える。
+- エラーの表示: 認証のエラーなど、英語のメッセージをそのまま出している箇所を日本語にする。
 
 ## Known Gaps
 
-- 投稿フォーム（画像アップロード含む）の詳細なコンポーネント仕様は、実装が進んだ段階で追記する。
-- フォロー機能（Phase 2）のUIパターンは未着手のため未定義。
-- ダークモードは要件定義書に記載がないため対象外とした。将来必要になった場合は別途検討する。
+- 一文の言葉を押したときに出る選択肢の画面（タグが増えたときの並べ方・検索）は、トップを直すときに決める。
+- 特徴と雰囲気で別々に「すべて／どれか」を選べるようにするには、バックエンドの変更が要る。今は1つのスイッチで両方にまとめて効く。
+- 写真は投稿時に 16:9 で切り抜いている。縦長の写真に対応するかは、別に検討する。
+- ダークモードは対象外。
