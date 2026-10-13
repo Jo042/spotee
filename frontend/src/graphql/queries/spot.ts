@@ -123,3 +123,33 @@ export const GET_SPOT_COUNT = gql(`
     }
   }
 `);
+
+export const GET_SPOT_ROWS = gql(`
+  query GetSpotRows($first: Int, $sort: SpotSortInput) {
+    spots(first: $first, sort: $sort) {
+      edges {
+        node {
+          id
+          title
+          description
+          address
+          likeCount
+          isLiked
+          images {
+            id
+            url
+          }
+          category {
+            id
+            name
+          }
+          user {
+            id
+            name
+            avatarUrl
+          }
+        }
+      }
+    }
+  }
+`);
