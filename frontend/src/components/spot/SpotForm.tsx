@@ -283,7 +283,7 @@ export function SpotForm({ spotId, initialValues }: SpotFormProps) {
 
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-2">
-          属性タグ（複数選択可）
+          特徴（複数選択可）
         </label>
         <div className="flex flex-wrap gap-2">
           {tagData?.attributeTags.map((tag) => (
@@ -307,7 +307,7 @@ export function SpotForm({ spotId, initialValues }: SpotFormProps) {
 
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-2">
-          ムードタグ（複数選択可）
+          雰囲気（複数選択可）
         </label>
         <div className="flex flex-wrap gap-2">
           {tagData?.moodTags.map((tag) => (
