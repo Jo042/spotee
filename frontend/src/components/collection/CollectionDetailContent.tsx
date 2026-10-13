@@ -143,8 +143,8 @@ export function CollectionDetailContent({
             <p className="shrink-0 text-sm text-gray-600">
               <span className="font-bold text-gray-900">
                 {formatCount(collection.spotCount)}
-              </span>{" "}
-              スポット
+              </span>
+              か所
             </p>
           </div>
         </header>

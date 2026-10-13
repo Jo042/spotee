@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { useMutation } from "@apollo/client/react";
 import { Heart } from "lucide-react";
 import { useRouter } from "next/navigation";
@@ -11,17 +12,19 @@ interface LikeButtonProps {
   spotId: string;
   likeCount: number;
   isLiked: boolean | null;
-  variant?: "inline" | "pill";
+  /** compact: カードの中（アイコンと数字）。labeled: 詳細ページ（アイコンと「いいね 128」） */
+  variant?: "compact" | "labeled";
 }
 
 export function LikeButton({
   spotId,
   likeCount,
   isLiked,
-  variant = "inline",
+  variant = "compact",
 }: LikeButtonProps) {
   const { user } = useAuth();
   const router = useRouter();
+  const [popCount, setPopCount] = useState(0);
 
   const [toggleLike, { loading }] = useMutation(TOGGLE_LIKE, {
     variables: { spotId },
@@ -51,38 +54,40 @@ export function LikeButton({
       router.push("/login");
       return;
     }
+    setPopCount((n) => n + 1);
     toggleLike();
   };
 
-  if (variant === "pill") {
-    return (
-      <button
-        onClick={handleClick}
-        disabled={loading}
-        aria-pressed={isLiked ?? false}
-        className={`flex items-center gap-1.5 rounded-full border px-4 py-2 text-sm font-medium transition-colors disabled:opacity-50 active:scale-95 ${
-          isLiked
-            ? "border-rose-200 bg-rose-50 text-rose-500"
-            : "border-gray-200 text-gray-500 hover:border-rose-200 hover:text-rose-400"
-        }`}
-      >
-        <Heart size={16} className={isLiked ? "fill-rose-500" : ""} />
-        <span>{formatCount(likeCount)}</span>
-      </button>
-    );
-  }
+  const labeled = variant === "labeled";
 
   return (
     <button
+      type="button"
       onClick={handleClick}
       disabled={loading}
       aria-pressed={isLiked ?? false}
-      className={`flex items-center gap-1 p-2 -m-2 text-sm transition-colors disabled:opacity-50 ${
-        isLiked ? "text-rose-500" : "text-gray-400 hover:text-rose-400"
+      aria-label={labeled ? undefined : `いいね ${likeCount}`}
+      className={`flex items-center transition-colors disabled:opacity-50 ${
+        labeled ? "gap-1.5 text-sm font-medium" : "-m-2 gap-1 p-2 text-xs"
+      } ${
+        isLiked
+          ? "text-rose-500"
+          : labeled
+            ? "text-gray-900 hover:text-rose-500"
+            : "text-gray-500 hover:text-rose-500"
       }`}
     >
-      <Heart size={14} className={isLiked ? "fill-rose-500" : ""} />
-      <span>{formatCount(likeCount)}</span>
+      <Heart
+        key={popCount}
+        size={labeled ? 20 : 16}
+        aria-hidden="true"
+        className={`${isLiked ? "fill-rose-500" : ""} ${
+          popCount > 0 ? "motion-safe:animate-pop" : ""
+        }`}
+      />
+      <span className="tabular-nums">
+        {labeled ? `いいね ${formatCount(likeCount)}` : formatCount(likeCount)}
+      </span>
     </button>
   );
 }
