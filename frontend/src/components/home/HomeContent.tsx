@@ -1,178 +1,151 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowRight } from "lucide-react";
+import { ChevronRight } from "lucide-react";
 import { useQuery } from "@apollo/client/react";
-import { SpotCard } from "@/components/spot/SpotCard";
-import { GET_SPOTS } from "@/graphql/queries/spot";
+import { GET_SPOT_ROWS } from "@/graphql/queries/spot";
 import { GET_COLLECTIONS } from "@/graphql/queries/collection";
+import { SpotSortBy, SortOrder } from "@/graphql/generated/graphql";
 import {
   CollectionCard,
   CollectionCardSkeleton,
 } from "@/components/collection/CollectionCard";
-import { useAuth } from "@/hooks/useAuth";
+import { SpotRow, SpotRowSkeleton } from "@/components/spot/SpotRow";
 import { AskBlock } from "./AskBlock";
-import { SpotSortBy, SortOrder } from "@/graphql/generated/graphql";
-import type { GetSpotsQuery } from "@/graphql/generated/graphql";
 
-const GRID_COUNT = 8;
-const LATEST_COUNT = 4;
 const COLLECTION_COUNT = 3;
+const POPULAR_COUNT = 6;
+const LATEST_COUNT = 5;
 
-type SpotNode = NonNullable<GetSpotsQuery["spots"]["edges"][number]["node"]>;
-
-function extractSpots(data: GetSpotsQuery | undefined): SpotNode[] {
-  return (data?.spots?.edges ?? [])
-    .map((e) => e.node)
-    .filter((n): n is SpotNode => n != null);
-}
-
-interface SectionHeaderProps {
-  title: string;
-  subtitle: string;
-  href: string;
-}
-
-function SectionHeader({ title, subtitle, href }: SectionHeaderProps) {
+function SectionHeading({ title, href }: { title: string; href: string }) {
   return (
-    <div className="mb-6 flex items-end justify-between gap-4">
-      <div>
-        <h2 className="text-[22px] font-bold leading-snug text-gray-900">
-          {title}
-        </h2>
-        <p className="mt-1 text-sm text-gray-500">{subtitle}</p>
-      </div>
+    <h2 className="text-lg font-bold text-gray-900">
       <Link
         href={href}
-        className="group flex shrink-0 items-center gap-1 text-sm font-medium text-primary-700 hover:text-primary-800"
+        className="inline-flex items-center gap-0.5 rounded-md decoration-gray-300 underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-300"
       >
-        もっと見る
-        <ArrowRight
-          size={16}
-          className="transition-transform duration-200 group-hover:translate-x-0.5"
-        />
+        {title}
+        <ChevronRight size={18} aria-hidden="true" className="text-gray-400" />
       </Link>
-    </div>
-  );
-}
-
-interface SpotCardGridProps {
-  spots: SpotNode[];
-  loading: boolean;
-  skeletonCount: number;
-}
-
-function SpotCardGrid({ spots, loading, skeletonCount }: SpotCardGridProps) {
-  return (
-    <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
-      {loading
-        ? [...Array(skeletonCount)].map((_, i) => (
-            <div
-              key={i}
-              className="aspect-video animate-pulse rounded-lg bg-gray-200"
-            />
-          ))
-        : spots.map((spot) => <SpotCard key={spot.id} spot={spot} />)}
-    </div>
+    </h2>
   );
 }
 
 export function HomeContent() {
-  const { user } = useAuth();
-
-  const { data, loading } = useQuery(GET_SPOTS, {
-    variables: {
-      first: GRID_COUNT,
-      sort: { sortBy: SpotSortBy.LikeCount, order: SortOrder.Desc },
+  const { data: collectionData, loading: collectionsLoading } = useQuery(
+    GET_COLLECTIONS,
+    { variables: { first: COLLECTION_COUNT, filter: null } },
+  );
+  const { data: popularData, loading: popularLoading } = useQuery(
+    GET_SPOT_ROWS,
+    {
+      variables: {
+        first: POPULAR_COUNT,
+        sort: { sortBy: SpotSortBy.LikeCount, order: SortOrder.Desc },
+      },
     },
-  });
-  const { data: latestData, loading: latestLoading } = useQuery(GET_SPOTS, {
+  );
+  const { data: latestData, loading: latestLoading } = useQuery(GET_SPOT_ROWS, {
     variables: {
       first: LATEST_COUNT,
       sort: { sortBy: SpotSortBy.CreatedAt, order: SortOrder.Desc },
     },
   });
-  const { data: collectionData, loading: collectionsLoading } = useQuery(
-    GET_COLLECTIONS,
-    { variables: { first: COLLECTION_COUNT, filter: null } },
-  );
 
-  const spots = extractSpots(data);
-  const latestSpots = extractSpots(latestData);
   const collections = (collectionData?.collections.edges ?? []).map(
     (edge) => edge.node,
   );
-
-  const gridSpots = spots.slice(0, GRID_COUNT);
+  const popularSpots = (popularData?.spots.edges ?? []).map((e) => e.node);
+  const latestSpots = (latestData?.spots.edges ?? []).map((e) => e.node);
 
   return (
-    <main className="bg-white">
+    <main className="bg-white pb-16">
       <AskBlock />
 
-      <section className="mx-auto max-w-5xl px-4 py-12">
-        <SectionHeader
-          title="人気のスポット"
-          subtitle="いいねが多い順のおすすめ"
-          href={`/spots?sortBy=${SpotSortBy.LikeCount}&order=${SortOrder.Desc}`}
-        />
-        <SpotCardGrid
-          spots={gridSpots}
-          loading={loading}
-          skeletonCount={GRID_COUNT}
-        />
-      </section>
+      <div className="mx-auto mt-12 grid max-w-[1160px] gap-12 px-4 lg:grid-cols-[minmax(0,1fr)_300px] lg:gap-14">
+        <div className="min-w-0 space-y-12">
+          {/* 読み込み中は枠で場所を取り、下の一覧がずれないようにする。0件なら出さない */}
+          {(collectionsLoading || collections.length > 0) && (
+            <section>
+              <SectionHeading title="新しい特集" href="/collections" />
+              <ul className="-mx-4 mt-4 flex snap-x snap-mandatory scroll-px-4 gap-4 overflow-x-auto px-4 pb-2 sm:mx-0 sm:grid sm:grid-cols-3 sm:overflow-visible sm:px-0 sm:pb-0">
+                {collectionsLoading
+                  ? [...Array(COLLECTION_COUNT)].map((_, i) => (
+                      <li key={i} className="w-[78%] shrink-0 sm:w-auto">
+                        <CollectionCardSkeleton />
+                      </li>
+                    ))
+                  : collections.map((collection) => (
+                      <li
+                        key={collection.id}
+                        className="w-[78%] shrink-0 snap-start sm:w-auto"
+                      >
+                        <CollectionCard collection={collection} />
+                      </li>
+                    ))}
+              </ul>
+            </section>
+          )}
 
-      {/* 読み込み中は枠で場所を取り、下の新着スポットがずれないようにする。0件なら出さない */}
-      {(collectionsLoading || collections.length > 0) && (
-        <section className="mx-auto max-w-5xl px-4 pb-12">
-          <SectionHeader
-            title="特集"
-            subtitle="テーマごとに選ばれたスポットのまとめ"
-            href="/collections"
-          />
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-            {collectionsLoading
-              ? [...Array(COLLECTION_COUNT)].map((_, i) => (
-                  <CollectionCardSkeleton key={i} />
-                ))
-              : collections.map((collection) => (
-                  <CollectionCard key={collection.id} collection={collection} />
-                ))}
-          </div>
-        </section>
-      )}
-
-      <section className="mx-auto max-w-5xl px-4 pb-12">
-        <SectionHeader
-          title="新着スポット"
-          subtitle="最近シェアされた場所"
-          href="/spots"
-        />
-        <SpotCardGrid
-          spots={latestSpots}
-          loading={latestLoading}
-          skeletonCount={LATEST_COUNT}
-        />
-      </section>
-
-      <section className="mx-auto max-w-5xl px-4 pb-16">
-        <div className="flex flex-col items-start gap-6 rounded-2xl border border-gray-100 bg-gray-50 p-8 sm:flex-row sm:items-center sm:justify-between md:p-10">
-          <div>
-            <h2 className="text-[22px] font-bold leading-snug text-gray-900">
-              あなたのお気に入りの場所をシェアしよう
-            </h2>
-            <p className="mt-2 text-sm leading-relaxed text-gray-600">
-              写真とタグで投稿すると、それが誰かの「次の行きたい場所」になります。
-            </p>
-          </div>
-          <Link
-            href={user ? "/spots/new" : "/login"}
-            className="shrink-0 rounded-lg bg-primary-600 px-6 py-3 text-sm font-bold text-white transition hover:bg-primary-700 active:scale-95"
-          >
-            スポットを投稿する
-          </Link>
+          <section>
+            <SectionHeading
+              title="いいねが多い場所"
+              href={`/spots?sortBy=${SpotSortBy.LikeCount}&order=${SortOrder.Desc}`}
+            />
+            <ul className="mt-1">
+              {popularLoading
+                ? [...Array(POPULAR_COUNT)].map((_, i) => (
+                    <li key={i}>
+                      <SpotRowSkeleton />
+                    </li>
+                  ))
+                : popularSpots.map((spot) => (
+                    <li key={spot.id}>
+                      <SpotRow spot={spot} />
+                    </li>
+                  ))}
+            </ul>
+            {!popularLoading && popularSpots.length === 0 && (
+              <p className="py-10 text-center text-sm text-gray-500">
+                まだスポットがありません
+              </p>
+            )}
+          </section>
         </div>
-      </section>
+
+        <aside aria-labelledby="latest-heading">
+          <h2 id="latest-heading" className="text-base font-bold text-gray-900">
+            新着の場所
+          </h2>
+          <ul className="mt-3 divide-y divide-gray-100">
+            {latestLoading
+              ? [...Array(LATEST_COUNT)].map((_, i) => (
+                  <li key={i} className="animate-pulse space-y-1.5 py-3">
+                    <div className="h-4 w-4/5 rounded bg-gray-100" />
+                    <div className="h-3 w-1/2 rounded bg-gray-100" />
+                  </li>
+                ))
+              : latestSpots.map((spot) => (
+                  <li key={spot.id}>
+                    <Link
+                      href={`/spots/${spot.id}`}
+                      className="group block py-3 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary-300"
+                    >
+                      <span className="block text-sm font-bold leading-snug text-gray-900 decoration-gray-300 underline-offset-4 group-hover:underline">
+                        {spot.title}
+                      </span>
+                      <span className="mt-1 block text-xs text-gray-500">
+                        {spot.category.name} ・ {spot.user.name}
+                      </span>
+                    </Link>
+                  </li>
+                ))}
+          </ul>
+          <Link href="/spots" className="btn-text mt-3">
+            新着をすべて見る
+          </Link>
+        </aside>
+      </div>
     </main>
   );
 }
