@@ -3,9 +3,10 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { MapPin, UserCircle } from "lucide-react";
+import { MapPin } from "lucide-react";
 import { LikeButton } from "@/components/spot/LikeButton";
 import { SaveButton } from "@/components/bookmark/SaveButton";
+import { Avatar } from "@/components/common/Avatar";
 
 interface SpotCardProps {
   spot: {
@@ -75,21 +76,11 @@ export function SpotCard({ spot }: SpotCardProps) {
               aria-label={`${spot.user.name} のプロフィールを見る`}
               className="flex items-center gap-2 min-w-0 rounded-lg transition-colors hover:text-primary-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-300"
             >
-              <div className="w-6 h-6 bg-gray-200 rounded-full overflow-hidden shrink-0">
-                {spot.user.avatarUrl ? (
-                  <Image
-                    src={spot.user.avatarUrl}
-                    alt={spot.user.name}
-                    width={24}
-                    height={24}
-                    className="w-full h-full object-cover"
-                  />
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center text-gray-400">
-                    <UserCircle size={24} />
-                  </div>
-                )}
-              </div>
+              <Avatar
+                name={spot.user.name}
+                src={spot.user.avatarUrl}
+                size={24}
+              />
               <span className="text-sm text-gray-600 truncate">
                 {spot.user.name}
               </span>

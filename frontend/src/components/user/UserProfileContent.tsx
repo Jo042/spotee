@@ -3,7 +3,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { useQuery } from "@apollo/client/react";
 import { useRouter } from "next/navigation";
-import Image from "next/image";
 import Link from "next/link";
 import { Camera, Loader2, UserCircle } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
@@ -17,6 +16,7 @@ import {
   GET_USER_PROFILE,
   GET_USER_SPOTS,
 } from "@/graphql/queries/user";
+import { Avatar } from "@/components/common/Avatar";
 
 interface UserProfileContentProps {
   userId: string;
@@ -136,21 +136,12 @@ export function UserProfileContent({ userId }: UserProfileContentProps) {
       <div className="bg-white shadow-sm">
         <div className="mx-auto max-w-4xl px-4 py-8 sm:py-10">
           <div className="flex items-start gap-4 sm:gap-6">
-            <div className="h-20 w-20 shrink-0 overflow-hidden rounded-full bg-gray-200 sm:h-24 sm:w-24">
-              {profile.avatarUrl ? (
-                <Image
-                  src={profile.avatarUrl}
-                  alt={profile.name}
-                  width={96}
-                  height={96}
-                  className="h-full w-full object-cover"
-                />
-              ) : (
-                <div className="flex h-full w-full items-center justify-center text-gray-400">
-                  <UserCircle size={48} />
-                </div>
-              )}
-            </div>
+            <Avatar
+              name={profile.name}
+              src={profile.avatarUrl}
+              size={80}
+              className="sm:size-24"
+            />
 
             <div className="min-w-0 flex-1">
               <div className="flex items-start justify-between gap-3">

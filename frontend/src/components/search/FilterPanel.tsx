@@ -60,7 +60,7 @@ export function FilterPanel() {
         updateFilter({ categoryIds: toggleIn(currentFilter.categoryIds, id) }),
     },
     {
-      label: '特徴タグ',
+      label: '特徴',
       items: data?.attributeTags ?? [],
       selectedIds: currentFilter.attributeTagIds,
       style: SECTION_STYLES.attribute,
@@ -68,7 +68,7 @@ export function FilterPanel() {
         updateFilter({ attributeTagIds: toggleIn(currentFilter.attributeTagIds, id) }),
     },
     {
-      label: 'ムードタグ',
+      label: '雰囲気',
       items: data?.moodTags ?? [],
       selectedIds: currentFilter.moodTagIds,
       style: SECTION_STYLES.mood,

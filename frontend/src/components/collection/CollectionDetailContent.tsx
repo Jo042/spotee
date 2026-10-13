@@ -4,13 +4,14 @@ import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useQuery } from "@apollo/client/react";
-import { Pencil, Trash2, UserCircle } from "lucide-react";
+import { Pencil, Trash2 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { GET_COLLECTION } from "@/graphql/queries/collection";
 import { GET_ME } from "@/graphql/queries/user";
 import { BackLink } from "@/components/common/BackLink";
 import { SpotCard } from "@/components/spot/SpotCard";
 import { SpotCardSkeleton } from "@/components/spot/SpotList";
+import { Avatar } from "@/components/common/Avatar";
 import { formatCount, formatRank } from "@/lib/format";
 import { DeleteCollectionDialog } from "./DeleteCollectionDialog";
 
@@ -124,23 +125,11 @@ export function CollectionDetailContent({
               href={`/users/${collection.user.id}`}
               className="flex min-w-0 items-center gap-3 rounded-lg text-gray-900 transition-colors hover:text-primary-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-300"
             >
-              <span className="h-10 w-10 shrink-0 overflow-hidden rounded-full bg-gray-200">
-                {collection.user.avatarUrl ? (
-                  <Image
-                    src={collection.user.avatarUrl}
-                    alt=""
-                    width={40}
-                    height={40}
-                    className="h-full w-full object-cover"
-                  />
-                ) : (
-                  <UserCircle
-                    size={40}
-                    className="text-gray-400"
-                    aria-hidden="true"
-                  />
-                )}
-              </span>
+              <Avatar
+                name={collection.user.name}
+                src={collection.user.avatarUrl}
+                size={40}
+              />
               <span className="min-w-0">
                 <span className="block truncate font-bold">
                   {collection.user.name}

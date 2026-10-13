@@ -2,10 +2,9 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { useQuery } from "@apollo/client/react";
-import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Loader2, UserCircle, Users } from "lucide-react";
+import { Loader2, Users } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useIntersectionObserver } from "@/hooks/useIntersectionObserver";
 import { FollowButton } from "@/components/user/FollowButton";
@@ -16,6 +15,7 @@ import {
   GET_USER_FOLLOWING,
   GET_USER_PROFILE,
 } from "@/graphql/queries/user";
+import { Avatar } from "@/components/common/Avatar";
 
 export type FollowListTab = "followers" | "following";
 
@@ -274,21 +274,7 @@ function FollowListRow({
         }}
         className="flex cursor-pointer items-center gap-3 rounded-xl border border-gray-100 bg-white p-3 transition-colors hover:border-gray-200 hover:bg-gray-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-300"
       >
-        <div className="h-11 w-11 shrink-0 overflow-hidden rounded-full bg-gray-200">
-          {user.avatarUrl ? (
-            <Image
-              src={user.avatarUrl}
-              alt={user.name}
-              width={44}
-              height={44}
-              className="h-full w-full object-cover"
-            />
-          ) : (
-            <div className="flex h-full w-full items-center justify-center text-gray-400">
-              <UserCircle size={28} />
-            </div>
-          )}
-        </div>
+        <Avatar name={user.name} src={user.avatarUrl} size={44} />
 
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2">

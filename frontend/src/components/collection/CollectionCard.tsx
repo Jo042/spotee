@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
-import { Layers, UserCircle } from "lucide-react";
+import { Layers } from "lucide-react";
+import { Avatar } from "@/components/common/Avatar";
 import { formatCount } from "@/lib/format";
 
 interface CollectionCardProps {
@@ -43,23 +44,11 @@ export function CollectionCard({ collection }: CollectionCardProps) {
 
           <div className="mt-3 flex items-center justify-between gap-3 border-t border-gray-100 pt-3 text-sm text-gray-600">
             <span className="flex min-w-0 items-center gap-2">
-              <span className="h-6 w-6 shrink-0 overflow-hidden rounded-full bg-gray-200">
-                {collection.user.avatarUrl ? (
-                  <Image
-                    src={collection.user.avatarUrl}
-                    alt=""
-                    width={24}
-                    height={24}
-                    className="h-full w-full object-cover"
-                  />
-                ) : (
-                  <UserCircle
-                    size={24}
-                    className="text-gray-400"
-                    aria-hidden="true"
-                  />
-                )}
-              </span>
+              <Avatar
+                name={collection.user.name}
+                src={collection.user.avatarUrl}
+                size={24}
+              />
               <span className="truncate">{collection.user.name}</span>
             </span>
             <span className="shrink-0">
