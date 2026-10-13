@@ -154,17 +154,17 @@ export function SpotDetail({ spot, isOwner = false }: SpotDetailProps) {
               {spot.address}
             </p>
           </div>
-          <div className="flex shrink-0 items-center gap-2">
+          <div className="flex shrink-0 items-center gap-5">
             <SaveButton
               spotId={spot.id}
               isBookmarked={spot.isBookmarked ?? null}
-              variant="pill"
+              variant="labeled"
             />
             <LikeButton
               spotId={spot.id}
               likeCount={spot.likeCount}
               isLiked={spot.isLiked ?? null}
-              variant="pill"
+              variant="labeled"
             />
           </div>
         </div>

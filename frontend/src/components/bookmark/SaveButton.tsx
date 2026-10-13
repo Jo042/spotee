@@ -9,7 +9,8 @@ import { FolderPickerSheet, type FolderSheetMode } from "./FolderPickerSheet";
 interface SaveButtonProps {
   spotId: string;
   isBookmarked: boolean | null;
-  variant?: "inline" | "pill";
+  /** overlay: カードの写真の上に重ねる白いアイコン。labeled: 詳細ページ（アイコンと「保存」） */
+  variant?: "overlay" | "labeled";
 }
 
 /**
@@ -19,11 +20,12 @@ interface SaveButtonProps {
 export function SaveButton({
   spotId,
   isBookmarked,
-  variant = "inline",
+  variant = "overlay",
 }: SaveButtonProps) {
   const { user } = useAuth();
   const router = useRouter();
   const [sheetMode, setSheetMode] = useState<FolderSheetMode | null>(null);
+  const [popCount, setPopCount] = useState(0);
 
   const saved = isBookmarked ?? false;
   const label = saved ? "保存済み・保存先を変更" : "フォルダに保存";
@@ -35,32 +37,28 @@ export function SaveButton({
       router.push("/login");
       return;
     }
+    setPopCount((n) => n + 1);
     setSheetMode(saved ? "manage" : "save");
   };
 
-  const icon = (
-    <Bookmark
-      size={variant === "pill" ? 16 : 14}
-      aria-hidden="true"
-      className={saved ? "fill-primary-600" : ""}
-    />
-  );
+  const popClass = popCount > 0 ? "motion-safe:animate-pop" : "";
 
   return (
     <>
-      {variant === "pill" ? (
+      {variant === "labeled" ? (
         <button
           type="button"
           onClick={handleClick}
           aria-label={label}
           aria-haspopup="dialog"
-          className={`flex items-center gap-1.5 rounded-full border px-4 py-2 text-sm font-medium transition-colors active:scale-95 ${
-            saved
-              ? "border-primary-200 bg-primary-50 text-primary-600"
-              : "border-gray-200 text-gray-500 hover:border-primary-200 hover:text-primary-600"
-          }`}
+          className="flex items-center gap-1.5 text-sm font-medium text-gray-900 transition-colors hover:text-gray-600"
         >
-          {icon}
+          <Bookmark
+            key={popCount}
+            size={20}
+            aria-hidden="true"
+            className={`${saved ? "fill-gray-900" : ""} ${popClass}`}
+          />
           <span>{saved ? "保存済み" : "保存"}</span>
         </button>
       ) : (
@@ -69,11 +67,14 @@ export function SaveButton({
           onClick={handleClick}
           aria-label={label}
           aria-haspopup="dialog"
-          className={`p-2 -m-2 transition-colors ${
-            saved ? "text-primary-600" : "text-gray-400 hover:text-primary-600"
-          }`}
+          className="p-2 text-white drop-shadow-[0_1px_3px_rgb(0_0_0/0.45)] transition-transform hover:scale-110"
         >
-          {icon}
+          <Bookmark
+            key={popCount}
+            size={20}
+            aria-hidden="true"
+            className={`${saved ? "fill-white" : ""} ${popClass}`}
+          />
         </button>
       )}
 
