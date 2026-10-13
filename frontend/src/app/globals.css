@@ -2,13 +2,14 @@
 
 :root {
   --background: #ffffff;
-  --foreground: #171717;
+  --foreground: #101828;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --font-sans: var(--font-noto-sans-jp);
+  --font-display: var(--font-zen-kaku), var(--font-noto-sans-jp), sans-serif;
   --font-mono: var(--font-geist-mono);
 }
 
@@ -67,4 +68,14 @@
 body {
   background: var(--background);
   color: var(--foreground);
+}
+
+@layer base {
+  h1,
+  h2,
+  h3,
+  h4 {
+    /* --font-zen-kaku は <body> で定義されるため、:root の --font-display 経由では届かない */
+    font-family: var(--font-zen-kaku), var(--font-noto-sans-jp), sans-serif;
+  }
 }
