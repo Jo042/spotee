@@ -8,7 +8,7 @@ import { SpotList } from "@/components/spot/SpotList";
 import Link from "next/link";
 import { useAuth } from "@/hooks/useAuth";
 import type { GetSpotsQuery, GetSpotsQueryVariables } from "@/graphql/generated/graphql";
-import { SpotSortBy, SortOrder, TagSearchMode } from "@/graphql/generated/graphql";
+import { SpotSortBy, SortOrder } from "@/graphql/generated/graphql";
 import { SortSelect, SortOption } from "@/components/search/SortSelect";
 import { FilterPanel } from "@/components/search/FilterPanel";
 import { FilterBottomSheet } from "@/components/search/FilterBottomSheet";
@@ -16,6 +16,7 @@ import { SearchBar } from "@/components/search/SearchBar";
 import { ActiveFilterChips } from "@/components/search/ActiveFilterChips";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useSpotFilter } from "@/hooks/useSpotFilter";
+import { toSpotFilterInput } from "@/lib/spot-filter";
 
 export default function SpotsPageContent() {
   const { user } = useAuth();
@@ -29,13 +30,7 @@ export default function SpotsPageContent() {
   const order = (searchParams.get("order") ?? SortOrder.Desc) as SortOption["order"];
   const currentSort: SortOption = { sortBy, order };
 
-  const filterVariables = {
-    categoryIds: currentFilter.categoryIds.length > 0 ? currentFilter.categoryIds : undefined,
-    attributeTagIds: currentFilter.attributeTagIds.length > 0 ? currentFilter.attributeTagIds : undefined,
-    moodTagIds: currentFilter.moodTagIds.length > 0 ? currentFilter.moodTagIds : undefined,
-    tagSearchMode: currentFilter.tagSearchMode as TagSearchMode,
-    keyword: currentFilter.keyword,
-  };
+  const filterVariables = toSpotFilterInput(currentFilter);
 
   const { data, loading, error, fetchMore } = useQuery<
     GetSpotsQuery,

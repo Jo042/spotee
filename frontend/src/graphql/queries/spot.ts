@@ -115,3 +115,11 @@ export const GET_SPOTS_PAGE = gql(`
     }
   }
 `);
+
+export const GET_SPOT_COUNT = gql(`
+  query GetSpotCount($filter: SpotFilterInput) {
+    spots(first: 1, filter: $filter) {
+      totalCount
+    }
+  }
+`);
