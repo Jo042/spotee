@@ -2,13 +2,13 @@
 
 import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
-import Image from "next/image";
-import { Camera, UserCircle } from "lucide-react";
+import { Camera } from "lucide-react";
 import { useMutation } from "@apollo/client/react";
 import { UPDATE_PROFILE } from "@/graphql/mutations/user";
 import { uploadImage } from "@/lib/storage";
 import { getUserFacingErrorMessage } from "@/lib/graphql-error";
 import imageCompression from "browser-image-compression";
+import { Avatar } from "@/components/common/Avatar";
 
 interface ProfileEditFormProps {
   initialName: string;
@@ -88,19 +88,7 @@ export function ProfileEditForm({
           disabled={avatarUploading}
           aria-label="アバター画像を変更"
         >
-          {avatarUrl ? (
-            <Image
-              src={avatarUrl}
-              alt="アバター"
-              width={96}
-              height={96}
-              className="w-full h-full object-cover"
-            />
-          ) : (
-            <div className="w-full h-full flex items-center justify-center text-gray-400">
-              <UserCircle size={48} />
-            </div>
-          )}
+          <Avatar name={name} src={avatarUrl} size={96} />
           {avatarUploading ? (
             <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
               <svg

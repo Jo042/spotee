@@ -3,9 +3,8 @@
 import { useCallback, useEffect, useState } from "react";
 import { useQuery } from "@apollo/client/react";
 import { useRouter, useSearchParams } from "next/navigation";
-import Image from "next/image";
 import Link from "next/link";
-import { Camera, Heart, Loader2, Pencil, UserCircle } from "lucide-react";
+import { Camera, Heart, Loader2, Pencil } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useIntersectionObserver } from "@/hooks/useIntersectionObserver";
 import { SpotCard } from "@/components/spot/SpotCard";
@@ -23,6 +22,7 @@ import {
   GET_MY_LIKED_SPOTS,
 } from "@/graphql/queries/user";
 import { formatCount } from "@/lib/format";
+import { Avatar } from "@/components/common/Avatar";
 
 const TABS = ["spots", "liked", "folders", "collections"] as const;
 type Tab = (typeof TABS)[number];
@@ -193,21 +193,12 @@ export function MyPageContent() {
       <div className="bg-white shadow-sm">
         <div className="max-w-4xl mx-auto px-4 pt-8 sm:pt-10">
           <div className="flex items-start gap-4 sm:gap-6">
-            <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full overflow-hidden bg-gray-200 shrink-0">
-              {me?.avatarUrl ? (
-                <Image
-                  src={me.avatarUrl}
-                  alt={me.name}
-                  width={96}
-                  height={96}
-                  className="w-full h-full object-cover"
-                />
-              ) : (
-                <div className="w-full h-full flex items-center justify-center text-gray-400">
-                  <UserCircle size={48} />
-                </div>
-              )}
-            </div>
+            <Avatar
+              name={me?.name ?? ""}
+              src={me?.avatarUrl}
+              size={80}
+              className="sm:size-24"
+            />
 
             <div className="flex-1 min-w-0">
               <div className="flex items-start justify-between gap-3">

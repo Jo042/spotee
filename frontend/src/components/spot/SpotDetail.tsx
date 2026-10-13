@@ -10,7 +10,6 @@ import {
   MapPin,
   Pencil,
   Trash2,
-  UserCircle,
 } from "lucide-react";
 import { useMutation } from "@apollo/client/react";
 import { DELETE_SPOT } from "@/graphql/mutations/spot";
@@ -21,6 +20,7 @@ import { FollowButton } from "@/components/user/FollowButton";
 import { BackLink } from "@/components/common/BackLink";
 import { useToast } from "@/components/common/toast/ToastProvider";
 import { getUserFacingErrorMessage } from "@/lib/graphql-error";
+import { Avatar } from "@/components/common/Avatar";
 
 interface SpotImage {
   id: string;
@@ -265,21 +265,11 @@ export function SpotDetail({ spot, isOwner = false }: SpotDetailProps) {
             className="block rounded-xl border border-gray-200 p-5 transition-colors hover:border-gray-300 hover:bg-gray-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-300"
           >
             <div className="flex items-center gap-3">
-              <div className="h-10 w-10 shrink-0 overflow-hidden rounded-full bg-gray-200">
-                {spot.user.avatarUrl ? (
-                  <Image
-                    src={spot.user.avatarUrl}
-                    alt={spot.user.name}
-                    width={40}
-                    height={40}
-                    className="w-full h-full object-cover"
-                  />
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center text-gray-400">
-                    <UserCircle size={40} />
-                  </div>
-                )}
-              </div>
+              <Avatar
+                name={spot.user.name}
+                src={spot.user.avatarUrl}
+                size={40}
+              />
               <div className="min-w-0">
                 <p className="truncate font-bold text-gray-900">
                   {spot.user.name}
