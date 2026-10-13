@@ -1,9 +1,11 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useQuery } from "@apollo/client/react";
 import { Layers, Loader2 } from "lucide-react";
+import { useAuth } from "@/hooks/useAuth";
 import { useIntersectionObserver } from "@/hooks/useIntersectionObserver";
 import { GET_COLLECTIONS } from "@/graphql/queries/collection";
 import { SearchInput } from "@/components/common/SearchInput";
@@ -67,6 +69,7 @@ function CollectionSearchBar({ keyword }: { keyword: string }) {
 }
 
 export function CollectionsPageContent() {
+  const { user } = useAuth();
   const searchParams = useSearchParams();
   const keyword = searchParams.get("q")?.trim() ?? "";
   const [loadingMore, setLoadingMore] = useState(false);
@@ -122,20 +125,30 @@ export function CollectionsPageContent() {
   return (
     <main className="min-h-screen bg-gray-50">
       <div className="bg-white shadow-sm">
-        <div className="mx-auto max-w-7xl px-4 py-6">
-          <h1 className="text-2xl font-bold text-gray-900">特集</h1>
-          <p className="mt-1 text-sm text-gray-500">
-            テーマごとに選ばれたスポットのまとめ
-            {connection && (
-              <>
-                {" ・ "}全{" "}
-                <span className="font-bold text-gray-900">
-                  {connection.totalCount}
-                </span>{" "}
-                件
-              </>
-            )}
-          </p>
+        <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-6">
+          <div>
+            <h1 className="text-2xl font-bold text-gray-900">特集</h1>
+            <p className="mt-1 text-sm text-gray-500">
+              テーマごとに選ばれたスポットのまとめ
+              {connection && (
+                <>
+                  {" ・ "}全{" "}
+                  <span className="font-bold text-gray-900">
+                    {connection.totalCount}
+                  </span>{" "}
+                  件
+                </>
+              )}
+            </p>
+          </div>
+          {user && (
+            <Link
+              href="/collections/new"
+              className="shrink-0 rounded-lg bg-primary-600 px-4 py-2.5 text-sm font-bold text-white transition hover:bg-primary-700 active:scale-95"
+            >
+              特集を作る
+            </Link>
+          )}
         </div>
       </div>
 
@@ -164,6 +177,14 @@ export function CollectionsPageContent() {
                 ? `「${keyword}」に一致する特集はありません`
                 : "まだ特集がありません"}
             </p>
+            {user && !keyword && (
+              <Link
+                href="/collections/new"
+                className="mt-5 rounded-lg bg-primary-600 px-4 py-2 text-sm font-bold text-white transition hover:bg-primary-700"
+              >
+                特集を作る
+              </Link>
+            )}
           </div>
         ) : (
           <>
@@ -174,7 +195,11 @@ export function CollectionsPageContent() {
             </div>
             {loadingMore && (
               <div className="flex items-center justify-center gap-2 py-8 text-sm text-gray-500">
-                <Loader2 size={18} className="animate-spin" aria-hidden="true" />
+                <Loader2
+                  size={18}
+                  className="animate-spin"
+                  aria-hidden="true"
+                />
                 読み込み中...
               </div>
             )}

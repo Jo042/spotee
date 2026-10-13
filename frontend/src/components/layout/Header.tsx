@@ -66,6 +66,7 @@ export function Header() {
   };
 
   const isSpotsActive = pathname.startsWith("/spots");
+  const isCollectionsActive = pathname.startsWith("/collections");
   const isMypageActive = pathname.startsWith("/mypage");
 
   return (
@@ -82,6 +83,11 @@ export function Header() {
 
           <nav className="hidden items-center gap-6 md:flex">
             <NavLink href="/spots" label="スポット一覧" active={isSpotsActive} />
+            <NavLink
+              href="/collections"
+              label="特集"
+              active={isCollectionsActive}
+            />
 
             {loading ? (
               <div className="h-8 w-20 animate-pulse rounded bg-gray-100" />
@@ -153,6 +159,11 @@ export function Header() {
               href="/spots"
               label="スポット一覧"
               active={isSpotsActive}
+            />
+            <MobileNavLink
+              href="/collections"
+              label="特集"
+              active={isCollectionsActive}
             />
 
             {!loading && user && (

@@ -37,7 +37,7 @@ export function DeleteCollectionDialog({
     try {
       await deleteCollection({ variables: { id: collection.id } });
       toast.success(`「${collection.title}」を削除しました`);
-      router.replace("/collections");
+      router.replace("/mypage?tab=collections");
     } catch (err) {
       toast.error(getUserFacingErrorMessage(err, "特集を削除できませんでした"));
       onClose();

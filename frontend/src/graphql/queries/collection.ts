@@ -69,3 +69,29 @@ export const GET_COLLECTION = gql(`
     }
   }
 `);
+
+export const GET_MY_COLLECTIONS = gql(`
+  query GetMyCollections($first: Int, $after: String) {
+    myCollections(first: $first, after: $after) {
+      totalCount
+      edges {
+        node {
+          id
+          title
+          thumbnailUrl
+          spotCount
+          user {
+            id
+            name
+            avatarUrl
+          }
+        }
+        cursor
+      }
+      pageInfo {
+        hasNextPage
+        endCursor
+      }
+    }
+  }
+`);

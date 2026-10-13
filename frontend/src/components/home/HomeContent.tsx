@@ -9,6 +9,11 @@ import { useQuery } from "@apollo/client/react";
 import { SpotCard } from "@/components/spot/SpotCard";
 import { GET_SPOTS } from "@/graphql/queries/spot";
 import { GET_CATEGORIES } from "@/graphql/queries/tag";
+import { GET_COLLECTIONS } from "@/graphql/queries/collection";
+import {
+  CollectionCard,
+  CollectionCardSkeleton,
+} from "@/components/collection/CollectionCard";
 import { useAuth } from "@/hooks/useAuth";
 import { SpotSortBy, SortOrder } from "@/graphql/generated/graphql";
 import type { GetSpotsQuery } from "@/graphql/generated/graphql";
@@ -16,6 +21,7 @@ import type { GetSpotsQuery } from "@/graphql/generated/graphql";
 const GRID_COUNT = 8;
 const COLLAGE_COUNT = 3;
 const LATEST_COUNT = 4;
+const COLLECTION_COUNT = 3;
 const CATEGORY_SHORTCUT_COUNT = 4;
 
 type SpotNode = NonNullable<GetSpotsQuery["spots"]["edges"][number]["node"]>;
@@ -121,11 +127,18 @@ export function HomeContent() {
       sort: { sortBy: SpotSortBy.CreatedAt, order: SortOrder.Desc },
     },
   });
+  const { data: collectionData, loading: collectionsLoading } = useQuery(
+    GET_COLLECTIONS,
+    { variables: { first: COLLECTION_COUNT, filter: null } },
+  );
   const { data: categoryData, loading: categoriesLoading } =
     useQuery(GET_CATEGORIES);
 
   const spots = extractSpots(data);
   const latestSpots = extractSpots(latestData);
+  const collections = (collectionData?.collections.edges ?? []).map(
+    (edge) => edge.node,
+  );
 
   const gridSpots = spots.slice(0, GRID_COUNT);
   const heroPool = spots.slice(GRID_COUNT).filter((s) => s.images.length > 0);
@@ -272,6 +285,26 @@ export function HomeContent() {
           skeletonCount={GRID_COUNT}
         />
       </section>
+
+      {/* 読み込み中は枠で場所を取り、下の新着スポットがずれないようにする。0件なら出さない */}
+      {(collectionsLoading || collections.length > 0) && (
+        <section className="mx-auto max-w-5xl px-4 pb-12">
+          <SectionHeader
+            title="特集"
+            subtitle="テーマごとに選ばれたスポットのまとめ"
+            href="/collections"
+          />
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+            {collectionsLoading
+              ? [...Array(COLLECTION_COUNT)].map((_, i) => (
+                  <CollectionCardSkeleton key={i} />
+                ))
+              : collections.map((collection) => (
+                  <CollectionCard key={collection.id} collection={collection} />
+                ))}
+          </div>
+        </section>
+      )}
 
       <section className="mx-auto max-w-5xl px-4 pb-12">
         <SectionHeader
