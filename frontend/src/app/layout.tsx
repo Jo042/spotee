@@ -3,6 +3,7 @@ import { Noto_Sans_JP, Zen_Kaku_Gothic_New } from "next/font/google";
 import "./globals.css";
 import { Providers } from "./provider";
 import { Header } from "@/components/layout/Header";
+import { Footer } from "@/components/layout/Footer";
 import { InAppNavigationTracker } from "@/components/common/InAppNavigationTracker";
 
 const notoSansJP = Noto_Sans_JP({
@@ -35,12 +36,13 @@ export default function RootLayout({
   return (
     <html lang="ja">
       <body
-        className={`${notoSansJP.variable} ${zenKaku.variable} font-sans antialiased`}
+        className={`${notoSansJP.variable} ${zenKaku.variable} flex min-h-screen flex-col font-sans antialiased`}
       >
         <Providers>
           <InAppNavigationTracker />
           <Header />
-          {children}
+          <div className="flex-1">{children}</div>
+          <Footer />
         </Providers>
       </body>
     </html>
