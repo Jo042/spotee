@@ -3,7 +3,6 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { MapPin } from "lucide-react";
 import { LikeButton } from "@/components/spot/LikeButton";
 import { SaveButton } from "@/components/bookmark/SaveButton";
 import { Avatar } from "@/components/common/Avatar";
@@ -37,66 +36,55 @@ export function SpotCard({ spot }: SpotCardProps) {
   return (
     <Link
       href={`/spots/${spot.id}`}
-      className="group block rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-300 focus-visible:ring-offset-2"
+      className="group block rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-300 focus-visible:ring-offset-4"
     >
-      <article className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden transition duration-300 group-hover:shadow-md group-hover:-translate-y-0.5">
-        <div className="aspect-video bg-gray-100 relative overflow-hidden">
+      <article>
+        <div className="relative aspect-video overflow-hidden rounded-xl bg-gray-100">
           {firstImage ? (
             <Image
               src={firstImage}
               alt={spot.title}
               fill
               sizes="(min-width: 1024px) 300px, (min-width: 640px) 50vw, 100vw"
-              className="object-cover transition-transform duration-500 ease-out group-hover:scale-105"
+              className="object-cover"
             />
           ) : (
-            <div className="w-full h-full flex items-center justify-center text-gray-400">
-              No Image
+            <div className="flex h-full w-full items-center justify-center text-xs text-gray-500">
+              写真がありません
             </div>
           )}
-          <span className="absolute top-2.5 left-2.5 max-w-[calc(100%-20px)] truncate rounded-full bg-white/90 backdrop-blur px-2.5 py-1 text-xs font-medium text-primary-700">
-            {spot.category.name}
-          </span>
+          <div className="absolute right-1 top-1">
+            <SaveButton
+              spotId={spot.id}
+              isBookmarked={spot.isBookmarked ?? null}
+            />
+          </div>
         </div>
 
-        <div className="p-3 sm:px-4 sm:pb-4">
-          <h3 className="font-bold text-gray-900 line-clamp-1 transition-colors group-hover:text-primary-700">
-            {spot.title}
-          </h3>
+        <h3 className="mt-2.5 line-clamp-2 text-[15px] font-bold leading-snug text-gray-900 decoration-gray-300 underline-offset-4 group-hover:underline">
+          {spot.title}
+        </h3>
+        <p className="mt-1 line-clamp-2 text-xs text-gray-500">
+          {spot.address} ・ {spot.category.name}
+        </p>
 
-          <p className="mt-1 text-sm text-gray-500 line-clamp-1 flex items-center gap-1">
-            <MapPin size={13} className="shrink-0" />
-            {spot.address}
-          </p>
-
-          <div className="mt-3 pt-3 border-t border-gray-100 flex items-center justify-between gap-2">
-            <button
-              type="button"
-              onClick={handleAuthorClick}
-              aria-label={`${spot.user.name} のプロフィールを見る`}
-              className="flex items-center gap-2 min-w-0 rounded-lg transition-colors hover:text-primary-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-300"
-            >
-              <Avatar
-                name={spot.user.name}
-                src={spot.user.avatarUrl}
-                size={24}
-              />
-              <span className="text-sm text-gray-600 truncate">
-                {spot.user.name}
-              </span>
-            </button>
-            <div className="flex shrink-0 items-center gap-3">
-              <SaveButton
-                spotId={spot.id}
-                isBookmarked={spot.isBookmarked ?? null}
-              />
-              <LikeButton
-                spotId={spot.id}
-                likeCount={spot.likeCount}
-                isLiked={spot.isLiked ?? null}
-              />
-            </div>
-          </div>
+        <div className="mt-2 flex items-center justify-between gap-3">
+          <button
+            type="button"
+            onClick={handleAuthorClick}
+            aria-label={`${spot.user.name} のプロフィールを見る`}
+            className="flex min-w-0 items-center gap-1.5 rounded-full text-xs text-gray-700 transition-colors hover:text-primary-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-300"
+          >
+            <Avatar name={spot.user.name} src={spot.user.avatarUrl} size={20} />
+            <span className="line-clamp-2 break-all text-left">
+              {spot.user.name}
+            </span>
+          </button>
+          <LikeButton
+            spotId={spot.id}
+            likeCount={spot.likeCount}
+            isLiked={spot.isLiked ?? null}
+          />
         </div>
       </article>
     </Link>
