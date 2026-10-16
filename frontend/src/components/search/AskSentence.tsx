@@ -8,6 +8,8 @@ interface AskSentenceProps {
   /** buildAskSentence の結果（雰囲気・特徴・カテゴリの順） */
   layers: AskSentenceLayer[];
   onPick: (layer: AskLayer) => void;
+  /** lg: トップの大きな一文（言葉の上に層の名前）。sm: 一覧の上のバー */
+  size?: "lg" | "sm";
 }
 
 const SELECTED_WORD =
@@ -59,9 +61,11 @@ function Slot({
   item,
   onPick,
   suffix,
+  showLabel,
 }: {
   item: AskSentenceLayer;
   onPick: (layer: AskLayer) => void;
+  showLabel: boolean;
   /** 言葉のすぐ後ろの文字。行の頭に「、」だけが送られないよう、言葉と同じ塊に入れる */
   suffix?: string;
 }) {
@@ -73,9 +77,11 @@ function Slot({
       aria-label={`${item.label}を選ぶ（今: ${describeContent(item.content)}）`}
       className="inline-flex flex-col items-start rounded-md text-left align-bottom focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-300"
     >
-      <span className="font-sans text-[11px] font-medium leading-none tracking-wide text-primary-700 sm:text-xs">
-        {item.label}
-      </span>
+      {showLabel && (
+        <span className="font-sans text-[11px] font-medium leading-none tracking-wide text-primary-700 sm:text-xs">
+          {item.label}
+        </span>
+      )}
       <span className="leading-[1.35]">
         <Words content={item.content} />
         {suffix && <span className="text-gray-900">{suffix}</span>}
@@ -85,13 +91,25 @@ function Slot({
 }
 
 /** 「[雰囲気]、[特徴] [カテゴリ]を探す」の一文。言葉を押すとその層を選び直す */
-export function AskSentence({ layers, onPick }: AskSentenceProps) {
+export function AskSentence({ layers, onPick, size = "lg" }: AskSentenceProps) {
   const [mood, attribute, category] = layers;
+  const showLabel = size === "lg";
   return (
-    <p className="font-display text-[26px] font-black leading-[2.1] text-gray-900 sm:text-[44px] sm:leading-[1.75]">
-      <Slot item={mood} onPick={onPick} suffix="、" />{" "}
-      <Slot item={attribute} onPick={onPick} />{" "}
-      <Slot item={category} onPick={onPick} suffix="を探す" />
+    <p
+      className={`font-display font-black text-gray-900 ${
+        size === "lg"
+          ? "text-[26px] leading-[2.1] sm:text-[44px] sm:leading-[1.75]"
+          : "text-lg leading-loose sm:text-[22px]"
+      }`}
+    >
+      <Slot item={mood} onPick={onPick} suffix="、" showLabel={showLabel} />{" "}
+      <Slot item={attribute} onPick={onPick} showLabel={showLabel} />{" "}
+      <Slot
+        item={category}
+        onPick={onPick}
+        suffix="を探す"
+        showLabel={showLabel}
+      />
     </p>
   );
 }

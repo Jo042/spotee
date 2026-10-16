@@ -24,6 +24,10 @@ interface ConditionsSheetProps {
   onModeChange: (mode: TagSearchMode) => void;
   onClose: () => void;
   footer: React.ReactNode;
+  /** 渡すと、層ごとに「選ぶ」を出し、その層の選択肢を開けるようにする */
+  onPickLayer?: (layer: AskLayer) => void;
+  /** 見出し。省くと「選んだ条件 n」 */
+  title?: string;
 }
 
 /** 選んだ条件を層ごとにすべて並べ、外したり「すべて／どれか」を切り替えたりする */
@@ -36,6 +40,8 @@ export function ConditionsSheet({
   onModeChange,
   onClose,
   footer,
+  onPickLayer,
+  title,
 }: ConditionsSheetProps) {
   const total = countSelected(filter);
 
@@ -43,8 +49,8 @@ export function ConditionsSheet({
     <BottomSheet
       open={open}
       onClose={onClose}
-      label="選んだ条件"
-      title={`選んだ条件 ${total}`}
+      label={title ?? "選んだ条件"}
+      title={title ?? `選んだ条件 ${total}`}
       desktop="dialog"
       footer={footer}
     >
@@ -61,9 +67,21 @@ export function ConditionsSheet({
           const phrases = selectedPhrases(filter, tags, layer);
           return (
             <section key={layer}>
-              <h3 className="font-sans text-xs font-medium text-gray-500">
-                {ASK_LAYER_LABELS[layer]}
-              </h3>
+              <div className="flex items-baseline justify-between gap-3">
+                <h3 className="font-sans text-xs font-medium text-gray-500">
+                  {ASK_LAYER_LABELS[layer]}
+                </h3>
+                {onPickLayer && (
+                  <button
+                    type="button"
+                    onClick={() => onPickLayer(layer)}
+                    aria-label={`${ASK_LAYER_LABELS[layer]}を選ぶ`}
+                    className="btn-text text-xs"
+                  >
+                    選ぶ
+                  </button>
+                )}
+              </div>
               {phrases.length === 0 ? (
                 <p className="mt-1.5 text-sm text-gray-400">選んでいません</p>
               ) : (

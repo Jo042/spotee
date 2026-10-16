@@ -6,13 +6,14 @@ import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { useQuery } from "@apollo/client/react";
-import { GET_SPOTS, GET_SPOT_COUNT } from "@/graphql/queries/spot";
+import { GET_SPOTS } from "@/graphql/queries/spot";
 import { GET_ALL_TAGS } from "@/graphql/queries/tag";
 import { SpotSortBy, SortOrder } from "@/graphql/generated/graphql";
 import { AskSentence } from "@/components/search/AskSentence";
 import { ConditionsSheet } from "@/components/search/ConditionsSheet";
 import { LayerPickerSheet } from "@/components/search/LayerPickerSheet";
 import { ModeSwitch } from "@/components/search/ModeSwitch";
+import { ZeroResultHint } from "@/components/search/ZeroResultHint";
 import { SearchInput } from "@/components/common/SearchInput";
 import {
   buildAskSentence,
@@ -62,19 +63,6 @@ export function AskBlock() {
   const result = data ?? previousData;
   const total = result?.spots.totalCount;
   const peekSpots = (result?.spots.edges ?? []).map((edge) => edge.node);
-
-  // 「すべて」で0件のときだけ、「どれか」にしたときの件数を問い合わせる
-  const needsOrCount =
-    filter.tagSearchMode === "AND" &&
-    isModeEffective(filter) &&
-    data?.spots.totalCount === 0;
-  const { data: orCountData } = useQuery(GET_SPOT_COUNT, {
-    variables: {
-      filter: toSpotFilterInput({ ...filter, tagSearchMode: "OR" }),
-    },
-    skip: !needsOrCount,
-  });
-  const orTotal = needsOrCount ? orCountData?.spots.totalCount : undefined;
 
   const selectedCount = countSelected(filter);
   const href = buildSpotsHref(filter);
@@ -137,32 +125,13 @@ export function AskBlock() {
         </div>
 
         {total === 0 ? (
-          <div className="mt-4 rounded-lg bg-white px-4 py-3 text-sm leading-relaxed text-gray-700">
-            {orTotal ? (
-              <>
-                <p>
-                  特徴と雰囲気の言葉がすべて当てはまる場所は、まだありません。「どれか当てはまる」にすると
-                  <span className="mx-1 font-bold text-primary-700">
-                    {formatCount(orTotal)}件
-                  </span>
-                  あります。
-                </p>
-                <button
-                  type="button"
-                  onClick={() =>
-                    setFilter((prev) => ({ ...prev, tagSearchMode: "OR" }))
-                  }
-                  className="btn-primary mt-3"
-                >
-                  「どれか当てはまる」にする
-                </button>
-              </>
-            ) : (
-              <p>
-                この条件に合う場所は、まだありません。言葉を外すと見つかるかもしれません。
-              </p>
-            )}
-          </div>
+          <ZeroResultHint
+            filter={filter}
+            onSwitchToOr={() =>
+              setFilter((prev) => ({ ...prev, tagSearchMode: "OR" }))
+            }
+            className="mt-4"
+          />
         ) : (
           <ul className="mt-4 grid grid-cols-4 gap-1.5 sm:grid-cols-6 sm:gap-2.5">
             {Array.from({ length: PEEK_COUNT }).map((_, i) => {
