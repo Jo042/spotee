@@ -3,10 +3,15 @@ import {
   buildSpotsHref,
   EMPTY_SPOT_FILTER,
   parseSpotFilter,
+  spotsQueryVariables,
   toSpotFilterInput,
   writeSpotFilter,
 } from "./spot-filter";
-import { TagSearchMode } from "@/graphql/generated/graphql";
+import {
+  SortOrder,
+  SpotSortBy,
+  TagSearchMode,
+} from "@/graphql/generated/graphql";
 
 describe("buildSpotsHref", () => {
   it("何も選ばなければ /spots", () => {
@@ -78,5 +83,30 @@ describe("toSpotFilterInput", () => {
       tagSearchMode: TagSearchMode.And,
       keyword: undefined,
     });
+  });
+});
+
+describe("spotsQueryVariables", () => {
+  const filter = {
+    ...EMPTY_SPOT_FILTER,
+    categoryIds: ["c1", "c2"],
+    tagSearchMode: "AND" as const,
+  };
+  const sort = { sortBy: SpotSortBy.LikeCount, order: SortOrder.Desc };
+
+  it("続きの読み込みにも、1ページ目と同じ絞り込みと並び順を入れる", () => {
+    const first = spotsQueryVariables({ filter, sort });
+    const next = spotsQueryVariables({ filter, sort, after: "cursor-20" });
+    expect(next.filter).toEqual(first.filter);
+    expect(next.filter.categoryIds).toEqual(["c1", "c2"]);
+    expect(next.sort).toEqual(sort);
+    expect(next.first).toBe(first.first);
+  });
+
+  it("続きのときだけ after が入る", () => {
+    expect(spotsQueryVariables({ filter, sort }).after).toBeUndefined();
+    expect(
+      spotsQueryVariables({ filter, sort, after: "cursor-20" }).after,
+    ).toBe("cursor-20");
   });
 });

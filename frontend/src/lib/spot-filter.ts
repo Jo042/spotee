@@ -1,4 +1,7 @@
-import type { SpotFilterInput } from "@/graphql/generated/graphql";
+import type {
+  SpotFilterInput,
+  SpotSortInput,
+} from "@/graphql/generated/graphql";
 import { TagSearchMode as GqlTagSearchMode } from "@/graphql/generated/graphql";
 
 export type TagSearchMode = "AND" | "OR";
@@ -82,5 +85,33 @@ export function toSpotFilterInput(filter: SpotFilter): SpotFilterInput {
         ? GqlTagSearchMode.And
         : GqlTagSearchMode.Or,
     keyword: filter.keyword,
+  };
+}
+
+export const SPOTS_PAGE_SIZE = 20;
+
+/**
+ * 一覧の問い合わせの条件。1ページ目も続きの読み込みも、必ずこの関数から作る
+ * （続きの問い合わせは元の条件を引き継がないため、絞り込みが落ちないようにする）
+ */
+export function spotsQueryVariables({
+  filter,
+  sort,
+  after,
+}: {
+  filter: SpotFilter;
+  sort: SpotSortInput;
+  after?: string;
+}): {
+  first: number;
+  after?: string;
+  sort: SpotSortInput;
+  filter: SpotFilterInput;
+} {
+  return {
+    first: SPOTS_PAGE_SIZE,
+    after,
+    sort,
+    filter: toSpotFilterInput(filter),
   };
 }
