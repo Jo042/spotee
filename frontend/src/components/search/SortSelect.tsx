@@ -1,12 +1,10 @@
 "use client";
 
-import { ArrowDownUp, ChevronDown } from "lucide-react";
+import { ChevronDown } from "lucide-react";
 import { SpotSortBy, SortOrder } from "@/graphql/generated/graphql";
+import type { SpotSort } from "@/lib/spot-filter";
 
-export type SortOption = {
-  sortBy: SpotSortBy;
-  order: SortOrder;
-};
+export type SortOption = SpotSort;
 
 interface SortSelectProps {
   value: SortOption;
@@ -33,20 +31,15 @@ export function SortSelect({ value, onChange }: SortSelectProps) {
   };
 
   return (
-    <div className="relative">
+    <div className="relative inline-block">
       <label htmlFor="sort" className="sr-only">
         並び替え
       </label>
-      <ArrowDownUp
-        size={14}
-        className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
-        aria-hidden="true"
-      />
       <select
         id="sort"
         value={currentIndex}
         onChange={handleChange}
-        className="w-full appearance-none rounded-lg border border-gray-200 bg-white py-2.5 pl-9 pr-9 text-sm text-gray-700 shadow-sm transition hover:border-gray-300 focus:border-primary-700 focus:outline-none focus:ring-1 focus:ring-primary-700"
+        className="appearance-none rounded-md bg-transparent py-1 pl-1 pr-6 text-sm font-medium text-gray-700 hover:text-gray-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-300"
       >
         {SORT_OPTIONS.map((option, index) => (
           <option key={index} value={index}>
@@ -56,7 +49,7 @@ export function SortSelect({ value, onChange }: SortSelectProps) {
       </select>
       <ChevronDown
         size={15}
-        className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-gray-400"
+        className="pointer-events-none absolute right-1 top-1/2 -translate-y-1/2 text-gray-400"
         aria-hidden="true"
       />
     </div>
