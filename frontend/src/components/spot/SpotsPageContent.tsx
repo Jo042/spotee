@@ -16,7 +16,7 @@ import { SearchBar } from "@/components/search/SearchBar";
 import { ActiveFilterChips } from "@/components/search/ActiveFilterChips";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useSpotFilter } from "@/hooks/useSpotFilter";
-import { toSpotFilterInput } from "@/lib/spot-filter";
+import { spotsQueryVariables } from "@/lib/spot-filter";
 
 export default function SpotsPageContent() {
   const { user } = useAuth();
@@ -30,12 +30,12 @@ export default function SpotsPageContent() {
   const order = (searchParams.get("order") ?? SortOrder.Desc) as SortOption["order"];
   const currentSort: SortOption = { sortBy, order };
 
-  const filterVariables = toSpotFilterInput(currentFilter);
-
   const { data, loading, error, fetchMore } = useQuery<
     GetSpotsQuery,
     GetSpotsQueryVariables
-  >(GET_SPOTS, { variables: { first: 20, sort: { sortBy, order }, filter: filterVariables } });
+  >(GET_SPOTS, {
+    variables: spotsQueryVariables({ filter: currentFilter, sort: currentSort }),
+  });
 
   const handleSortChange = (newSort: SortOption) => {
     const params = new URLSearchParams(searchParams.toString());
@@ -52,11 +52,11 @@ export default function SpotsPageContent() {
     try {
       await fetchMore({
         query: GET_SPOTS_PAGE,
-        variables: {
-          first: 20,
-          after: data.spots.pageInfo.endCursor,
+        variables: spotsQueryVariables({
+          filter: currentFilter,
           sort: { sortBy, order },
-        },
+          after: data.spots.pageInfo.endCursor,
+        }),
         updateQuery: (prevResult, { fetchMoreResult }) => {
           if (!fetchMoreResult) return prevResult;
 
@@ -77,7 +77,7 @@ export default function SpotsPageContent() {
     } finally {
       setLoadingMore(false);
     }
-  }, [data, fetchMore, sortBy, order]);
+  }, [data, fetchMore, currentFilter, sortBy, order]);
 
   if (error) {
     return (
