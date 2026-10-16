@@ -2,7 +2,11 @@ import type {
   SpotFilterInput,
   SpotSortInput,
 } from "@/graphql/generated/graphql";
-import { TagSearchMode as GqlTagSearchMode } from "@/graphql/generated/graphql";
+import {
+  SortOrder,
+  SpotSortBy,
+  TagSearchMode as GqlTagSearchMode,
+} from "@/graphql/generated/graphql";
 
 export type TagSearchMode = "AND" | "OR";
 
@@ -113,5 +117,30 @@ export function spotsQueryVariables({
     after,
     sort,
     filter: toSpotFilterInput(filter),
+  };
+}
+
+export interface SpotSort {
+  sortBy: SpotSortBy;
+  order: SortOrder;
+}
+
+export const DEFAULT_SPOT_SORT: SpotSort = {
+  sortBy: SpotSortBy.CreatedAt,
+  order: SortOrder.Desc,
+};
+
+const isSpotSortBy = (value: string | null): value is SpotSortBy =>
+  Object.values<string | null>(SpotSortBy).includes(value);
+const isSortOrder = (value: string | null): value is SortOrder =>
+  Object.values<string | null>(SortOrder).includes(value);
+
+/** URL の並び順を読む。知らない値は既定（新着順）にする（そのまま送ると問い合わせが失敗する） */
+export function parseSpotSort(params: ReadableParams): SpotSort {
+  const sortBy = params.get("sortBy");
+  const order = params.get("order");
+  return {
+    sortBy: isSpotSortBy(sortBy) ? sortBy : DEFAULT_SPOT_SORT.sortBy,
+    order: isSortOrder(order) ? order : DEFAULT_SPOT_SORT.order,
   };
 }

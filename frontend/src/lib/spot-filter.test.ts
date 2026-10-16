@@ -3,6 +3,7 @@ import {
   buildSpotsHref,
   EMPTY_SPOT_FILTER,
   parseSpotFilter,
+  parseSpotSort,
   spotsQueryVariables,
   toSpotFilterInput,
   writeSpotFilter,
@@ -108,5 +109,21 @@ describe("spotsQueryVariables", () => {
     expect(
       spotsQueryVariables({ filter, sort, after: "cursor-20" }).after,
     ).toBe("cursor-20");
+  });
+});
+
+describe("parseSpotSort", () => {
+  it("知っている値はそのまま読む", () => {
+    expect(
+      parseSpotSort(new URLSearchParams("sortBy=LIKE_COUNT&order=ASC")),
+    ).toEqual({ sortBy: SpotSortBy.LikeCount, order: SortOrder.Asc });
+  });
+
+  it("無いときや知らない値は、新着順にする", () => {
+    const fallback = { sortBy: SpotSortBy.CreatedAt, order: SortOrder.Desc };
+    expect(parseSpotSort(new URLSearchParams(""))).toEqual(fallback);
+    expect(
+      parseSpotSort(new URLSearchParams("sortBy=likeCount&order=down")),
+    ).toEqual(fallback);
   });
 });

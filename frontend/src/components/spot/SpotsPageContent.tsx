@@ -1,40 +1,52 @@
 "use client";
 
-import { useQuery } from "@apollo/client/react";
 import { useCallback, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useQuery } from "@apollo/client/react";
 import { SlidersHorizontal } from "lucide-react";
 import { GET_SPOTS, GET_SPOTS_PAGE } from "@/graphql/queries/spot";
+import { GET_ALL_TAGS } from "@/graphql/queries/tag";
 import { SpotList } from "@/components/spot/SpotList";
-import Link from "next/link";
-import { useAuth } from "@/hooks/useAuth";
-import type { GetSpotsQuery, GetSpotsQueryVariables } from "@/graphql/generated/graphql";
-import { SpotSortBy, SortOrder } from "@/graphql/generated/graphql";
-import { SortSelect, SortOption } from "@/components/search/SortSelect";
-import { FilterPanel } from "@/components/search/FilterPanel";
-import { FilterBottomSheet } from "@/components/search/FilterBottomSheet";
+import { SortSelect, type SortOption } from "@/components/search/SortSelect";
 import { SearchBar } from "@/components/search/SearchBar";
-import { ActiveFilterChips } from "@/components/search/ActiveFilterChips";
-import { useRouter, useSearchParams } from "next/navigation";
+import { AskSentence } from "@/components/search/AskSentence";
+import { ConditionsSheet } from "@/components/search/ConditionsSheet";
+import { LayerPickerSheet } from "@/components/search/LayerPickerSheet";
+import { ZeroResultHint } from "@/components/search/ZeroResultHint";
 import { useSpotFilter } from "@/hooks/useSpotFilter";
-import { spotsQueryVariables } from "@/lib/spot-filter";
+import {
+  buildAskSentence,
+  countSelected,
+  toggleTag,
+  type AskLayer,
+  type AskTags,
+} from "@/lib/ask-sentence";
+import { parseSpotSort, spotsQueryVariables } from "@/lib/spot-filter";
+import { formatCount } from "@/lib/format";
+
+type OpenSheet = { kind: "layer"; layer: AskLayer } | { kind: "all" } | null;
 
 export default function SpotsPageContent() {
-  const { user } = useAuth();
   const router = useRouter();
   const searchParams = useSearchParams();
   const [loadingMore, setLoadingMore] = useState(false);
-  const [isFilterOpen, setIsFilterOpen] = useState(false);
-  const { currentFilter, hasActiveFilter } = useSpotFilter();
+  const [sheet, setSheet] = useState<OpenSheet>(null);
+  const { currentFilter, updateFilter } = useSpotFilter();
+  const currentSort = parseSpotSort(searchParams);
+  const { sortBy, order } = currentSort;
 
-  const sortBy = (searchParams.get("sortBy") ?? SpotSortBy.CreatedAt) as SortOption["sortBy"];
-  const order = (searchParams.get("order") ?? SortOrder.Desc) as SortOption["order"];
-  const currentSort: SortOption = { sortBy, order };
+  const { data: tagData } = useQuery(GET_ALL_TAGS);
+  const tags: AskTags = {
+    moods: tagData?.moodTags ?? [],
+    attributes: tagData?.attributeTags ?? [],
+    categories: tagData?.categories ?? [],
+  };
 
-  const { data, loading, error, fetchMore } = useQuery<
-    GetSpotsQuery,
-    GetSpotsQueryVariables
-  >(GET_SPOTS, {
-    variables: spotsQueryVariables({ filter: currentFilter, sort: currentSort }),
+  const { data, loading, error, fetchMore, refetch } = useQuery(GET_SPOTS, {
+    variables: spotsQueryVariables({
+      filter: currentFilter,
+      sort: currentSort,
+    }),
   });
 
   const handleSortChange = (newSort: SortOption) => {
@@ -42,6 +54,10 @@ export default function SpotsPageContent() {
     params.set("sortBy", newSort.sortBy);
     params.set("order", newSort.order);
     router.push(`/spots?${params.toString()}`);
+  };
+
+  const handleToggle = (layer: AskLayer, id: string) => {
+    updateFilter(toggleTag(currentFilter, layer, id));
   };
 
   const handleLoadMore = useCallback(async () => {
@@ -79,108 +95,118 @@ export default function SpotsPageContent() {
     }
   }, [data, fetchMore, currentFilter, sortBy, order]);
 
-  if (error) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <p className="text-red-500">エラーが発生しました: {error.message}</p>
-      </div>
-    );
-  }
-
-  const spots = (data?.spots?.edges ?? [])
-    .map((edge) => edge.node)
-    .filter((node): node is NonNullable<typeof node> => node != null) as Array<{
-      id: string;
-      title: string;
-      address: string;
-      likeCount: number;
-      isLiked?: boolean | null;
-      images: { url: string }[];
-      category: { name: string };
-      user: { id: string; name: string; avatarUrl?: string | null };
-    }>;
+  const spots = (data?.spots?.edges ?? []).map((edge) => edge.node);
   const hasNextPage = data?.spots?.pageInfo?.hasNextPage ?? false;
   const totalCount = data?.spots?.totalCount;
+  const selectedCount = countSelected(currentFilter);
+
+  const closeSheet = () => setSheet(null);
+  const sheetFooter = (
+    <button
+      type="button"
+      onClick={closeSheet}
+      className="btn-primary w-full py-3"
+    >
+      {totalCount === undefined
+        ? "スポットを表示"
+        : `${formatCount(totalCount)}件を表示`}
+    </button>
+  );
 
   return (
-    <main className="min-h-screen bg-gray-50">
-      <div className="bg-white shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 py-6">
-          <div className="flex items-center justify-between gap-4">
-            <div>
-              <h1 className="text-2xl font-bold text-gray-900">スポット一覧</h1>
-              {data?.spots?.totalCount !== undefined && (
-                <p className="mt-1 flex flex-wrap items-center gap-2 text-sm text-gray-500">
-                  <span>
-                    全 <span className="font-bold text-gray-900">{data.spots.totalCount}</span> 件
-                  </span>
-                  {hasActiveFilter && (
-                    <span className="inline-flex items-center gap-1.5 rounded-full bg-primary-50 px-2.5 py-0.5 text-xs font-medium text-primary-700">
-                      <span className="w-1.5 h-1.5 rounded-full bg-primary-600" aria-hidden="true" />
-                      フィルター適用中
-                    </span>
-                  )}
-                </p>
-              )}
-            </div>
+    <main className="bg-white pb-16">
+      <h1 className="sr-only">スポットを探す</h1>
 
-            {user && (
-              <Link
-                href="/spots/new"
-                className="shrink-0 rounded-lg bg-primary-600 px-4 py-2.5 text-sm font-bold text-white transition hover:bg-primary-700 active:scale-95"
-              >
-                スポットを投稿
-              </Link>
+      <div className="border-b border-gray-200">
+        <div className="mx-auto max-w-[1240px] px-4 py-3 sm:py-4">
+          <AskSentence
+            size="sm"
+            layers={buildAskSentence(currentFilter, tags)}
+            onPick={(layer) => setSheet({ kind: "layer", layer })}
+          />
+        </div>
+      </div>
+
+      <div className="mx-auto max-w-[1240px] px-4">
+        <div className="mt-5 max-w-lg">
+          <SearchBar />
+        </div>
+
+        <div className="mt-4 mb-5 flex items-center justify-between gap-3">
+          <div className="flex items-center gap-3">
+            <p className="text-base font-bold text-gray-900" aria-live="polite">
+              {totalCount === undefined ? "" : `${formatCount(totalCount)}件`}
+            </p>
+            <SortSelect value={currentSort} onChange={handleSortChange} />
+          </div>
+          <button
+            type="button"
+            onClick={() => setSheet({ kind: "all" })}
+            aria-haspopup="dialog"
+            className="btn-secondary"
+          >
+            <SlidersHorizontal size={15} aria-hidden="true" />
+            絞り込み
+            {selectedCount > 0 && (
+              <span className="flex size-5 items-center justify-center rounded-full bg-gray-900 text-[11px] text-white">
+                {selectedCount}
+              </span>
             )}
-          </div>
+          </button>
         </div>
+
+        {error ? (
+          <div className="py-16 text-center">
+            <p className="text-sm text-gray-700">
+              スポットを読み込めませんでした。時間をおいて、もう一度お試しください。
+            </p>
+            <button
+              type="button"
+              onClick={() => refetch()}
+              className="btn-secondary mt-4"
+            >
+              もう一度読み込む
+            </button>
+          </div>
+        ) : totalCount === 0 ? (
+          <ZeroResultHint
+            filter={currentFilter}
+            onSwitchToOr={() => updateFilter({ tagSearchMode: "OR" })}
+            surface="gray"
+          />
+        ) : (
+          <SpotList
+            spots={spots}
+            loading={loading && !data}
+            hasNextPage={hasNextPage}
+            loadingMore={loadingMore}
+            onLoadMore={handleLoadMore}
+          />
+        )}
       </div>
 
-      <FilterBottomSheet
-        open={isFilterOpen}
-        totalCount={totalCount}
-        onClose={() => setIsFilterOpen(false)}
+      <LayerPickerSheet
+        layer={sheet?.kind === "layer" ? sheet.layer : null}
+        tags={tags}
+        filter={currentFilter}
+        onToggle={handleToggle}
+        onClose={closeSheet}
+        footer={sheetFooter}
       />
-
-      <div className="max-w-7xl mx-auto px-4 py-8">
-        <div className="flex gap-6">
-          <aside className="hidden lg:block w-72 shrink-0">
-            <div className="bg-white border border-gray-200 rounded-xl p-4">
-              <FilterPanel />
-            </div>
-          </aside>
-          <div className="flex-1 min-w-0">
-            <div className="mb-4 flex flex-col gap-3 sm:flex-row">
-              <div className="flex-1 min-w-0">
-                <SearchBar />
-              </div>
-              <div className="flex items-center gap-3">
-                <button
-                  onClick={() => setIsFilterOpen(true)}
-                  className="lg:hidden flex flex-1 items-center justify-center gap-1.5 rounded-lg border border-gray-200 bg-white px-4 py-2.5 text-sm text-gray-700 shadow-sm transition hover:border-gray-300 hover:bg-gray-50 active:scale-95 sm:flex-none"
-                >
-                  <SlidersHorizontal size={15} aria-hidden="true" />
-                  絞り込み
-                  {hasActiveFilter && (
-                    <span className="w-2 h-2 rounded-full bg-primary-600" aria-hidden="true" />
-                  )}
-                </button>
-                <div className="flex-1 sm:flex-none">
-                  <SortSelect value={currentSort} onChange={handleSortChange} />
-                </div>
-              </div>
-            </div>
-            <ActiveFilterChips />
-            <SpotList
-              spots={spots}
-              loading={loading}
-              hasNextPage={hasNextPage}
-              loadingMore={loadingMore}
-              onLoadMore={handleLoadMore}
-            />
-          </div>
-        </div>
-      </div>
+      <ConditionsSheet
+        open={sheet?.kind === "all"}
+        filter={currentFilter}
+        tags={tags}
+        onRemove={handleToggle}
+        onClear={() =>
+          updateFilter({ categoryIds: [], attributeTagIds: [], moodTagIds: [] })
+        }
+        onModeChange={(mode) => updateFilter({ tagSearchMode: mode })}
+        onPickLayer={(layer) => setSheet({ kind: "layer", layer })}
+        title="絞り込み"
+        onClose={closeSheet}
+        footer={sheetFooter}
+      />
     </main>
   );
 }
