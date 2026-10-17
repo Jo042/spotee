@@ -1,6 +1,9 @@
 import type { CollectionInput } from "@/graphql/generated/graphql";
 
-/** サーバーの入力の上限（backend の collection-input.constants.ts）と合わせる */
+/**
+ * サーバーの検証の上限（backend/src/collection/dto/collection-input.constants.ts）の写し。
+ * 値が一致することを単体テストで確かめている
+ */
 export const COLLECTION_TITLE_MAX_LENGTH = 60;
 export const COLLECTION_DESCRIPTION_MAX_LENGTH = 1000;
 export const COLLECTION_COMMENT_MAX_LENGTH = 200;
