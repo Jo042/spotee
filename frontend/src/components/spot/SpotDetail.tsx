@@ -4,13 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import {
-  Banknote,
-  Clock,
-  MapPin,
-  Pencil,
-  Trash2,
-} from "lucide-react";
+import { MapPin } from "lucide-react";
 import { useMutation } from "@apollo/client/react";
 import { DELETE_SPOT } from "@/graphql/mutations/spot";
 import { PriceRange } from "@/graphql/generated/graphql";
@@ -21,6 +15,7 @@ import { BackLink } from "@/components/common/BackLink";
 import { useToast } from "@/components/common/toast/ToastProvider";
 import { getUserFacingErrorMessage } from "@/lib/graphql-error";
 import { Avatar } from "@/components/common/Avatar";
+import { SpotTagLinks } from "./SpotTagLinks";
 
 interface SpotImage {
   id: string;
@@ -89,49 +84,43 @@ export function SpotDetail({ spot, isOwner = false }: SpotDetailProps) {
 
   const sortedImages = [...spot.images].sort((a, b) => a.order - b.order);
   const currentImage = sortedImages[currentImageIndex];
-  const attributeTags = spot.attributeTags ?? [];
-  const moodTags = spot.moodTags ?? [];
-  const hasTags = attributeTags.length > 0 || moodTags.length > 0;
+  const hasBasicInfo = !!spot.priceRange || !!spot.businessHours;
 
   return (
-    <div className="max-w-4xl mx-auto">
-      <div className="flex items-center justify-between gap-4 mb-6">
+    <article className="mx-auto max-w-[720px]">
+      <div className="mb-4 flex min-h-9 items-center justify-between gap-4">
         <BackLink fallbackHref="/spots" fallbackLabel="スポット一覧" />
         {isOwner && (
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-4 text-sm">
             {confirmDelete ? (
               <>
-                <span className="text-sm text-gray-600">
-                  本当に削除しますか？
-                </span>
+                <span className="text-gray-600">本当に削除しますか？</span>
                 <button
+                  type="button"
                   onClick={handleDelete}
                   disabled={deleting}
-                  className="px-3 py-1.5 text-sm font-medium text-white bg-red-500 rounded-lg hover:bg-red-600 disabled:opacity-50 transition-colors"
+                  className="rounded-full bg-red-600 px-3.5 py-1.5 font-bold text-white transition-colors hover:bg-red-700 disabled:opacity-50"
                 >
                   削除する
                 </button>
                 <button
+                  type="button"
                   onClick={() => setConfirmDelete(false)}
-                  className="px-3 py-1.5 text-sm text-gray-700 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+                  className="text-gray-600 hover:text-gray-900"
                 >
-                  キャンセル
+                  やめる
                 </button>
               </>
             ) : (
               <>
-                <Link
-                  href={`/spots/${spot.id}/edit`}
-                  className="flex items-center gap-1.5 px-3 py-1.5 text-sm text-gray-700 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
-                >
-                  <Pencil size={14} />
+                <Link href={`/spots/${spot.id}/edit`} className="btn-text">
                   編集
                 </Link>
                 <button
+                  type="button"
                   onClick={() => setConfirmDelete(true)}
-                  className="flex items-center gap-1.5 px-3 py-1.5 text-sm text-red-500 border border-red-200 rounded-lg hover:bg-red-50 transition-colors"
+                  className="text-red-600 underline decoration-red-200 underline-offset-4 hover:decoration-red-600"
                 >
-                  <Trash2 size={14} />
                   削除
                 </button>
               </>
@@ -140,50 +129,20 @@ export function SpotDetail({ spot, isOwner = false }: SpotDetailProps) {
         )}
       </div>
 
-      <header className="mb-6">
-        <span className="inline-block rounded-full bg-primary-600 px-2.5 py-1 text-xs font-medium text-white">
-          {spot.category.name}
-        </span>
-        <div className="mt-3 flex flex-wrap items-start justify-between gap-x-4 gap-y-3">
-          <div className="min-w-0">
-            <h1 className="text-2xl sm:text-[28px] font-bold leading-[1.4] text-gray-900">
-              {spot.title}
-            </h1>
-            <p className="mt-2 flex items-center gap-1.5 text-sm text-gray-500">
-              <MapPin size={14} className="shrink-0" />
-              {spot.address}
-            </p>
-          </div>
-          <div className="flex shrink-0 items-center gap-5">
-            <SaveButton
-              spotId={spot.id}
-              isBookmarked={spot.isBookmarked ?? null}
-              variant="labeled"
-            />
-            <LikeButton
-              spotId={spot.id}
-              likeCount={spot.likeCount}
-              isLiked={spot.isLiked ?? null}
-              variant="labeled"
-            />
-          </div>
-        </div>
-      </header>
-
-      <div className="mb-8">
-        <div className="relative aspect-video overflow-hidden rounded-2xl bg-gray-100">
+      <div>
+        <div className="relative aspect-video overflow-hidden rounded-xl bg-gray-100">
           {currentImage ? (
             <Image
               src={currentImage.url}
               alt={spot.title}
               fill
               priority
-              sizes="(min-width: 896px) 864px, 100vw"
+              sizes="(min-width: 752px) 720px, 100vw"
               className="object-cover"
             />
           ) : (
-            <div className="w-full h-full flex items-center justify-center text-gray-400">
-              No Image
+            <div className="flex h-full w-full items-center justify-center text-sm text-gray-500">
+              写真がありません
             </div>
           )}
           {sortedImages.length > 1 && (
@@ -198,21 +157,22 @@ export function SpotDetail({ spot, isOwner = false }: SpotDetailProps) {
             {sortedImages.map((image, index) => (
               <button
                 key={image.id}
+                type="button"
                 onClick={() => setCurrentImageIndex(index)}
                 aria-label={`${index + 1}枚目の写真を表示`}
                 aria-current={index === currentImageIndex}
-                className={`h-16 w-16 shrink-0 overflow-hidden rounded-lg transition ${
+                className={`relative aspect-video w-20 shrink-0 overflow-hidden rounded-lg transition ${
                   index === currentImageIndex
-                    ? "ring-2 ring-primary-600 ring-offset-2"
+                    ? "ring-2 ring-primary-700 ring-offset-2"
                     : "opacity-60 hover:opacity-100"
                 }`}
               >
                 <Image
                   src={image.url}
-                  alt={`${spot.title} ${index + 1}`}
-                  width={64}
-                  height={64}
-                  className="w-full h-full object-cover"
+                  alt=""
+                  fill
+                  sizes="80px"
+                  className="object-cover"
                 />
               </button>
             ))}
@@ -220,117 +180,112 @@ export function SpotDetail({ spot, isOwner = false }: SpotDetailProps) {
         )}
       </div>
 
-      <div className="grid gap-8 lg:grid-cols-3 lg:gap-10">
-        <aside className="space-y-4 lg:order-2">
-          <div className="rounded-xl border border-gray-200 p-5">
-            <h2 className="text-sm font-bold text-gray-900">基本情報</h2>
-            <dl className="mt-4 space-y-4 text-sm">
-              {spot.priceRange && (
-                <div className="flex items-start gap-3">
-                  <Banknote
-                    size={16}
-                    className="mt-0.5 shrink-0 text-gray-400"
-                  />
-                  <div>
-                    <dt className="text-xs text-gray-500">価格帯</dt>
-                    <dd className="mt-0.5 text-gray-900">
-                      {priceRangeLabels[spot.priceRange]}
-                    </dd>
-                  </div>
-                </div>
-              )}
-              {spot.businessHours && (
-                <div className="flex items-start gap-3">
-                  <Clock size={16} className="mt-0.5 shrink-0 text-gray-400" />
-                  <div>
-                    <dt className="text-xs text-gray-500">営業時間</dt>
-                    <dd className="mt-0.5 text-gray-900">
-                      {spot.businessHours}
-                    </dd>
-                  </div>
-                </div>
-              )}
-              <div className="flex items-start gap-3">
-                <MapPin size={16} className="mt-0.5 shrink-0 text-gray-400" />
-                <div>
-                  <dt className="text-xs text-gray-500">住所</dt>
-                  <dd className="mt-0.5 text-gray-900">{spot.address}</dd>
-                </div>
-              </div>
-            </dl>
-          </div>
+      <header className="mt-6">
+        <h1 className="text-2xl font-bold leading-snug text-balance text-gray-900 sm:text-[28px]">
+          {spot.title}
+        </h1>
+        <p className="mt-2 flex items-start gap-1.5 text-sm text-gray-500">
+          <MapPin size={15} className="mt-0.5 shrink-0" aria-hidden="true" />
+          <span>
+            {spot.address} ・ {spot.category.name}
+          </span>
+        </p>
+        <div className="mt-4 flex items-center gap-6">
+          <SaveButton
+            spotId={spot.id}
+            isBookmarked={spot.isBookmarked ?? null}
+            variant="labeled"
+          />
+          <LikeButton
+            spotId={spot.id}
+            likeCount={spot.likeCount}
+            isLiked={spot.isLiked ?? null}
+            variant="labeled"
+          />
+        </div>
+      </header>
 
+      {spot.description && (
+        <p className="mt-6 whitespace-pre-wrap text-[15px] leading-loose text-gray-800">
+          {spot.description}
+        </p>
+      )}
+
+      <section
+        aria-labelledby="spot-tags"
+        className="mt-8 border-t border-gray-200 pt-6"
+      >
+        <h2 id="spot-tags" className="mb-4 text-base font-bold text-gray-900">
+          タグ
+        </h2>
+        <SpotTagLinks
+          category={spot.category}
+          moodTags={spot.moodTags ?? []}
+          attributeTags={spot.attributeTags ?? []}
+        />
+      </section>
+
+      {hasBasicInfo && (
+        <section
+          aria-labelledby="spot-info"
+          className="mt-8 border-t border-gray-200 pt-6"
+        >
+          <h2 id="spot-info" className="mb-4 text-base font-bold text-gray-900">
+            基本情報
+          </h2>
+          <dl className="grid grid-cols-[4.5em_1fr] gap-x-4 gap-y-3 text-[15px]">
+            {spot.priceRange && (
+              <>
+                <dt className="pt-0.5 text-xs text-gray-500">価格帯</dt>
+                <dd className="text-gray-900">
+                  {priceRangeLabels[spot.priceRange]}
+                </dd>
+              </>
+            )}
+            {spot.businessHours && (
+              <>
+                <dt className="pt-0.5 text-xs text-gray-500">営業時間</dt>
+                <dd className="whitespace-pre-wrap text-gray-900">
+                  {spot.businessHours}
+                </dd>
+              </>
+            )}
+          </dl>
+        </section>
+      )}
+
+      <section
+        aria-labelledby="spot-author"
+        className="mt-8 border-t border-gray-200 pt-6"
+      >
+        <h2 id="spot-author" className="mb-4 text-base font-bold text-gray-900">
+          書いた人
+        </h2>
+        <div className="flex items-center gap-4">
           <Link
             href={`/users/${spot.user.id}`}
-            className="block rounded-xl border border-gray-200 p-5 transition-colors hover:border-gray-300 hover:bg-gray-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-300"
+            className="group flex min-w-0 flex-1 items-center gap-3 rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-300"
           >
-            <div className="flex items-center gap-3">
-              <Avatar
-                name={spot.user.name}
-                src={spot.user.avatarUrl}
-                size={40}
-              />
-              <div className="min-w-0">
-                <p className="truncate font-bold text-gray-900">
-                  {spot.user.name}
-                </p>
-                <p className="text-xs text-gray-500">
-                  {new Date(spot.createdAt).toLocaleDateString("ja-JP")} に投稿
-                </p>
-              </div>
-              {!isOwner && (
-                <div className="ml-auto shrink-0">
-                  <FollowButton
-                    userId={spot.user.id}
-                    isFollowing={spot.user.isFollowing ?? null}
-                    followersCount={spot.user.followersCount ?? 0}
-                    size="sm"
-                  />
-                </div>
-              )}
-            </div>
+            <Avatar name={spot.user.name} src={spot.user.avatarUrl} size={40} />
+            <span className="min-w-0">
+              <span className="block break-words font-bold text-gray-900 decoration-gray-300 underline-offset-4 group-hover:underline">
+                {spot.user.name}
+              </span>
+              <span className="block text-xs text-gray-500">
+                {new Date(spot.createdAt).toLocaleDateString("ja-JP")} に投稿
+              </span>
+            </span>
           </Link>
-        </aside>
-
-        <div className="space-y-8 lg:col-span-2 lg:order-1">
-          {spot.description && (
-            <section>
-              <h2 className="text-lg font-bold text-gray-900">
-                このスポットについて
-              </h2>
-              <p className="mt-3 whitespace-pre-wrap leading-relaxed text-gray-700">
-                {spot.description}
-              </p>
-            </section>
-          )}
-
-          {hasTags && (
-            <section>
-              <h2 className="text-lg font-bold text-gray-900">
-                このスポットの特徴
-              </h2>
-              <div className="mt-3 flex flex-wrap gap-2">
-                {attributeTags.map((tag) => (
-                  <span
-                    key={tag.id}
-                    className="rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1.5 text-xs font-medium text-emerald-700"
-                  >
-                    {tag.name}
-                  </span>
-                ))}
-                {moodTags.map((tag) => (
-                  <span
-                    key={tag.id}
-                    className="rounded-full border border-purple-200 bg-purple-50 px-3 py-1.5 text-xs font-medium text-purple-700"
-                  >
-                    {tag.name}
-                  </span>
-                ))}
-              </div>
-            </section>
+          {!isOwner && (
+            <FollowButton
+              userId={spot.user.id}
+              isFollowing={spot.user.isFollowing ?? null}
+              followersCount={spot.user.followersCount ?? 0}
+              size="sm"
+            />
           )}
         </div>
-      </div>
-    </div>
+      </section>
+    </article>
   );
 }
