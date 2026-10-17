@@ -31,3 +31,26 @@ export function getUserFacingErrorMessage(
 
   return fallback;
 }
+
+/**
+ * 「見つからない」（404）のエラーかどうか。通信やサーバーの失敗と分けて、
+ * 「見つかりません」か「もう一度読み込む」かを出し分けるために使う。
+ * 今はバックエンドの NotFoundException が code を INTERNAL_SERVER_ERROR のまま
+ * status: 404 を添えて返すので、code と status の両方を見る
+ */
+export function isNotFoundError(error: unknown): boolean {
+  if (!CombinedGraphQLErrors.is(error)) return false;
+
+  return error.errors.some((e) => {
+    const extensions = e.extensions ?? {};
+    if (extensions.code === "NOT_FOUND" || extensions.status === 404) {
+      return true;
+    }
+    const original = extensions.originalError;
+    return (
+      typeof original === "object" &&
+      original !== null &&
+      (original as { statusCode?: unknown }).statusCode === 404
+    );
+  });
+}
