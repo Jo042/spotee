@@ -11,8 +11,9 @@ export const SPOT_INPUT_LIMITS = {
 } as const;
 
 /**
- * 「入力した数/上限」。HTML の maxLength もサーバーの @MaxLength も
- * JavaScript の length（UTF-16 の単位）で数えるので、同じ数え方にする
+ * 「入力した数/上限」。入力欄の maxLength と同じく JavaScript の length
+ * （UTF-16 の単位）で数える。サーバーの @MaxLength は絵文字などを1文字と
+ * 数えるので、フロントのほうが厳しめになり、送ってから弾かれることはない
  */
 export function charCountLabel(value: string, max: number): string {
   return `${value.length}/${max}`;

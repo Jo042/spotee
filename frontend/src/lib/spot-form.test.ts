@@ -24,7 +24,7 @@ describe("charCountLabel", () => {
     expect(charCountLabel("渋谷のカフェ", 100)).toBe("6/100");
   });
 
-  it("絵文字はサーバーと同じく2文字と数える", () => {
+  it("絵文字は入力欄の maxLength と同じく2文字と数える", () => {
     expect(charCountLabel("🍰", 100)).toBe("2/100");
   });
 });
