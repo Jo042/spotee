@@ -170,3 +170,24 @@ body {
     border-radius: 2px;
   }
 }
+
+/* 入力欄の見た目（DESIGN.md「入力欄」）。フォーカスは光の輪ではなく枠の色と太さで示す */
+@utility text-input {
+  display: block;
+  width: 100%;
+  border: 1px solid var(--color-gray-300);
+  border-radius: 0.5rem;
+  background-color: #fff;
+  padding: 0.625rem 0.875rem;
+  font-size: 0.9375rem;
+  color: var(--color-gray-900);
+  transition: border-color 150ms;
+  &::placeholder {
+    color: var(--color-gray-400);
+  }
+  &:focus {
+    border-color: var(--color-primary-700);
+    outline: none;
+    box-shadow: inset 0 0 0 1px var(--color-primary-700);
+  }
+}
