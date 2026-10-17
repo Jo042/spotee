@@ -89,15 +89,15 @@ export class UpdateSpotInput {
 
   @Field(() => [ID], { nullable: true })
   @IsOptional()
-  @ArrayMaxSize(TAG_IDS_MAX, { message: `属性タグは${TAG_IDS_MAX}件までです` })
-  @IsUUID('4', { each: true, message: '属性タグの指定が不正です' })
+  @ArrayMaxSize(TAG_IDS_MAX, { message: `特徴は${TAG_IDS_MAX}件までです` })
+  @IsUUID('4', { each: true, message: '特徴の指定が不正です' })
   attributeTagIds?: string[];
 
   @Field(() => [ID], { nullable: true })
   @IsOptional()
   @ArrayMaxSize(TAG_IDS_MAX, {
-    message: `ムードタグは${TAG_IDS_MAX}件までです`,
+    message: `雰囲気は${TAG_IDS_MAX}件までです`,
   })
-  @IsUUID('4', { each: true, message: 'ムードタグの指定が不正です' })
+  @IsUUID('4', { each: true, message: '雰囲気の指定が不正です' })
   moodTagIds?: string[];
 }

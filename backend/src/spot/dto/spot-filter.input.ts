@@ -21,13 +21,13 @@ export class SpotFilterInput {
   @Field(() => [ID], { nullable: true })
   @IsOptional()
   @ArrayMaxSize(TAG_IDS_MAX)
-  @IsUUID('4', { each: true, message: '属性タグの指定が不正です' })
+  @IsUUID('4', { each: true, message: '特徴の指定が不正です' })
   attributeTagIds?: string[];
 
   @Field(() => [ID], { nullable: true })
   @IsOptional()
   @ArrayMaxSize(TAG_IDS_MAX)
-  @IsUUID('4', { each: true, message: 'ムードタグの指定が不正です' })
+  @IsUUID('4', { each: true, message: '雰囲気の指定が不正です' })
   moodTagIds?: string[];
 
   @Field(() => TagSearchMode, {

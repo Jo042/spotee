@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { useForm } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
 import { useMutation, useQuery } from "@apollo/client/react";
 import { CREATE_SPOT, UPDATE_SPOT } from "@/graphql/mutations/spot";
 import { GET_ALL_TAGS } from "@/graphql/queries/tag";
@@ -10,6 +10,8 @@ import { ImageUploader } from "@/components/common/ImageUploader";
 import { useToast } from "@/components/common/toast/ToastProvider";
 import { getUserFacingErrorMessage } from "@/lib/graphql-error";
 import { PriceRange } from "@/graphql/generated/graphql";
+import { FieldError, FieldLabel } from "@/components/common/FieldLabel";
+import { charCountLabel, SPOT_INPUT_LIMITS } from "@/lib/spot-form";
 
 interface SpotFormData {
   title: string;
@@ -71,7 +73,7 @@ export function SpotForm({ spotId, initialValues }: SpotFormProps) {
     handleSubmit,
     formState: { errors },
     setValue,
-    watch,
+    control,
   } = useForm<SpotFormData>({
     defaultValues: {
       title: initialValues?.title ?? "",
@@ -85,8 +87,24 @@ export function SpotForm({ spotId, initialValues }: SpotFormProps) {
     },
   });
 
-  const selectedAttributeTags = watch("attributeTagIds");
-  const selectedMoodTags = watch("moodTagIds");
+  const [
+    selectedAttributeTags,
+    selectedMoodTags,
+    title,
+    description,
+    address,
+    businessHours,
+  ] = useWatch({
+    control,
+    name: [
+      "attributeTagIds",
+      "moodTagIds",
+      "title",
+      "description",
+      "address",
+      "businessHours",
+    ],
+  });
 
   const toggleTag = (
     field: "attributeTagIds" | "moodTagIds",
@@ -144,37 +162,37 @@ export function SpotForm({ spotId, initialValues }: SpotFormProps) {
   };
 
   if (tagLoading) {
-    return <div className="text-center py-8">読み込み中...</div>;
+    return (
+      <p className="py-8 text-center text-sm text-gray-500">読み込み中...</p>
+    );
   }
 
-  return (
-    <form
-      onSubmit={handleSubmit(onSubmit)}
-      className="space-y-6 max-w-2xl mx-auto"
-    >
-      <div>
-        <label
-          htmlFor="title"
-          className="block text-sm font-medium text-gray-700 mb-1"
-        >
-          スポット名 <span className="text-red-500">*</span>
-        </label>
-        <input
-          id="title"
-          type="text"
-          {...register("title", { required: "スポット名は必須です" })}
-          className="w-full rounded-lg border border-gray-300 px-3.5 py-2.5 text-[15px] text-gray-900 placeholder:text-gray-400 transition focus:border-primary-700 focus:outline-none focus:ring-1 focus:ring-primary-700"
-          placeholder="例: 渋谷のおしゃれカフェ"
-        />
-        {errors.title && (
-          <p className="mt-1 text-sm text-red-500">{errors.title.message}</p>
-        )}
-      </div>
+  const tagGroups: {
+    field: "moodTagIds" | "attributeTagIds";
+    label: string;
+    tags: { id: string; name: string }[];
+    selected: string[];
+  }[] = [
+    {
+      field: "moodTagIds",
+      label: "雰囲気",
+      tags: tagData?.moodTags ?? [],
+      selected: selectedMoodTags,
+    },
+    {
+      field: "attributeTagIds",
+      label: "特徴",
+      tags: tagData?.attributeTags ?? [],
+      selected: selectedAttributeTags,
+    },
+  ];
 
+  return (
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-7">
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">
-          写真 <span className="text-red-500">*</span>（1〜5枚）
-        </label>
+        <FieldLabel id="images-label" count={`${imageUrls.length}/5枚`}>
+          写真
+        </FieldLabel>
         <ImageUploader
           images={imageUrls}
           onChange={setImageUrls}
@@ -183,165 +201,185 @@ export function SpotForm({ spotId, initialValues }: SpotFormProps) {
       </div>
 
       <div>
-        <label
-          htmlFor="address"
-          className="block text-sm font-medium text-gray-700 mb-1"
+        <FieldLabel
+          htmlFor="title"
+          count={charCountLabel(title, SPOT_INPUT_LIMITS.title)}
         >
-          住所 <span className="text-red-500">*</span>
-        </label>
+          スポット名
+        </FieldLabel>
         <input
-          id="address"
+          id="title"
           type="text"
-          {...register("address", { required: "住所は必須です" })}
-          className="w-full rounded-lg border border-gray-300 px-3.5 py-2.5 text-[15px] text-gray-900 placeholder:text-gray-400 transition focus:border-primary-700 focus:outline-none focus:ring-1 focus:ring-primary-700"
-          placeholder="例: 東京都渋谷区〇〇1-2-3"
+          maxLength={SPOT_INPUT_LIMITS.title}
+          aria-invalid={!!errors.title}
+          aria-describedby={errors.title ? "title-error" : undefined}
+          {...register("title", {
+            required: "スポット名を入力してください",
+            validate: (v) => v.trim() !== "" || "スポット名を入力してください",
+          })}
+          className="text-input"
+          placeholder="例: 窓辺の席が気持ちいい喫茶店"
         />
-        {errors.address && (
-          <p className="mt-1 text-sm text-red-500">{errors.address.message}</p>
-        )}
+        <FieldError id="title-error" message={errors.title?.message} />
       </div>
 
       <div>
-        <label
-          htmlFor="categoryId"
-          className="block text-sm font-medium text-gray-700 mb-1"
+        <FieldLabel
+          htmlFor="description"
+          optional
+          count={charCountLabel(description, SPOT_INPUT_LIMITS.description)}
         >
-          カテゴリ <span className="text-red-500">*</span>
-        </label>
+          説明
+        </FieldLabel>
+        <textarea
+          id="description"
+          maxLength={SPOT_INPUT_LIMITS.description}
+          {...register("description")}
+          rows={5}
+          className="text-input leading-relaxed"
+          placeholder="どんなところが好きか、行くときのコツなど"
+        />
+      </div>
+
+      <div>
+        <FieldLabel htmlFor="categoryId">カテゴリ</FieldLabel>
         <select
           id="categoryId"
+          aria-invalid={!!errors.categoryId}
+          aria-describedby={errors.categoryId ? "categoryId-error" : undefined}
           {...register("categoryId", {
-            required: "カテゴリを選択してください",
+            required: "カテゴリを選んでください",
           })}
-          className="w-full rounded-lg border border-gray-300 px-3.5 py-2.5 text-[15px] text-gray-900 placeholder:text-gray-400 transition focus:border-primary-700 focus:outline-none focus:ring-1 focus:ring-primary-700"
+          className="text-input"
         >
-          <option value="">選択してください</option>
+          <option value="">選んでください</option>
           {tagData?.categories.map((category) => (
             <option key={category.id} value={category.id}>
               {category.name}
             </option>
           ))}
         </select>
-        {errors.categoryId && (
-          <p className="mt-1 text-sm text-red-500">
-            {errors.categoryId.message}
-          </p>
-        )}
-      </div>
-
-      <div>
-        <label
-          htmlFor="description"
-          className="block text-sm font-medium text-gray-700 mb-1"
-        >
-          説明
-        </label>
-        <textarea
-          id="description"
-          {...register("description")}
-          rows={4}
-          className="w-full rounded-lg border border-gray-300 px-3.5 py-2.5 text-[15px] text-gray-900 placeholder:text-gray-400 transition focus:border-primary-700 focus:outline-none focus:ring-1 focus:ring-primary-700"
-          placeholder="このスポットの魅力を教えてください"
+        <FieldError
+          id="categoryId-error"
+          message={errors.categoryId?.message}
         />
       </div>
 
-      <div>
-        <label
-          htmlFor="priceRange"
-          className="block text-sm font-medium text-gray-700 mb-1"
-        >
-          価格帯
-        </label>
-        <select
-          id="priceRange"
-          {...register("priceRange", { valueAsNumber: true })}
-          className="w-full rounded-lg border border-gray-300 px-3.5 py-2.5 text-[15px] text-gray-900 placeholder:text-gray-400 transition focus:border-primary-700 focus:outline-none focus:ring-1 focus:ring-primary-700"
-        >
-          <option value="">選択してください</option>
-          <option value={1}>~1,000円</option>
-          <option value={2}>1,000~3,000円</option>
-          <option value={3}>3,000~5,000円</option>
-          <option value={4}>5,000円~</option>
-        </select>
-      </div>
-
-      <div>
-        <label
-          htmlFor="businessHours"
-          className="block text-sm font-medium text-gray-700 mb-1"
-        >
-          営業時間
-        </label>
-        <input
-          id="businessHours"
-          type="text"
-          {...register("businessHours")}
-          className="w-full rounded-lg border border-gray-300 px-3.5 py-2.5 text-[15px] text-gray-900 placeholder:text-gray-400 transition focus:border-primary-700 focus:outline-none focus:ring-1 focus:ring-primary-700"
-          placeholder="例: 10:00-22:00（定休日: 月曜）"
-        />
-      </div>
-
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">
-          特徴（複数選択可）
-        </label>
-        <div className="flex flex-wrap gap-2">
-          {tagData?.attributeTags.map((tag) => (
-            <button
-              key={tag.id}
-              type="button"
-              onClick={() =>
-                toggleTag("attributeTagIds", tag.id, selectedAttributeTags)
-              }
-              className={`px-3 py-1 rounded-full text-sm border transition-colors ${
-                selectedAttributeTags.includes(tag.id)
-                  ? "bg-emerald-50 text-emerald-700 border-emerald-200"
-                  : "bg-white border-gray-300 text-gray-700 hover:bg-gray-50"
-              }`}
-            >
-              {tag.name}
-            </button>
-          ))}
+      {tagGroups.map(({ field, label, tags, selected }) => (
+        <div key={field}>
+          <FieldLabel id={`${field}-label`} optional>
+            {label}
+          </FieldLabel>
+          <div
+            role="group"
+            aria-labelledby={`${field}-label`}
+            className="flex flex-wrap gap-2"
+          >
+            {tags.map((tag) => {
+              const active = selected.includes(tag.id);
+              return (
+                <button
+                  key={tag.id}
+                  type="button"
+                  aria-pressed={active}
+                  onClick={() => toggleTag(field, tag.id, selected)}
+                  className={`rounded-full border px-3 py-1.5 text-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-300 ${
+                    active
+                      ? "border-primary-700 bg-primary-50 font-bold text-primary-700"
+                      : "border-gray-300 bg-white text-gray-700 hover:border-gray-400"
+                  }`}
+                >
+                  {tag.name}
+                </button>
+              );
+            })}
+          </div>
         </div>
-      </div>
+      ))}
 
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">
-          雰囲気（複数選択可）
-        </label>
-        <div className="flex flex-wrap gap-2">
-          {tagData?.moodTags.map((tag) => (
-            <button
-              key={tag.id}
-              type="button"
-              onClick={() => toggleTag("moodTagIds", tag.id, selectedMoodTags)}
-              className={`px-3 py-1 rounded-full text-sm border transition-colors ${
-                selectedMoodTags.includes(tag.id)
-                  ? "bg-purple-50 text-purple-700 border-purple-200"
-                  : "bg-white border-gray-300 text-gray-700 hover:bg-gray-50"
-              }`}
-            >
-              {tag.name}
-            </button>
-          ))}
+      <section
+        aria-labelledby="basic-info"
+        className="space-y-7 border-t border-gray-200 pt-7"
+      >
+        <h2 id="basic-info" className="text-base font-bold text-gray-900">
+          基本情報
+        </h2>
+
+        <div>
+          <FieldLabel
+            htmlFor="address"
+            count={charCountLabel(address, SPOT_INPUT_LIMITS.address)}
+          >
+            住所
+          </FieldLabel>
+          <input
+            id="address"
+            type="text"
+            maxLength={SPOT_INPUT_LIMITS.address}
+            aria-invalid={!!errors.address}
+            aria-describedby={errors.address ? "address-error" : undefined}
+            {...register("address", {
+              required: "住所を入力してください",
+              validate: (v) => v.trim() !== "" || "住所を入力してください",
+            })}
+            className="text-input"
+            placeholder="例: 東京都渋谷区〇〇1-2-3"
+          />
+          <FieldError id="address-error" message={errors.address?.message} />
         </div>
-      </div>
 
-      <div className="pt-4">
-        <button
-          type="submit"
-          disabled={loading}
-          className="w-full py-3 px-4 bg-primary-600 text-white font-medium rounded-lg hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-        >
-          {loading
-            ? isEditMode
-              ? "更新中..."
-              : "投稿中..."
-            : isEditMode
-              ? "スポットを更新する"
-              : "スポットを投稿する"}
-        </button>
-      </div>
+        <div>
+          <FieldLabel htmlFor="priceRange" optional>
+            価格帯
+          </FieldLabel>
+          <select
+            id="priceRange"
+            {...register("priceRange", { valueAsNumber: true })}
+            className="text-input"
+          >
+            <option value="">選んでください</option>
+            <option value={1}>~1,000円</option>
+            <option value={2}>1,000~3,000円</option>
+            <option value={3}>3,000~5,000円</option>
+            <option value={4}>5,000円~</option>
+          </select>
+        </div>
+
+        <div>
+          <FieldLabel
+            htmlFor="businessHours"
+            optional
+            count={charCountLabel(
+              businessHours,
+              SPOT_INPUT_LIMITS.businessHours,
+            )}
+          >
+            営業時間
+          </FieldLabel>
+          <input
+            id="businessHours"
+            type="text"
+            maxLength={SPOT_INPUT_LIMITS.businessHours}
+            {...register("businessHours")}
+            className="text-input"
+            placeholder="例: 10:00-22:00（定休日: 月曜）"
+          />
+        </div>
+      </section>
+
+      <button
+        type="submit"
+        disabled={loading}
+        className="btn-primary w-full py-3"
+      >
+        {loading
+          ? isEditMode
+            ? "更新中..."
+            : "投稿中..."
+          : isEditMode
+            ? "スポットを更新する"
+            : "スポットを投稿する"}
+      </button>
     </form>
   );
 }

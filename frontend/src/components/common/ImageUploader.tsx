@@ -299,7 +299,7 @@ export function ImageUploader({
             <span className="text-gray-500">アップロード中...</span>
           ) : (
             <>
-              <span className="text-gray-500">クリックして画像を選択</span>
+              <span className="text-gray-700">写真を選ぶ</span>
               <span className="text-sm text-gray-400 mt-1">
                 残り {maxImages - images.length} 枚
               </span>
@@ -310,8 +310,10 @@ export function ImageUploader({
 
       {error && <p className="text-red-500 text-sm">{error}</p>}
 
-      <p className="text-sm text-gray-500">
-        JPEG, PNG, WebP, GIF 形式、最大5MB、{maxImages}枚まで
+      <p className="text-xs text-gray-500">
+        JPEG・PNG・WebP・GIF の写真を{maxImages}
+        枚まで。大きな写真は自動で小さくします（GIF は {MAX_FILE_SIZE_MB}MB
+        まで）
       </p>
 
       {croppingItem?.previewUrl && (

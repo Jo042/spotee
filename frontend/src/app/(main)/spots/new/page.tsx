@@ -17,9 +17,7 @@ export default function NewSpotPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <p>読み込み中...</p>
-      </div>
+      <p className="py-24 text-center text-sm text-gray-500">読み込み中...</p>
     );
   }
 
@@ -28,10 +26,10 @@ export default function NewSpotPage() {
   }
 
   return (
-    <main className="min-h-screen bg-gray-50 py-8 px-4">
-      <div className="max-w-2xl mx-auto">
-        <h1 className="text-2xl font-bold text-gray-900 mb-8">
-          スポットを投稿
+    <main className="bg-white px-4 pb-20 pt-8 sm:pt-10">
+      <div className="mx-auto max-w-[640px]">
+        <h1 className="mb-8 text-2xl font-bold text-gray-900">
+          スポットを投稿する
         </h1>
         <SpotForm />
       </div>
