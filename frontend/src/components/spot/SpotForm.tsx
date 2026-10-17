@@ -11,7 +11,8 @@ import { useToast } from "@/components/common/toast/ToastProvider";
 import { getUserFacingErrorMessage } from "@/lib/graphql-error";
 import { PriceRange } from "@/graphql/generated/graphql";
 import { FieldError, FieldLabel } from "@/components/common/FieldLabel";
-import { charCountLabel, SPOT_INPUT_LIMITS } from "@/lib/spot-form";
+import { charCountLabel } from "@/lib/format";
+import { SPOT_INPUT_LIMITS } from "@/lib/spot-form";
 
 interface SpotFormData {
   title: string;
