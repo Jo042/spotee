@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { CombinedGraphQLErrors } from "@apollo/client";
-import { getUserFacingErrorMessage } from "./graphql-error";
+import { getUserFacingErrorMessage, isNotFoundError } from "./graphql-error";
 
 const FALLBACK = "投稿に失敗しました";
 
@@ -86,4 +86,45 @@ describe("getUserFacingErrorMessage", () => {
       expect(getUserFacingErrorMessage(value, FALLBACK)).toBe(FALLBACK);
     },
   );
+});
+
+describe("isNotFoundError", () => {
+  it("status が 404 なら見つからない", () => {
+    const error = graphqlError({
+      code: "INTERNAL_SERVER_ERROR",
+      status: 404,
+      originalError: { message: "Spot not found", statusCode: 404 },
+    });
+    expect(isNotFoundError(error)).toBe(true);
+  });
+
+  it("originalError の statusCode が 404 なら見つからない", () => {
+    const error = graphqlError({
+      code: "INTERNAL_SERVER_ERROR",
+      originalError: { statusCode: 404 },
+    });
+    expect(isNotFoundError(error)).toBe(true);
+  });
+
+  it("code が NOT_FOUND なら見つからない", () => {
+    expect(isNotFoundError(graphqlError({ code: "NOT_FOUND" }))).toBe(true);
+  });
+
+  it("サーバーの失敗・入力の誤りは、見つからないにしない", () => {
+    expect(
+      isNotFoundError(graphqlError({ code: "INTERNAL_SERVER_ERROR" })),
+    ).toBe(false);
+    expect(
+      isNotFoundError(
+        graphqlError({
+          code: "BAD_REQUEST",
+          originalError: { statusCode: 400 },
+        }),
+      ),
+    ).toBe(false);
+  });
+
+  it("通信の失敗（GraphQL のエラーでないもの）は、見つからないにしない", () => {
+    expect(isNotFoundError(new Error("Failed to fetch"))).toBe(false);
+  });
 });
