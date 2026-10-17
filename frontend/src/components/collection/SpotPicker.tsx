@@ -68,10 +68,7 @@ export function SpotPicker({ selected, onToggle }: SpotPickerProps) {
         <p className="text-sm text-gray-600">
           特集に入れられるのは、自分が投稿したスポットだけです
         </p>
-        <Link
-          href="/spots/new"
-          className="mt-4 inline-block rounded-lg bg-primary-600 px-4 py-2 text-sm font-bold text-white transition hover:bg-primary-700"
-        >
+        <Link href="/spots/new" className="btn-primary mt-4">
           スポットを投稿する
         </Link>
       </div>
@@ -95,7 +92,7 @@ export function SpotPicker({ selected, onToggle }: SpotPickerProps) {
                 }
                 className={`group relative block w-full overflow-hidden rounded-lg text-left transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-300 disabled:cursor-not-allowed disabled:opacity-40 ${
                   isSelected
-                    ? "ring-2 ring-primary-600 ring-offset-2"
+                    ? "ring-2 ring-primary-700 ring-offset-2"
                     : "hover:opacity-90"
                 }`}
               >
@@ -114,7 +111,7 @@ export function SpotPicker({ selected, onToggle }: SpotPickerProps) {
                     </span>
                   )}
                   {isSelected && (
-                    <span className="absolute right-1.5 top-1.5 flex h-6 w-6 items-center justify-center rounded-full bg-primary-600 text-white">
+                    <span className="absolute right-1.5 top-1.5 flex h-6 w-6 items-center justify-center rounded-full bg-primary-700 text-white">
                       <Check size={14} aria-hidden="true" />
                     </span>
                   )}
@@ -133,7 +130,7 @@ export function SpotPicker({ selected, onToggle }: SpotPickerProps) {
           type="button"
           onClick={handleLoadMore}
           disabled={loadingMore}
-          className="mt-4 flex w-full items-center justify-center gap-2 rounded-lg border border-gray-200 py-2.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 disabled:opacity-50"
+          className="btn-secondary mt-4 w-full"
         >
           {loadingMore && (
             <Loader2 size={16} className="animate-spin" aria-hidden="true" />

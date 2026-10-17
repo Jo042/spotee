@@ -1,12 +1,14 @@
 "use client";
 
 import { useEffect } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useQuery } from "@apollo/client/react";
 import { useAuth } from "@/hooks/useAuth";
 import { GET_COLLECTION } from "@/graphql/queries/collection";
 import { GET_ME } from "@/graphql/queries/user";
 import { BackLink } from "@/components/common/BackLink";
+import { isNotFoundError } from "@/lib/graphql-error";
 import { CollectionForm } from "./CollectionForm";
 
 export function CollectionEditContent({
@@ -19,7 +21,7 @@ export function CollectionEditContent({
   const { data: meData, loading: meLoading } = useQuery(GET_ME, {
     skip: !user,
   });
-  const { data, loading } = useQuery(GET_COLLECTION, {
+  const { data, loading, error, refetch } = useQuery(GET_COLLECTION, {
     variables: { id: collectionId },
   });
 
@@ -39,30 +41,46 @@ export function CollectionEditContent({
   }, [isReady, user, collection, isOwner, router, collectionId]);
 
   if (isReady && !collection) {
+    const notFound = !error || isNotFoundError(error);
     return (
-      <div className="min-h-screen flex items-center justify-center text-sm text-gray-500">
-        特集が見つかりません
-      </div>
+      <main className="px-4 py-16 text-center">
+        <p className="text-sm text-gray-700">
+          {notFound
+            ? "特集が見つかりません。削除されたか、URL が違う可能性があります。"
+            : "特集を読み込めませんでした。時間をおいて、もう一度お試しください。"}
+        </p>
+        {notFound ? (
+          <Link href="/collections" className="btn-secondary mt-4">
+            特集一覧へ
+          </Link>
+        ) : (
+          <button
+            type="button"
+            onClick={() => refetch()}
+            className="btn-secondary mt-4"
+          >
+            もう一度読み込む
+          </button>
+        )}
+      </main>
     );
   }
 
   if (!collection || !isOwner) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <p>読み込み中...</p>
-      </div>
+      <p className="py-24 text-center text-sm text-gray-500">読み込み中...</p>
     );
   }
 
   return (
-    <main className="min-h-screen bg-gray-50 px-4 py-8">
-      <div className="mx-auto max-w-2xl">
+    <main className="bg-white px-4 pb-20 pt-6 sm:pt-8">
+      <div className="mx-auto max-w-[640px]">
         <BackLink
           fallbackHref={`/collections/${collectionId}`}
           fallbackLabel="特集に戻る"
         />
         <h1 className="mb-8 mt-2 text-2xl font-bold text-gray-900">
-          特集を編集
+          特集を編集する
         </h1>
         <CollectionForm
           collectionId={collectionId}
