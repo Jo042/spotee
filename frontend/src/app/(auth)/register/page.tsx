@@ -11,6 +11,7 @@ import {
 import { GoogleButton } from "@/components/auth/GoogleButton";
 import { Spinner } from "@/components/common/Spinner";
 import { toAuthErrorMessage } from "@/lib/auth-error";
+import { PROFILE_INPUT_LIMITS } from "@/lib/profile-form";
 
 export default function RegisterPage() {
   const { signUp, signInWithGoogle, loading } = useAuth();
@@ -104,7 +105,7 @@ export default function RegisterPage() {
             type="text"
             autoComplete="name"
             required
-            maxLength={50}
+            maxLength={PROFILE_INPUT_LIMITS.name}
             value={name}
             onChange={(e) => setName(e.target.value)}
             className="text-input"

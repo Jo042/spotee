@@ -4,13 +4,16 @@ import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useQuery } from "@apollo/client/react";
-import { ArrowLeft, Bookmark, Loader2, Pencil, Trash2 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useIntersectionObserver } from "@/hooks/useIntersectionObserver";
 import { SpotCard } from "@/components/spot/SpotCard";
 import { SpotCardSkeleton } from "@/components/spot/SpotList";
 import { GET_FOLDER } from "@/graphql/queries/bookmark";
 import { formatCount } from "@/lib/format";
+import { isNotFoundError } from "@/lib/graphql-error";
+import { BackLink } from "@/components/common/BackLink";
+import { EmptyState } from "@/components/common/EmptyState";
+import { Spinner } from "@/components/common/Spinner";
 import { RenameFolderDialog } from "./RenameFolderDialog";
 import { DeleteFolderDialog } from "./DeleteFolderDialog";
 
@@ -24,7 +27,7 @@ export function FolderDetailContent({ folderId }: { folderId: string }) {
   const [dialog, setDialog] = useState<Dialog>(null);
   const [loadingMore, setLoadingMore] = useState(false);
 
-  const { data, loading, fetchMore } = useQuery(GET_FOLDER, {
+  const { data, loading, error, fetchMore, refetch } = useQuery(GET_FOLDER, {
     variables: { id: folderId, first: PAGE_SIZE },
     skip: !user,
   });
@@ -74,37 +77,45 @@ export function FolderDetailContent({ folderId }: { folderId: string }) {
     }
   }, [isIntersecting, hasNextPage, loadingMore, handleLoadMore]);
 
-  if (authLoading) {
+  // ログインしていなければログインの画面へ（描画の途中では移動しない）
+  useEffect(() => {
+    if (!authLoading && !user) router.replace("/login");
+  }, [authLoading, user, router]);
+
+  if (authLoading || !user) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        読み込み中...
-      </div>
+      <p className="py-24 text-center text-sm text-gray-500">読み込み中...</p>
     );
   }
 
-  if (!user) {
-    router.push("/login");
-    return null;
-  }
-
   const backLink = (
-    <Link
-      href="/mypage?tab=folders"
-      className="inline-flex min-h-11 items-center gap-1.5 text-sm text-gray-500 transition-colors hover:text-gray-900"
-    >
-      <ArrowLeft size={16} aria-hidden="true" />
-      マイページ
-    </Link>
+    <BackLink fallbackHref="/mypage?tab=folders" fallbackLabel="マイページ" />
   );
 
   if (!loading && !folder) {
+    const notFound = !error || isNotFoundError(error);
     return (
-      <main className="min-h-screen bg-gray-50">
-        <div className="max-w-4xl mx-auto px-4 py-8">
-          {backLink}
-          <div className="flex flex-col items-center py-16 text-center">
-            <p className="text-sm text-gray-500">フォルダが見つかりません</p>
-          </div>
+      <main className="mx-auto max-w-[960px] px-4 pb-20 pt-6 sm:pt-8">
+        {backLink}
+        <div className="py-16 text-center">
+          <p className="text-sm text-gray-700">
+            {notFound
+              ? "フォルダが見つかりません。削除された可能性があります。"
+              : "フォルダを読み込めませんでした。時間をおいて、もう一度お試しください。"}
+          </p>
+          {notFound ? (
+            <Link href="/mypage?tab=folders" className="btn-secondary mt-4">
+              保存したフォルダへ
+            </Link>
+          ) : (
+            <button
+              type="button"
+              onClick={() => refetch()}
+              className="btn-secondary mt-4"
+            >
+              もう一度読み込む
+            </button>
+          )}
         </div>
       </main>
     );
@@ -113,92 +124,76 @@ export function FolderDetailContent({ folderId }: { folderId: string }) {
   const spots = (folder?.spots.edges ?? []).map((edge) => edge.node);
 
   return (
-    <main className="min-h-screen bg-gray-50">
-      <div className="bg-white shadow-sm">
-        <div className="max-w-4xl mx-auto px-4 pt-4 pb-6 sm:pb-8">
+    <main className="bg-white pb-20">
+      <div className="mx-auto max-w-[960px] px-4 pt-6 sm:pt-8">
+        <div className="flex min-h-9 items-center justify-between gap-4">
           {backLink}
-          <div className="mt-2 flex flex-wrap items-end justify-between gap-3">
-            <div className="min-w-0">
-              {folder ? (
-                <h1 className="truncate text-xl sm:text-[22px] font-bold leading-snug text-gray-900">
-                  {folder.name}
-                </h1>
-              ) : (
-                <div className="h-7 w-40 animate-pulse rounded bg-gray-200" />
-              )}
-              <p className="mt-1 text-sm text-gray-600">
-                <span className="font-bold text-gray-900">
-                  {folder ? formatCount(folder.spotCount) : "-"}
-                </span>{" "}
-                件のスポット
-              </p>
+          {folder && (
+            <div className="flex items-center gap-4 text-sm">
+              <button
+                type="button"
+                onClick={() => setDialog("rename")}
+                className="btn-text"
+              >
+                名前を変更
+              </button>
+              <button
+                type="button"
+                onClick={() => setDialog("delete")}
+                className="text-red-600 underline decoration-red-200 underline-offset-4 hover:decoration-red-600"
+              >
+                削除
+              </button>
             </div>
-            {folder && (
-              <div className="flex shrink-0 items-center gap-2">
-                <button
-                  type="button"
-                  onClick={() => setDialog("rename")}
-                  className="flex items-center gap-1.5 rounded-lg border border-gray-200 px-3 py-1.5 text-sm text-gray-700 transition-colors hover:bg-gray-50"
-                >
-                  <Pencil size={14} aria-hidden="true" />
-                  名前を変更
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setDialog("delete")}
-                  className="flex items-center gap-1.5 rounded-lg border border-red-200 px-3 py-1.5 text-sm text-red-500 transition-colors hover:bg-red-50"
-                >
-                  <Trash2 size={14} aria-hidden="true" />
-                  削除
-                </button>
-              </div>
-            )}
-          </div>
+          )}
         </div>
-      </div>
 
-      <div className="max-w-4xl mx-auto px-4 py-6 sm:py-8">
-        {!folder ? (
-          <div className="grid grid-cols-2 gap-4 sm:gap-6 lg:grid-cols-3">
-            {Array.from({ length: 6 }).map((_, i) => (
-              <SpotCardSkeleton key={i} />
-            ))}
-          </div>
-        ) : spots.length === 0 ? (
-          <div className="flex flex-col items-center py-16 sm:py-20 text-center">
-            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-gray-100 text-gray-400">
-              <Bookmark size={22} aria-hidden="true" />
-            </div>
-            <p className="mt-4 text-sm text-gray-500">
-              このフォルダにはまだスポットがありません
-            </p>
-            <Link
-              href="/spots"
-              className="mt-5 rounded-lg border border-gray-200 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
-            >
-              スポットを探す
-            </Link>
-          </div>
-        ) : (
-          <>
-            <div className="grid grid-cols-2 gap-4 sm:gap-6 lg:grid-cols-3">
-              {spots.map((spot) => (
-                <SpotCard key={spot.id} spot={spot} />
+        <div className="mt-3">
+          {folder ? (
+            <h1 className="break-words text-2xl font-bold leading-snug text-gray-900">
+              {folder.name}
+            </h1>
+          ) : (
+            <div className="h-8 w-40 animate-pulse rounded bg-gray-100" />
+          )}
+          <p className="mt-1 text-sm text-gray-600">
+            {folder ? `${formatCount(folder.spotCount)}件` : ""}
+          </p>
+        </div>
+
+        <div className="pt-6">
+          {!folder ? (
+            <div className="grid grid-cols-2 gap-x-3 gap-y-7 sm:gap-x-5 lg:grid-cols-3">
+              {Array.from({ length: 6 }).map((_, i) => (
+                <SpotCardSkeleton key={i} />
               ))}
             </div>
-            {loadingMore && (
-              <div className="flex items-center justify-center gap-2 py-8 text-sm text-gray-500">
-                <Loader2
-                  size={18}
-                  className="animate-spin"
-                  aria-hidden="true"
-                />
-                読み込み中...
+          ) : spots.length === 0 ? (
+            <EmptyState
+              message="このフォルダにはまだスポットがありません"
+              action={
+                <Link href="/spots" className="btn-secondary">
+                  スポットを探す
+                </Link>
+              }
+            />
+          ) : (
+            <>
+              <div className="grid grid-cols-2 gap-x-3 gap-y-7 sm:gap-x-5 lg:grid-cols-3">
+                {spots.map((spot) => (
+                  <SpotCard key={spot.id} spot={spot} />
+                ))}
               </div>
-            )}
-            {hasNextPage && <div ref={targetRef} className="h-1" />}
-          </>
-        )}
+              {loadingMore && (
+                <div className="flex items-center justify-center gap-2 py-8 text-sm text-gray-500">
+                  <Spinner className="h-4 w-4" />
+                  読み込み中...
+                </div>
+              )}
+              {hasNextPage && <div ref={targetRef} className="h-1" />}
+            </>
+          )}
+        </div>
       </div>
 
       {folder && dialog === "rename" && (

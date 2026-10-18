@@ -28,7 +28,7 @@ export function NewFolderForm({
       <button
         type="button"
         onClick={() => setIsOpen(true)}
-        className="flex w-full items-center gap-3 rounded-lg px-2 py-2.5 text-sm font-bold text-primary-600 transition-colors hover:bg-primary-50 hover:text-primary-700"
+        className="flex w-full items-center gap-3 rounded-lg px-2 py-2.5 text-sm font-bold text-primary-700 transition-colors hover:bg-primary-50"
       >
         <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-dashed border-primary-200">
           <Plus size={18} aria-hidden="true" />
