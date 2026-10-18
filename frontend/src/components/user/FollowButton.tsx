@@ -78,9 +78,9 @@ export function FollowButton({
 
   const styleClass = following
     ? hovered
-      ? "border border-rose-200 bg-rose-50 text-rose-600"
-      : "border border-gray-200 bg-white text-gray-700"
-    : "border border-primary-600 bg-primary-600 text-white hover:bg-primary-700 hover:border-primary-700";
+      ? "border border-red-200 bg-red-50 text-red-600"
+      : "border border-gray-900 bg-white text-gray-900"
+    : "border border-primary-600 bg-primary-600 text-white hover:border-primary-700 hover:bg-primary-700";
 
   return (
     <button
@@ -90,7 +90,7 @@ export function FollowButton({
       onPointerLeave={() => setHovered(false)}
       aria-pressed={following}
       aria-label={following ? "フォローを解除する" : "フォローする"}
-      className={`relative inline-flex items-center justify-center rounded-lg font-bold transition-colors active:scale-[0.98] ${sizeClass} ${styleClass}`}
+      className={`relative inline-flex items-center justify-center rounded-full font-bold transition-colors active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-300 focus-visible:ring-offset-2 ${sizeClass} ${styleClass}`}
     >
       <span className={loading ? "invisible" : ""}>{label}</span>
       {loading && (
