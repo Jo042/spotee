@@ -9,6 +9,10 @@ import { uploadImage } from "@/lib/storage";
 import { getUserFacingErrorMessage } from "@/lib/graphql-error";
 import imageCompression from "browser-image-compression";
 import { Avatar } from "@/components/common/Avatar";
+import { FieldLabel } from "@/components/common/FieldLabel";
+import { Spinner } from "@/components/common/Spinner";
+import { charCountLabel } from "@/lib/format";
+import { PROFILE_INPUT_LIMITS } from "@/lib/profile-form";
 
 interface ProfileEditFormProps {
   initialName: string;
@@ -54,7 +58,7 @@ export function ProfileEditForm({
     }
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.SubmitEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!name.trim()) {
       setError("名前を入力してください");
@@ -79,47 +83,28 @@ export function ProfileEditForm({
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
-      <div className="flex flex-col items-center gap-3">
+    <form onSubmit={handleSubmit} className="space-y-7">
+      <div className="flex flex-col items-center gap-2">
         <button
           type="button"
           onClick={() => fileInputRef.current?.click()}
-          className="group relative w-24 h-24 rounded-full overflow-hidden bg-gray-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-300 focus-visible:ring-offset-2"
+          className="group relative size-24 overflow-hidden rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-300 focus-visible:ring-offset-2"
           disabled={avatarUploading}
           aria-label="アバター画像を変更"
         >
           <Avatar name={name} src={avatarUrl} size={96} />
           {avatarUploading ? (
-            <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
-              <svg
-                className="animate-spin h-5 w-5 text-white"
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-              >
-                <circle
-                  className="opacity-25"
-                  cx="12"
-                  cy="12"
-                  r="10"
-                  stroke="currentColor"
-                  strokeWidth="4"
-                />
-                <path
-                  className="opacity-75"
-                  fill="currentColor"
-                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
-                />
-              </svg>
+            <div className="absolute inset-0 flex items-center justify-center bg-black/40">
+              <Spinner className="h-5 w-5 text-white" />
             </div>
           ) : (
-            <div className="absolute inset-0 bg-black/40 flex flex-col items-center justify-center gap-0.5 opacity-0 transition-opacity group-hover:opacity-100 group-focus-visible:opacity-100">
-              <Camera size={18} className="text-white" />
+            <div className="absolute inset-0 flex flex-col items-center justify-center gap-0.5 bg-black/40 opacity-0 transition-opacity group-hover:opacity-100 group-focus-visible:opacity-100">
+              <Camera size={18} className="text-white" aria-hidden="true" />
               <span className="text-[10px] font-medium text-white">変更</span>
             </div>
           )}
         </button>
-        <span className="text-xs text-gray-500">タップして画像を変更</span>
+        <span className="text-xs text-gray-500">押すと画像を変えられます</span>
         <input
           ref={fileInputRef}
           type="file"
@@ -130,65 +115,60 @@ export function ProfileEditForm({
       </div>
 
       <div>
-        <div className="flex items-baseline justify-between mb-1.5">
-          <label
-            htmlFor="profile-name"
-            className="text-sm font-medium text-gray-700"
-          >
-            名前
-          </label>
-          <span className="text-xs text-gray-400">{name.length}/50</span>
-        </div>
+        <FieldLabel
+          htmlFor="profile-name"
+          count={charCountLabel(name, PROFILE_INPUT_LIMITS.name)}
+        >
+          名前
+        </FieldLabel>
         <input
           id="profile-name"
           type="text"
           value={name}
           onChange={(e) => setName(e.target.value)}
-          maxLength={50}
-          className="block w-full rounded-lg border border-gray-300 px-3.5 py-2.5 text-[15px] text-gray-900 transition focus:border-primary-700 focus:outline-none focus:ring-1 focus:ring-primary-700"
+          maxLength={PROFILE_INPUT_LIMITS.name}
+          className="text-input"
         />
       </div>
 
       <div>
-        <div className="flex items-baseline justify-between mb-1.5">
-          <label
-            htmlFor="profile-bio"
-            className="text-sm font-medium text-gray-700"
-          >
-            自己紹介
-          </label>
-          <span className="text-xs text-gray-400">{bio.length}/200</span>
-        </div>
+        <FieldLabel
+          htmlFor="profile-bio"
+          optional
+          count={charCountLabel(bio, PROFILE_INPUT_LIMITS.bio)}
+        >
+          自己紹介
+        </FieldLabel>
         <textarea
           id="profile-bio"
           value={bio}
           onChange={(e) => setBio(e.target.value)}
-          maxLength={200}
+          maxLength={PROFILE_INPUT_LIMITS.bio}
           rows={4}
-          className="block w-full rounded-lg border border-gray-300 px-3.5 py-2.5 text-[15px] text-gray-900 transition focus:border-primary-700 focus:outline-none focus:ring-1 focus:ring-primary-700 resize-none"
+          className="text-input resize-none leading-relaxed"
         />
       </div>
 
       {error && (
-        <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600">
+        <p role="alert" className="text-sm leading-relaxed text-red-600">
           {error}
-        </div>
+        </p>
       )}
 
       <div className="flex gap-3">
         <button
           type="button"
           onClick={() => router.back()}
-          className="flex-1 py-2.5 border border-gray-200 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
+          className="btn-secondary flex-1 py-3"
         >
           キャンセル
         </button>
         <button
           type="submit"
           disabled={loading || avatarUploading}
-          className="flex-1 py-2.5 bg-primary-600 text-white rounded-lg text-sm font-bold hover:bg-primary-700 active:scale-[0.98] transition disabled:opacity-50"
+          className="btn-primary flex-1 py-3"
         >
-          {loading ? "保存中..." : "保存"}
+          {loading ? "保存中..." : "保存する"}
         </button>
       </div>
     </form>
