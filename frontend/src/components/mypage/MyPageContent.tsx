@@ -4,7 +4,6 @@ import { useCallback, useEffect, useState } from "react";
 import { useQuery } from "@apollo/client/react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { Camera, Heart, Loader2, Pencil } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useIntersectionObserver } from "@/hooks/useIntersectionObserver";
 import { SpotCard } from "@/components/spot/SpotCard";
@@ -21,8 +20,13 @@ import {
   GET_MY_SPOTS,
   GET_MY_LIKED_SPOTS,
 } from "@/graphql/queries/user";
-import { formatCount } from "@/lib/format";
-import { Avatar } from "@/components/common/Avatar";
+import { EmptyState } from "@/components/common/EmptyState";
+import { Spinner } from "@/components/common/Spinner";
+import {
+  UnderlineTabs,
+  type UnderlineTab,
+} from "@/components/common/UnderlineTabs";
+import { ProfileHeader } from "@/components/user/ProfileHeader";
 
 const TABS = ["spots", "liked", "folders", "collections"] as const;
 type Tab = (typeof TABS)[number];
@@ -143,17 +147,15 @@ export function MyPageContent() {
     }
   }, [isIntersecting, hasNextPage, loadingMore, handleLoadMore]);
 
-  if (authLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        読み込み中...
-      </div>
-    );
-  }
+  // ログインしていなければログインの画面へ（描画の途中では移動しない）
+  useEffect(() => {
+    if (!authLoading && !user) router.replace("/login");
+  }, [authLoading, user, router]);
 
-  if (!user) {
-    router.push("/login");
-    return null;
+  if (authLoading || !user) {
+    return (
+      <p className="py-24 text-center text-sm text-gray-500">読み込み中...</p>
+    );
   }
 
   const me = meData?.me;
@@ -177,7 +179,7 @@ export function MyPageContent() {
         ? likedLoading
         : foldersLoading && !folders;
 
-  const tabs: { key: Tab; label: string; count: number | undefined }[] = [
+  const tabs: UnderlineTab<Tab>[] = [
     { key: "spots", label: "投稿", count: spotsCount },
     { key: "liked", label: "いいね", count: likedCount },
     { key: "folders", label: "保存", count: folders?.length },
@@ -189,188 +191,112 @@ export function MyPageContent() {
   ];
 
   return (
-    <main className="min-h-screen bg-gray-50">
-      <div className="bg-white shadow-sm">
-        <div className="max-w-4xl mx-auto px-4 pt-8 sm:pt-10">
-          <div className="flex items-start gap-4 sm:gap-6">
-            <Avatar
-              name={me?.name ?? ""}
-              src={me?.avatarUrl}
-              size={80}
-              className="sm:size-24"
-            />
-
-            <div className="flex-1 min-w-0">
-              <div className="flex items-start justify-between gap-3">
-                <div className="min-w-0">
-                  {meLoading ? (
-                    <div className="h-7 w-32 bg-gray-200 rounded animate-pulse" />
-                  ) : (
-                    <h1 className="text-xl sm:text-[22px] font-bold leading-snug text-gray-900 truncate">
-                      {me?.name ?? user.email}
-                    </h1>
-                  )}
-                  <div className="mt-1.5 flex flex-wrap items-center gap-4 text-sm text-gray-600">
-                    <span>
-                      <span className="font-bold text-gray-900">
-                        {spotsCount === undefined
-                          ? "-"
-                          : formatCount(spotsCount)}
-                      </span>{" "}
-                      投稿
-                    </span>
-                    <span>
-                      <span className="font-bold text-gray-900">
-                        {likedCount === undefined
-                          ? "-"
-                          : formatCount(likedCount)}
-                      </span>{" "}
-                      いいね
-                    </span>
-                    {me ? (
-                      <>
-                        <Link
-                          href={`/users/${me.id}/followers`}
-                          className="transition-colors hover:text-gray-900"
-                        >
-                          <span className="font-bold text-gray-900">
-                            {formatCount(me.followersCount)}
-                          </span>{" "}
-                          フォロワー
-                        </Link>
-                        <Link
-                          href={`/users/${me.id}/following`}
-                          className="transition-colors hover:text-gray-900"
-                        >
-                          <span className="font-bold text-gray-900">
-                            {formatCount(me.followingCount)}
-                          </span>{" "}
-                          フォロー中
-                        </Link>
-                      </>
-                    ) : (
-                      <>
-                        <span>- フォロワー</span>
-                        <span>- フォロー中</span>
-                      </>
-                    )}
-                  </div>
-                </div>
-                <Link
-                  href="/mypage/edit"
-                  className="flex items-center gap-1.5 px-3 py-1.5 text-sm text-gray-700 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors shrink-0"
-                >
-                  <Pencil size={14} />
-                  <span className="hidden sm:inline">プロフィールを編集</span>
-                  <span className="sm:hidden">編集</span>
-                </Link>
-              </div>
-              {me?.bio && (
-                <p className="mt-2 text-sm leading-relaxed text-gray-600">
-                  {me.bio}
-                </p>
-              )}
-            </div>
-          </div>
-
-          <nav className="mt-6 flex gap-4 sm:gap-6">
-            {tabs.map((tab) => {
-              const isActive = activeTab === tab.key;
-              return (
-                <button
-                  key={tab.key}
-                  onClick={() => selectTab(tab.key)}
-                  aria-current={isActive ? "page" : undefined}
-                  className={`relative flex items-center gap-1.5 py-3 text-sm transition-colors ${
-                    isActive
-                      ? "font-bold text-gray-900"
-                      : "font-medium text-gray-500 hover:text-gray-700"
-                  }`}
-                >
-                  {tab.label}
-                  {typeof tab.count === "number" && (
-                    <span
-                      className={`rounded-full px-2 py-0.5 text-xs font-medium ${
-                        isActive
-                          ? "bg-primary-50 text-primary-700"
-                          : "bg-gray-100 text-gray-500"
-                      }`}
-                    >
-                      {tab.count}
-                    </span>
-                  )}
-                  {isActive && (
-                    <span className="absolute inset-x-0 bottom-0 h-0.5 rounded-full bg-primary-600" />
-                  )}
-                </button>
-              );
-            })}
-          </nav>
-        </div>
-      </div>
-
-      <div className="max-w-4xl mx-auto px-4 py-6 sm:py-8">
-        {activeTab === "collections" ? (
-          <MyCollectionsTab />
-        ) : activeLoading ? (
-          <div className="grid grid-cols-2 gap-4 sm:gap-6 lg:grid-cols-3">
-            {Array.from({ length: 6 }).map((_, i) => (
-              <SpotCardSkeleton key={i} />
-            ))}
-          </div>
-        ) : activeTab === "folders" ? (
-          <FolderGrid folders={folders ?? []} />
-        ) : activeSpots.length === 0 ? (
-          <div className="flex flex-col items-center py-16 sm:py-20 text-center">
-            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-gray-100 text-gray-400">
-              {activeTab === "spots" ? (
-                <Camera size={22} />
-              ) : (
-                <Heart size={22} />
-              )}
-            </div>
-            <p className="mt-4 text-sm text-gray-500">
-              {activeTab === "spots"
-                ? "まだ投稿がありません"
-                : "まだいいねしたスポットがありません"}
-            </p>
-            {activeTab === "spots" ? (
-              <Link
-                href="/spots/new"
-                className="mt-5 rounded-lg bg-primary-600 px-4 py-2 text-sm font-bold text-white hover:bg-primary-700 transition-colors"
-              >
-                スポットを投稿する
+    <main className="bg-white pb-20">
+      <div className="mx-auto max-w-[960px] px-4 pt-8 sm:pt-10">
+        {me ? (
+          <ProfileHeader
+            name={me.name}
+            avatarUrl={me.avatarUrl}
+            bio={me.bio}
+            stats={[
+              { label: "投稿", count: spotsCount },
+              { label: "いいね", count: likedCount },
+              {
+                label: "フォロワー",
+                count: me.followersCount,
+                href: `/users/${me.id}/followers`,
+              },
+              {
+                label: "フォロー中",
+                count: me.followingCount,
+                href: `/users/${me.id}/following`,
+              },
+            ]}
+            action={
+              <Link href="/mypage/edit" className="btn-secondary">
+                <span className="hidden sm:inline">プロフィールを編集</span>
+                <span className="sm:hidden">編集</span>
               </Link>
-            ) : (
-              <Link
-                href="/spots"
-                className="mt-5 rounded-lg border border-gray-200 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
-              >
-                スポットを探す
-              </Link>
-            )}
-          </div>
+            }
+          />
         ) : (
-          <>
-            <div className="grid grid-cols-2 gap-4 sm:gap-6 lg:grid-cols-3">
-              {activeSpots.map((spot) => (
-                <SpotCard key={spot.id} spot={spot} />
+          <ProfileHeaderSkeleton loading={meLoading} />
+        )}
+
+        <div className="mt-8">
+          <UnderlineTabs
+            label="マイページの一覧"
+            tabs={tabs}
+            active={activeTab}
+            onSelect={selectTab}
+          />
+        </div>
+
+        <div className="pt-6">
+          {activeTab === "collections" ? (
+            <MyCollectionsTab />
+          ) : activeLoading ? (
+            <div className="grid grid-cols-2 gap-x-3 gap-y-7 sm:gap-x-5 lg:grid-cols-3">
+              {Array.from({ length: 6 }).map((_, i) => (
+                <SpotCardSkeleton key={i} />
               ))}
             </div>
-            {loadingMore && (
-              <div className="flex items-center justify-center gap-2 py-8 text-sm text-gray-500">
-                <Loader2
-                  size={18}
-                  className="animate-spin"
-                  aria-hidden="true"
-                />
-                読み込み中...
+          ) : activeTab === "folders" ? (
+            <FolderGrid folders={folders ?? []} />
+          ) : activeSpots.length === 0 ? (
+            activeTab === "spots" ? (
+              <EmptyState
+                message="まだ投稿がありません"
+                action={
+                  <Link href="/spots/new" className="btn-primary">
+                    スポットを投稿する
+                  </Link>
+                }
+              />
+            ) : (
+              <EmptyState
+                message="まだいいねしたスポットがありません"
+                action={
+                  <Link href="/spots" className="btn-secondary">
+                    スポットを探す
+                  </Link>
+                }
+              />
+            )
+          ) : (
+            <>
+              <div className="grid grid-cols-2 gap-x-3 gap-y-7 sm:gap-x-5 lg:grid-cols-3">
+                {activeSpots.map((spot) => (
+                  <SpotCard key={spot.id} spot={spot} />
+                ))}
               </div>
-            )}
-            {hasNextPage && <div ref={targetRef} className="h-1" />}
-          </>
-        )}
+              {loadingMore && (
+                <div className="flex items-center justify-center gap-2 py-8 text-sm text-gray-500">
+                  <Spinner className="h-4 w-4" />
+                  読み込み中...
+                </div>
+              )}
+              {hasNextPage && <div ref={targetRef} className="h-1" />}
+            </>
+          )}
+        </div>
       </div>
     </main>
+  );
+}
+
+function ProfileHeaderSkeleton({ loading }: { loading: boolean }) {
+  if (!loading) return null;
+  return (
+    <div
+      className="flex animate-pulse items-start gap-4 sm:gap-6"
+      aria-hidden="true"
+    >
+      <div className="size-[72px] shrink-0 rounded-full bg-gray-100 sm:size-24" />
+      <div className="flex-1 space-y-2 pt-1">
+        <div className="h-7 w-40 rounded bg-gray-100" />
+        <div className="h-4 w-56 rounded bg-gray-100" />
+      </div>
+    </div>
   );
 }
