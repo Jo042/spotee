@@ -4,11 +4,11 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useQuery } from "@apollo/client/react";
-import { Layers, Loader2 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useIntersectionObserver } from "@/hooks/useIntersectionObserver";
 import { GET_COLLECTIONS } from "@/graphql/queries/collection";
 import { SearchInput } from "@/components/common/SearchInput";
+import { Spinner } from "@/components/common/Spinner";
 import { CollectionCard, CollectionCardSkeleton } from "./CollectionCard";
 
 const PAGE_SIZE = 20;
@@ -74,12 +74,15 @@ export function CollectionsPageContent() {
   const keyword = searchParams.get("q")?.trim() ?? "";
   const [loadingMore, setLoadingMore] = useState(false);
 
-  const { data, loading, error, fetchMore } = useQuery(GET_COLLECTIONS, {
-    variables: {
-      first: PAGE_SIZE,
-      filter: keyword ? { keyword } : null,
+  const { data, loading, error, fetchMore, refetch } = useQuery(
+    GET_COLLECTIONS,
+    {
+      variables: {
+        first: PAGE_SIZE,
+        filter: keyword ? { keyword } : null,
+      },
     },
-  });
+  );
 
   const connection = data?.collections;
   const pageInfo = connection?.pageInfo;
@@ -123,83 +126,75 @@ export function CollectionsPageContent() {
   const collections = (connection?.edges ?? []).map((edge) => edge.node);
 
   return (
-    <main className="min-h-screen bg-gray-50">
-      <div className="bg-white shadow-sm">
-        <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-6">
+    <main className="bg-white pb-20">
+      <div className="mx-auto max-w-[1240px] px-4 pt-8 sm:pt-10">
+        <div className="flex items-end justify-between gap-4">
           <div>
             <h1 className="text-2xl font-bold text-gray-900">特集</h1>
-            <p className="mt-1 text-sm text-gray-500">
-              テーマごとに選ばれたスポットのまとめ
-              {connection && (
-                <>
-                  {" ・ "}全{" "}
-                  <span className="font-bold text-gray-900">
-                    {connection.totalCount}
-                  </span>{" "}
-                  件
-                </>
-              )}
+            <p className="mt-1 text-sm text-gray-600">
+              テーマに沿って選ばれた場所を、順番に巡るまとめ
             </p>
           </div>
           {user && (
-            <Link
-              href="/collections/new"
-              className="shrink-0 rounded-lg bg-primary-600 px-4 py-2.5 text-sm font-bold text-white transition hover:bg-primary-700 active:scale-95"
-            >
+            <Link href="/collections/new" className="btn-secondary shrink-0">
               特集を作る
             </Link>
           )}
         </div>
-      </div>
 
-      <div className="mx-auto max-w-7xl px-4 py-8">
-        <div className="mb-6 max-w-xl">
+        <div className="mt-6 max-w-lg">
           <CollectionSearchBar keyword={keyword} />
         </div>
 
+        <p
+          className="mb-5 mt-4 text-base font-bold text-gray-900"
+          aria-live="polite"
+        >
+          {connection ? `${connection.totalCount}件` : ""}
+        </p>
+
         {error ? (
-          <p className="py-16 text-center text-sm text-gray-500">
-            特集を読み込めませんでした。時間をおいてもう一度お試しください
-          </p>
+          <div className="py-16 text-center">
+            <p className="text-sm text-gray-700">
+              特集を読み込めませんでした。時間をおいて、もう一度お試しください。
+            </p>
+            <button
+              type="button"
+              onClick={() => refetch()}
+              className="btn-secondary mt-4"
+            >
+              もう一度読み込む
+            </button>
+          </div>
         ) : loading && !connection ? (
-          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="grid grid-cols-1 gap-x-5 gap-y-8 sm:grid-cols-2 lg:grid-cols-3">
             {Array.from({ length: 6 }).map((_, i) => (
               <CollectionCardSkeleton key={i} />
             ))}
           </div>
         ) : collections.length === 0 ? (
-          <div className="flex flex-col items-center py-16 text-center sm:py-20">
-            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-gray-100 text-gray-400">
-              <Layers size={22} aria-hidden="true" />
-            </div>
-            <p className="mt-4 text-sm text-gray-500">
+          <div className="py-16 text-center">
+            <p className="text-sm text-gray-700">
               {keyword
                 ? `「${keyword}」に一致する特集はありません`
                 : "まだ特集がありません"}
             </p>
             {user && !keyword && (
-              <Link
-                href="/collections/new"
-                className="mt-5 rounded-lg bg-primary-600 px-4 py-2 text-sm font-bold text-white transition hover:bg-primary-700"
-              >
+              <Link href="/collections/new" className="btn-primary mt-4">
                 特集を作る
               </Link>
             )}
           </div>
         ) : (
           <>
-            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="grid grid-cols-1 gap-x-5 gap-y-8 sm:grid-cols-2 lg:grid-cols-3">
               {collections.map((collection) => (
                 <CollectionCard key={collection.id} collection={collection} />
               ))}
             </div>
             {loadingMore && (
               <div className="flex items-center justify-center gap-2 py-8 text-sm text-gray-500">
-                <Loader2
-                  size={18}
-                  className="animate-spin"
-                  aria-hidden="true"
-                />
+                <Spinner className="h-4 w-4" />
                 読み込み中...
               </div>
             )}

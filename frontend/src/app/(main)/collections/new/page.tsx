@@ -18,15 +18,13 @@ export default function NewCollectionPage() {
 
   if (loading || !user) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <p>読み込み中...</p>
-      </div>
+      <p className="py-24 text-center text-sm text-gray-500">読み込み中...</p>
     );
   }
 
   return (
-    <main className="min-h-screen bg-gray-50 px-4 py-8">
-      <div className="mx-auto max-w-2xl">
+    <main className="bg-white px-4 pb-20 pt-6 sm:pt-8">
+      <div className="mx-auto max-w-[640px]">
         <BackLink fallbackHref="/collections" fallbackLabel="特集一覧" />
         <h1 className="mb-8 mt-2 text-2xl font-bold text-gray-900">
           特集を作る

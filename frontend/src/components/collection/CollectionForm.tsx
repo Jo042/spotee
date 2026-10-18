@@ -22,6 +22,8 @@ import {
   updateComment,
   type SelectedSpot,
 } from "@/lib/collection-form";
+import { FieldError, FieldLabel } from "@/components/common/FieldLabel";
+import { charCountLabel } from "@/lib/format";
 import { SpotPicker } from "./SpotPicker";
 import { SelectedSpotList } from "./SelectedSpotList";
 
@@ -40,9 +42,6 @@ interface CollectionFormProps {
     spots: SelectedSpot[];
   };
 }
-
-const inputClass =
-  "w-full rounded-lg border border-gray-300 px-3.5 py-2.5 text-[15px] text-gray-900 placeholder:text-gray-400 transition focus:border-primary-700 focus:outline-none focus:ring-1 focus:ring-primary-700";
 
 export function CollectionForm({
   collectionId,
@@ -112,56 +111,19 @@ export function CollectionForm({
     }
   };
 
-  const titleLength = useWatch({ control, name: "title" }).length;
+  const [title, description] = useWatch({
+    control,
+    name: ["title", "description"],
+  });
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
       <div>
-        <div className="mb-1 flex items-baseline justify-between">
-          <label htmlFor="title" className="text-sm font-medium text-gray-700">
-            タイトル <span className="text-red-500">*</span>
-          </label>
-          <span className="text-xs text-gray-400">
-            {titleLength}/{COLLECTION_TITLE_MAX_LENGTH}
-          </span>
-        </div>
-        <input
-          id="title"
-          type="text"
-          maxLength={COLLECTION_TITLE_MAX_LENGTH}
-          {...register("title", {
-            validate: (value) =>
-              value.trim() !== "" || "タイトルを入力してください",
-          })}
-          className={inputClass}
-          placeholder="例: 雨の日の横浜デート10選"
-        />
-        {errors.title && (
-          <p className="mt-1 text-sm text-red-500">{errors.title.message}</p>
-        )}
-      </div>
-
-      <div>
-        <label
-          htmlFor="description"
-          className="mb-1 block text-sm font-medium text-gray-700"
-        >
-          説明
-        </label>
-        <textarea
-          id="description"
-          rows={3}
-          maxLength={COLLECTION_DESCRIPTION_MAX_LENGTH}
-          {...register("description")}
-          className={inputClass}
-          placeholder="どんな人に、どんな場面で行ってほしいかを書いてください"
-        />
-      </div>
-
-      <div>
-        <p className="mb-1 text-sm font-medium text-gray-700">カバー画像</p>
+        <FieldLabel id="cover-label" optional>
+          カバー画像
+        </FieldLabel>
         <p className="mb-2 text-xs text-gray-500">
-          設定しないときは、一覧のカードに先頭のスポットの写真が使われます
+          選ばないときは、一覧のカードに1か所目のスポットの写真を使います
         </p>
         <ImageUploader
           images={coverImages}
@@ -170,18 +132,57 @@ export function CollectionForm({
         />
       </div>
 
+      <div>
+        <FieldLabel
+          htmlFor="title"
+          count={charCountLabel(title, COLLECTION_TITLE_MAX_LENGTH)}
+        >
+          タイトル
+        </FieldLabel>
+        <input
+          id="title"
+          type="text"
+          maxLength={COLLECTION_TITLE_MAX_LENGTH}
+          aria-invalid={!!errors.title}
+          aria-describedby={errors.title ? "title-error" : undefined}
+          {...register("title", {
+            validate: (value) =>
+              value.trim() !== "" || "タイトルを入力してください",
+          })}
+          className="text-input"
+          placeholder="例: 雨の日に行きたい、屋内で過ごせる場所"
+        />
+        <FieldError id="title-error" message={errors.title?.message} />
+      </div>
+
+      <div>
+        <FieldLabel
+          htmlFor="description"
+          optional
+          count={charCountLabel(description, COLLECTION_DESCRIPTION_MAX_LENGTH)}
+        >
+          説明
+        </FieldLabel>
+        <textarea
+          id="description"
+          rows={4}
+          maxLength={COLLECTION_DESCRIPTION_MAX_LENGTH}
+          {...register("description")}
+          className="text-input leading-relaxed"
+          placeholder="どんな人に、どんな場面で行ってほしいかを書いてください"
+        />
+      </div>
+
       <section aria-labelledby="pick-spots-heading">
-        <div className="mb-2 flex items-baseline justify-between">
-          <h2
-            id="pick-spots-heading"
-            className="text-sm font-medium text-gray-700"
-          >
-            スポットを選ぶ <span className="text-red-500">*</span>
-          </h2>
-          <span className="text-xs text-gray-500">
-            {spots.length}/{COLLECTION_SPOTS_MAX} 件
-          </span>
-        </div>
+        <FieldLabel
+          id="pick-spots-heading"
+          count={`${spots.length}/${COLLECTION_SPOTS_MAX}か所`}
+        >
+          スポットを選ぶ
+        </FieldLabel>
+        <p className="mb-3 text-xs text-gray-500">
+          自分が投稿したスポットから選びます。押した順に並び、もう一度押すと外れます
+        </p>
         <SpotPicker
           selected={spots}
           onToggle={(spot) => setSpots((prev) => toggleSpot(prev, spot))}
@@ -193,7 +194,7 @@ export function CollectionForm({
           id="order-heading"
           className="mb-2 text-sm font-medium text-gray-700"
         >
-          並び順と添え書き
+          並び順とひとこと
         </h2>
         <SelectedSpotList
           spots={spots}
@@ -210,7 +211,7 @@ export function CollectionForm({
       <button
         type="submit"
         disabled={loading}
-        className="w-full rounded-lg bg-primary-600 px-4 py-3 font-bold text-white transition hover:bg-primary-700 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
+        className="btn-primary w-full py-3"
       >
         {loading
           ? "保存中..."

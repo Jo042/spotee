@@ -2,7 +2,6 @@
 
 import Image from "next/image";
 import { ArrowDown, ArrowUp, ImageOff, X } from "lucide-react";
-import { formatRank } from "@/lib/format";
 import {
   COLLECTION_COMMENT_MAX_LENGTH,
   type SelectedSpot,
@@ -27,7 +26,7 @@ export function SelectedSpotList({
 }: SelectedSpotListProps) {
   if (spots.length === 0) {
     return (
-      <p className="rounded-lg bg-gray-50 px-4 py-6 text-center text-sm text-gray-500">
+      <p className="border-t border-gray-200 py-6 text-center text-sm text-gray-500">
         上の一覧からスポットを選ぶと、ここに並びます
       </p>
     );
@@ -36,13 +35,10 @@ export function SelectedSpotList({
   return (
     <ol className="space-y-3">
       {spots.map((spot, index) => (
-        <li
-          key={spot.spotId}
-          className="rounded-xl border border-gray-200 bg-white p-3"
-        >
+        <li key={spot.spotId} className="border-t border-gray-200 py-4">
           <div className="flex items-center gap-3">
-            <span className="w-7 shrink-0 text-base font-bold tabular-nums text-primary-700">
-              {formatRank(index + 1)}
+            <span className="w-14 shrink-0 text-sm font-bold text-primary-700">
+              {index + 1}か所目
             </span>
             <span className="relative h-12 w-12 shrink-0 overflow-hidden rounded-md bg-gray-100">
               {spot.imageUrl ? (
@@ -93,16 +89,16 @@ export function SelectedSpotList({
           </div>
 
           <label className="mt-3 block">
-            <span className="sr-only">{spot.title} の添え書き</span>
+            <span className="sr-only">{spot.title} のひとこと</span>
             <textarea
               value={spot.comment}
               onChange={(e) => onCommentChange(spot.spotId, e.target.value)}
               maxLength={COLLECTION_COMMENT_MAX_LENGTH}
               rows={2}
-              placeholder="添え書き（任意）: このスポットをこの特集に入れた理由など"
-              className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 transition focus:border-primary-700 focus:outline-none focus:ring-1 focus:ring-primary-700"
+              placeholder="ひとこと（任意）: この特集に入れた理由、行くときのコツなど"
+              className="text-input text-sm"
             />
-            <span className="mt-0.5 block text-right text-xs text-gray-400">
+            <span className="mt-0.5 block text-right text-xs tabular-nums text-gray-500">
               {spot.comment.length}/{COLLECTION_COMMENT_MAX_LENGTH}
             </span>
           </label>

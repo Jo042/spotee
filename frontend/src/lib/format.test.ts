@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { formatCount, formatRank } from "./format";
+import { charCountLabel, formatCount } from "./format";
 
 describe("formatCount", () => {
   describe("1万未満はそのまま表示する", () => {
@@ -55,13 +55,13 @@ describe("formatCount", () => {
   });
 });
 
-describe("formatRank", () => {
-  it.each([
-    [1, "01"],
-    [9, "09"],
-    [10, "10"],
-    [30, "30"],
-  ])("%i は %s", (rank, expected) => {
-    expect(formatRank(rank)).toBe(expected);
+describe("charCountLabel", () => {
+  it("入力した数/上限 を返す", () => {
+    expect(charCountLabel("", 100)).toBe("0/100");
+    expect(charCountLabel("渋谷のカフェ", 100)).toBe("6/100");
+  });
+
+  it("絵文字は入力欄の maxLength と同じく2文字と数える", () => {
+    expect(charCountLabel("🍰", 100)).toBe("2/100");
   });
 });

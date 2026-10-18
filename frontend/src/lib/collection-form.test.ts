@@ -1,5 +1,10 @@
 import { describe, it, expect } from "vitest";
+import * as backendLimits from "../../../backend/src/collection/dto/collection-input.constants";
 import {
+  COLLECTION_COMMENT_MAX_LENGTH,
+  COLLECTION_DESCRIPTION_MAX_LENGTH,
+  COLLECTION_SPOTS_MAX,
+  COLLECTION_TITLE_MAX_LENGTH,
   moveSpot,
   toCollectionInput,
   toggleSpot,
@@ -101,5 +106,21 @@ describe("toCollectionInput", () => {
 
     expect(input.spots.map((s) => s.spotId)).toEqual(["c", "a", "b"]);
     expect(input.coverImageUrl).toBe("cover.jpg");
+  });
+});
+
+describe("特集の入力の上限", () => {
+  it("フロントの上限が、バックエンドの検証の上限と一致する", () => {
+    expect({
+      title: COLLECTION_TITLE_MAX_LENGTH,
+      description: COLLECTION_DESCRIPTION_MAX_LENGTH,
+      comment: COLLECTION_COMMENT_MAX_LENGTH,
+      spots: COLLECTION_SPOTS_MAX,
+    }).toEqual({
+      title: backendLimits.COLLECTION_TITLE_MAX_LENGTH,
+      description: backendLimits.COLLECTION_DESCRIPTION_MAX_LENGTH,
+      comment: backendLimits.COLLECTION_COMMENT_MAX_LENGTH,
+      spots: backendLimits.COLLECTION_SPOTS_MAX,
+    });
   });
 });
