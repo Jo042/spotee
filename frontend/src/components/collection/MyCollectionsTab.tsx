@@ -3,8 +3,9 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useQuery } from "@apollo/client/react";
-import { Layers, Loader2, Plus } from "lucide-react";
 import { GET_MY_COLLECTIONS } from "@/graphql/queries/collection";
+import { EmptyState } from "@/components/common/EmptyState";
+import { Spinner } from "@/components/common/Spinner";
 import { CollectionCard, CollectionCardSkeleton } from "./CollectionCard";
 
 /** マイページの件数バッジと同じ引数で問い合わせ、キャッシュを共有する */
@@ -45,11 +46,7 @@ export function MyCollectionsTab() {
   };
 
   const createLink = (
-    <Link
-      href="/collections/new"
-      className="inline-flex items-center gap-1.5 rounded-lg bg-primary-600 px-4 py-2 text-sm font-bold text-white transition hover:bg-primary-700 active:scale-95"
-    >
-      <Plus size={16} aria-hidden="true" />
+    <Link href="/collections/new" className="btn-secondary">
       特集を作る
     </Link>
   );
@@ -66,16 +63,11 @@ export function MyCollectionsTab() {
 
   if (collections.length === 0) {
     return (
-      <div className="flex flex-col items-center py-16 text-center sm:py-20">
-        <div className="flex h-12 w-12 items-center justify-center rounded-full bg-gray-100 text-gray-400">
-          <Layers size={22} aria-hidden="true" />
-        </div>
-        <p className="mt-4 text-sm text-gray-500">まだ特集がありません</p>
-        <p className="mt-1 text-xs text-gray-400">
-          投稿したスポットを、テーマごとにまとめて紹介できます
-        </p>
-        <div className="mt-5">{createLink}</div>
-      </div>
+      <EmptyState
+        message="まだ特集がありません"
+        description="投稿したスポットを、テーマごとにまとめて紹介できます"
+        action={createLink}
+      />
     );
   }
 
@@ -92,11 +84,9 @@ export function MyCollectionsTab() {
           type="button"
           onClick={handleLoadMore}
           disabled={loadingMore}
-          className="mt-6 flex w-full items-center justify-center gap-2 rounded-lg border border-gray-200 bg-white py-2.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 disabled:opacity-50"
+          className="btn-secondary mt-6 w-full"
         >
-          {loadingMore && (
-            <Loader2 size={16} className="animate-spin" aria-hidden="true" />
-          )}
+          {loadingMore && <Spinner className="h-4 w-4" />}
           もっと見る
         </button>
       )}
