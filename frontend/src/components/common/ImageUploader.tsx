@@ -283,7 +283,7 @@ export function ImageUploader({
             ${
               isUploading
                 ? "border-gray-300 bg-gray-50 cursor-not-allowed"
-                : "border-gray-300 hover:border-primary-500 hover:bg-primary-50"
+                : "border-gray-300 hover:border-primary-700 hover:bg-primary-50"
             }
           `}
         >

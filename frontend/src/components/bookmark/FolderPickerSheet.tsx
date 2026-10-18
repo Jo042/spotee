@@ -253,7 +253,7 @@ export function FolderPickerSheet({
                     <Check
                       size={20}
                       aria-hidden="true"
-                      className="shrink-0 text-primary-600 animate-scale-in motion-reduce:animate-none"
+                      className="shrink-0 text-primary-700 animate-scale-in motion-reduce:animate-none"
                     />
                   )}
                 </button>
